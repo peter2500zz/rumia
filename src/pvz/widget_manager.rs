@@ -3,8 +3,7 @@ use tracing::trace;
 
 use crate::{
     hook::pvz::widget_manager::{
-        ORIGINAL_WIDGET_MANAGER_CONSTRUCTOR, 
-        ORIGINAL_WIDGET_MANAGER_DESTRUCTOR
+        original_widget_manager_key_down, ORIGINAL_WIDGET_MANAGER_CONSTRUCTOR, ORIGINAL_WIDGET_MANAGER_DESTRUCTOR
     }, 
     pvz::lawn_app::LawnApp
 };
@@ -41,4 +40,13 @@ pub extern "thiscall" fn Destructor(
     trace!("析构 WidgetManager");
 
     ORIGINAL_WIDGET_MANAGER_DESTRUCTOR.wait()(this);
+}
+
+pub extern "stdcall" fn KeyDown(
+    this: *mut WidgetManager,
+    key: i32,
+) -> u8 {
+    trace!("按下键码 {:#x}", key);
+
+    original_widget_manager_key_down(this, key)
 }
