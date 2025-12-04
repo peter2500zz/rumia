@@ -1,6 +1,8 @@
+mod utils;
 mod debug;
 mod hook;
 mod logger;
+#[allow(non_snake_case)]
 mod pvz;
 
 use anyhow::Result;
@@ -19,7 +21,7 @@ use windows::{
 };
 use windows_wrapper::mb;
 
-use crate::{debug::alloc_console, hook::init_hooks, logger::setup_logger};
+use crate::{debug::alloc_console, hook::init_hook, logger::setup_logger};
 
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]
@@ -49,7 +51,7 @@ fn on_pocess_attach(handle: HINSTANCE) -> Result<()> {
     alloc_console()?;
     setup_logger()?;
 
-    if let Err(e) = init_hooks() {
+    if let Err(e) = init_hook() {
         error!("error when init hook: {}", e);
     }
 

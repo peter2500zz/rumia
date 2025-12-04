@@ -1,11 +1,14 @@
+#[allow(non_snake_case)]
+pub mod pvz;
+
 use anyhow::Result;
 use minhook::MinHook;
+use tracing::info;
 use std::ffi::c_void;
-const BOARD_ADDCOIN: *mut c_void = 0x0040CB10 as _;
-type BoardAddCoin = extern "thiscall" fn(*mut c_void, i32, i32, u32, u32) -> *mut c_void;
 
-// 保存原始函数地址
-static mut ORIGINAL_BOARD_ADDCOIN: Option<BoardAddCoin> = None;
+const ADDR_BOARD_ADDCOIN: *mut c_void = 0x0040CB10 as _;
+type SignBoardAddCoin = extern "thiscall" fn(*mut c_void, i32, i32, u32, u32) -> *mut c_void;
+static mut ORIGINAL_BOARD_ADDCOIN: Option<SignBoardAddCoin> = None;
 
 extern "thiscall" fn board_add_coin(
     board: *mut c_void,
@@ -23,13 +26,24 @@ extern "thiscall" fn board_add_coin(
     unsafe { ORIGINAL_BOARD_ADDCOIN.unwrap()(board, x, y, my_coin, coin_motion) }
 }
 
-pub fn init_hooks() -> Result<()> {
+fn hook<T>(target: *mut c_void, detour: *mut c_void) -> Result<T> {
     unsafe {
-        let trampoline = MinHook::create_hook(BOARD_ADDCOIN, board_add_coin as _)?;
+        let trampoline = MinHook::create_hook(target, detour)?;
 
-        ORIGINAL_BOARD_ADDCOIN = Some(std::mem::transmute(trampoline));
+        MinHook::enable_hook(target)?;
 
-        MinHook::enable_all_hooks()?;
+        info!("Hooked {:#x?} -> {:#x?}", target, detour);
+
+        Ok(std::mem::transmute_copy::<*mut c_void, T>(&trampoline))
+    }
+}
+
+
+pub fn init_hook() -> Result<()> {
+    pvz::init_hook()?;
+
+    unsafe {
+        ORIGINAL_BOARD_ADDCOIN = Some(hook(ADDR_BOARD_ADDCOIN, board_add_coin as _)?);
     }
 
     Ok(())

@@ -24,6 +24,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         })
         // .level(log::LevelFilter::Off)
         .level(tracing::log::LevelFilter::Trace)
+        .level_for("minhook", tracing::log::LevelFilter::Off)
         .chain(std::io::stdout())
         .chain(fern::log_file(LOG_PATH)?)
         .apply()?;
