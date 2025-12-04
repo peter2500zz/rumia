@@ -1,5 +1,6 @@
-pub mod LawnApp;
+pub mod lawn_app;
 pub mod debug;
+pub mod board;
 
 use inventory;
 use std::{ffi::c_void, sync::OnceLock};

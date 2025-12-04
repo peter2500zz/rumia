@@ -18,7 +18,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .format(move |out, message, record| {
             out.finish(format_args!(
                 "<{}/{}> {}",
-                record.target(),
+                record.target().replace("pvz_mod::pvz", "pvz"),
                 colors.color(record.level()),
                 message
             ))
@@ -30,7 +30,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .format(|out, message, record| {
             out.finish(format_args!(
                 "<{}/{}> {}",
-                record.target(),
+                record.target().replace("pvz_mod::pvz", "pvz"),
                 record.level(),
                 message
             ))
