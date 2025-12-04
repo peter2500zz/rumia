@@ -1,6 +1,7 @@
 pub mod LawnApp;
+pub mod debug;
 
-use tracing::info;
+use tracing::{debug, info};
 use windows::{
     Win32::{Foundation::HINSTANCE, UI::WindowsAndMessaging::SHOW_WINDOW_CMD},
     core::PSTR,
@@ -16,11 +17,14 @@ pub extern "stdcall" fn WinMain(
 ) -> i32 {
     let args = unsafe { lpCmdLine.to_string().unwrap_or_default() };
 
-    info!("启动参数: {}", args);
+    debug!("启动参数: {}", if args.is_empty() { "无" } else { &args });
+    info!("主程序启动");
+    debug!("句柄 {:#x?}", hInstance.0);
 
     let result = ORIGINAL_WINMAIN.wait()(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-    info!("终止代码: {:#x}", result);
+    info!("主程序终止");
+    debug!("退出代码 {:#x}", result);
 
     pause!("请按任意键继续. . .");
 

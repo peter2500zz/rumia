@@ -1,4 +1,5 @@
 pub mod LawnApp;
+pub mod debug;
 
 use inventory;
 use std::{ffi::c_void, sync::OnceLock};
@@ -10,13 +11,16 @@ use windows::{
 use super::{HookRegistration, hook};
 use crate::pvz;
 
+/// 主函数的地址
 const ADDR_WINMAIN: *mut c_void = 0x0044E8F0 as _;
+/// 主函数的签名
 type SignWinMain = extern "stdcall" fn(
     hInstance: HINSTANCE,
     hPrevInstance: HINSTANCE,
     lpCmdLine: PSTR,
     nCmdShow: SHOW_WINDOW_CMD,
 ) -> i32;
+/// 主函数的跳板
 pub static ORIGINAL_WINMAIN: OnceLock<SignWinMain> = OnceLock::new();
 
 inventory::submit! {

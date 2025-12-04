@@ -5,7 +5,7 @@ use anyhow::Result;
 use inventory;
 use minhook::MinHook;
 use std::ffi::c_void;
-use tracing::info;
+use tracing::trace;
 
 // const ADDR_BOARD_ADDCOIN: *mut c_void = 0x0040CB10 as _;
 // type SignBoardAddCoin = extern "thiscall" fn(*mut c_void, i32, i32, u32, u32) -> *mut c_void;
@@ -27,15 +27,34 @@ use tracing::info;
 //     unsafe { ORIGINAL_BOARD_ADDCOIN.unwrap()(board, x, y, my_coin, coin_motion) }
 // }
 
-fn hook<T>(target: *mut c_void, detour: *mut c_void) -> Result<T> {
+fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
     unsafe {
         let trampoline = MinHook::create_hook(target, detour)?;
 
-        MinHook::enable_hook(target)?;
+        // MinHook::enable_hook(target)?;
 
-        info!("Hooked {:#x?} -> {:#x?}", target, detour);
+        trace!("Hook {:#x?} -> {:#x?}", target, detour);
 
-        Ok(std::mem::transmute_copy::<*mut c_void, T>(&trampoline))
+        Ok(std::mem::transmute_copy::<*mut c_void, F>(&trampoline))
+    }
+}
+
+fn hook_api<F, T>(module_name: T, proc_name: T, detour: *mut c_void) -> Result<F> 
+where
+    T: AsRef<str> + Clone,
+{
+    unsafe {
+        let trampoline = MinHook::create_hook_api(
+            module_name.clone(),
+            proc_name.clone(), 
+            detour
+        )?;
+
+        // MinHook::enable_hook(trampoline)?;
+
+        trace!("Hook API {}::{} -> {:#x?}", module_name.as_ref(), proc_name.as_ref(), detour);
+
+        Ok(std::mem::transmute_copy::<*mut c_void, F>(&trampoline))
     }
 }
 
@@ -49,6 +68,10 @@ pub fn init_hook() -> Result<()> {
 
     for HookRegistration(hook_init) in inventory::iter::<HookRegistration> {
         hook_init()?;
+    }
+
+    unsafe {
+        MinHook::enable_all_hooks()?;
     }
 
     // unsafe {

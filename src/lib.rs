@@ -7,7 +7,10 @@ mod utils;
 
 use anyhow::Result;
 use std::ffi::c_void;
-use tracing::error;
+use tracing::{
+    info,
+    debug
+};
 use windows::{
     Win32::{
         Foundation::HINSTANCE,
@@ -32,7 +35,20 @@ pub extern "system" fn DllMain(
     let _ = lpReserved;
 
     let result = match fdwReason {
-        DLL_PROCESS_ATTACH => on_pocess_attach(hinstDLL).is_ok(),
+        DLL_PROCESS_ATTACH => {
+            match on_pocess_attach(hinstDLL) {
+                Ok(_) => {
+                    info!("初始化成功");
+
+                    true
+                },
+                Err(e) => {
+                    mb!("初始化时遇到问题\n{}", e);
+
+                    false
+                }
+            }
+        },
         DLL_PROCESS_DETACH => true,
         DLL_THREAD_ATTACH => true,
         DLL_THREAD_DETACH => true,
@@ -44,14 +60,15 @@ pub extern "system" fn DllMain(
 }
 
 fn on_pocess_attach(handle: HINSTANCE) -> Result<()> {
-    mb!("attached successfully\nwith handle: {:#x?}", &handle.0);
-
     alloc_console()?;
     setup_logger()?;
 
-    if let Err(e) = init_hook() {
-        error!("error when init hook: {}", e);
-    }
+    info!("DLL 注入成功");
+    debug!("句柄 {:#x?}", handle.0);
+
+    init_hook()?;
+
+    info!("Hook 成功");
 
     Ok(())
 }
