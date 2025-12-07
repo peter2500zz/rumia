@@ -4,6 +4,7 @@ pub mod board;
 pub mod widget_manager;
 pub mod zombie;
 pub mod data_array;
+pub mod coin;
 
 use tracing::{debug, info};
 use windows::{

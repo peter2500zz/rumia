@@ -5,17 +5,23 @@ use tracing::{debug, trace};
 use windows::core::BOOL;
 
 use crate::{
-    add_callback, callback, hook::pvz::board::{
+    add_callback, hook::pvz::board::{
         ADDR_ADDCOIN,
         ORIGINAL_ADDCOIN, 
         ORIGINAL_CONSTRUCTOR, 
         ORIGINAL_DESTRUCTOR, 
         ORIGINAL_INIT_LEVEL, 
         ORIGINAL_KEYDOWN
-    }, mods::register::{
-        POST, PRE
-    }, pvz::{
-        data_array::DataArray, lawn_app::LawnApp, zombie::{self, Zombie}
+    }, 
+    mods::register::callback_mut, 
+    pvz::{
+        coin::Coin, 
+        data_array::DataArray, 
+        lawn_app::LawnApp, 
+        zombie::{
+            self, 
+            Zombie
+        }
     }
 };
 
@@ -317,33 +323,38 @@ pub extern "thiscall" fn AddCoin(
     theY: i32, 
     theCoinType: u32, 
     theCoinMotion: u32
-) -> *mut c_void {
+) -> *mut Coin {
     trace!("产生掉落物 {} at ({}, {}) with motion {}", theCoinType, theX, theY, theCoinMotion);
-    let (
-        this,
-        theX,
-        theY,
-        theCoinType,
-        theCoinMotion
-    ) = callback!(PRE | ADDR_ADDCOIN, (
-        this,
-        theX,
-        theY,
-        theCoinType,
-        theCoinMotion
-    ));
+    // let (
+    //     theX,
+    //     theY,
+    //     theCoinType,
+    //     theCoinMotion
+    // ) = callback(ADDR_ADDCOIN, (
+    //     theX,
+    //     theY,
+    //     theCoinType,
+    //     theCoinMotion
+    // ));
 
-    let (result, ) = callback!(POST | ADDR_ADDCOIN, (ORIGINAL_ADDCOIN.wait()(
+    let coin = ORIGINAL_ADDCOIN.wait()(
         this, 
         theX, 
         theY, 
         theCoinType, 
         theCoinMotion
-    )));
+    );
 
-    result
+    unsafe {
+        let coin = &mut (*coin);
+
+        callback_mut(ADDR_ADDCOIN, coin);
+
+    }
+
+    coin
 }
-add_callback!("board_addcoin", ADDR_ADDCOIN);
+add_callback!("ADD_COIN", ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(

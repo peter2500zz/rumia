@@ -1,8 +1,8 @@
 
-use std::{ffi::c_void, sync::OnceLock};
+use std::sync::OnceLock;
 
 use super::{HookRegistration, hook};
-use crate::pvz::{board::{self, Board}, lawn_app::LawnApp};
+use crate::pvz::{board::{self, Board}, coin::Coin, lawn_app::LawnApp};
 
 /// `Board` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x00407B50 as _;
@@ -41,7 +41,7 @@ type SignAddCoin = extern "thiscall" fn(
     theY: i32, 
     theCoinType: u32, 
     theCoinMotion: u32
-) -> *mut c_void;
+) -> *mut Coin;
 /// `Board::AddCoin` 的跳板
 pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
 

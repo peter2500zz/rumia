@@ -8,7 +8,7 @@ use std::{
     sync::{Arc, LazyLock, Mutex},
 };
 use tracing::{error, info};
-use mlua::{Lua, Result as LuaResult, Table};
+use mlua::{FromLuaMulti, Lua, Result as LuaResult, Table};
 use regex::Regex;
 
 const MOD_DIR: &str = "mods";
@@ -53,9 +53,10 @@ static EXTRACT: LazyLock<Option<Regex>> = LazyLock::new(|| {
     Regex::new(r":\s(.*?):\s").ok()
 });
 
-pub fn with_lua<F>(exec: F) -> LuaResult<()>
+pub fn with_lua<F, T>(exec: F) -> LuaResult<T>
 where
-    F: FnOnce(&mut Lua) -> LuaResult<()>
+    F: FnOnce(&mut Lua) -> LuaResult<T>,
+    T: FromLuaMulti,
 {
     match LUA.lock() {
         Ok(mut lua) => {

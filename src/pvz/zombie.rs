@@ -227,8 +227,8 @@ pub extern "stdcall" fn ZombieInitialize(
         theParentZombie,
         theFromWave
     );
-    unsafe {
-        trace!("{:?}", *this);
-        // (*this).is_charmed = true;
-    }
+    // unsafe {
+    //     trace!("{:?}", *this);
+    //     // (*this).is_charmed = true;
+    // }
 }
