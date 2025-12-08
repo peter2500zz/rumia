@@ -2,7 +2,14 @@
 use std::sync::OnceLock;
 
 use super::{HookRegistration, hook};
-use crate::pvz::{board::{self, Board}, coin::Coin, lawn_app::LawnApp};
+use crate::pvz::{
+    board::{
+        self, 
+        board::Board
+    }, 
+    coin::Coin, 
+    lawn_app::lawn_app::LawnApp
+};
 
 /// `Board` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x00407B50 as _;

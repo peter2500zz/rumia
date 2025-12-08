@@ -4,7 +4,20 @@ use mlua::prelude::*;
 use tracing::trace;
 use windows::core::BOOL;
 
-use crate::{add_callback, hook::pvz::coin::{ADDR_COIN_INITIALIZE, CoinInitializeWrapper, DataArrayAllocWrapper}, mods::register::callback, pvz::data_array::DataArray};
+use crate::{
+    add_callback, 
+    add_field, 
+    hook::pvz::coin::{
+        ADDR_COIN_INITIALIZE, 
+        CoinInitializeWrapper, 
+        DataArrayAllocWrapper
+    }, 
+    mods::callback::{
+        PRE, 
+        callback
+    }, 
+    pvz::data_array::DataArray
+};
 
 
 #[repr(C)]
@@ -80,21 +93,6 @@ pub struct Coin {
     pub coin_id: i32,
 }
 
-macro_rules! add_field {
-    ($fields:expr, $name:literal, $field:ident) => {
-        $fields.add_field_method_get($name, |_, this| Ok(this.$field));
-        $fields.add_field_method_set($name, |_, this, val| Ok(this.$field = val));
-    };
-    
-    // 支持多个字段
-    ($fields:expr, $( $name:literal => $field:ident ),* $(,)?) => {
-        $(
-            $fields.add_field_method_get($name, |_, this| Ok(this.$field));
-            $fields.add_field_method_set($name, |_, this, val| Ok(this.$field = val));
-        )*
-    };
-}
-
 impl LuaUserData for Coin {
     // fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
     //     methods.add_meta_method(LuaMetaMethod::Index, |_, this, key: String| {
@@ -156,7 +154,7 @@ pub extern "stdcall" fn CoinInitialize(
     args: ArgCoinInitialize
 ) {
     let mut args = args;
-    callback(ADDR_COIN_INITIALIZE, &mut args);
+    callback(PRE | ADDR_COIN_INITIALIZE, &mut args);
 
     trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
     CoinInitializeWrapper(
@@ -177,4 +175,4 @@ pub extern "stdcall" fn CoinInitialize(
 
     // }
 }
-add_callback!("AT_NEW_COIN", ADDR_COIN_INITIALIZE);
+add_callback!("AT_NEW_COIN", PRE | ADDR_COIN_INITIALIZE);

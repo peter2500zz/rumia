@@ -1,28 +1,25 @@
+pub mod lawn_app;
 pub mod loading;
 
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
-use crate::hook::pvz::lawn_app::{
+use crate::{hook::pvz::lawn_app::{
     ORIGINAL_CONSTRUCTOR, 
     ORIGINAL_DESTRUCTOR, 
     ORIGINAL_INIT, 
     ORIGINAL_LOST_FOCUS
-};
-
-#[derive(Debug)]
-#[repr(C)]
-/// 这是 `LawnApp`
-/// 
-/// 手动管理生命周期并不好玩，孩子们
-pub struct LawnApp {
-    _pad: [u8; 0x8C8],  
-}
+}, pvz::lawn_app::lawn_app::LawnApp};
 
 /// 这是 `LawnApp` 的构造函数
 pub extern "stdcall" fn Constructor(
     uninit: *mut LawnApp
 ) -> *mut LawnApp {
     trace!("构造 LawnApp");
+
+    unsafe {
+        info!("{:?}", (0x6A9EC0 as *mut usize).is_null());
+        info!("{:?}", *(0x6A9EC0 as *mut usize));
+    }
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(
         uninit

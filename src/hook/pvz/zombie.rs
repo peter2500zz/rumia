@@ -2,7 +2,7 @@
 use std::{arch::{asm, naked_asm}, sync::OnceLock};
 use windows::core::BOOL;
 
-use crate::pvz::{data_array::DataArray, zombie::{self, Zombie}};
+use crate::pvz::{data_array::DataArray, zombie::{self, zombie::Zombie}};
 use super::{HookRegistration, hook};
 
 /// `DataArray<Zombie>::DataArrayAlloc` 构造函数的地址
@@ -57,7 +57,7 @@ pub extern "stdcall" fn DataArrayAllocWrapper(
 }
 
 /// `Zombie::ZombieInitialize` 的地址
-const ADDR_ZOMBIE_INITIALIZE: u32 = 0x00522580;
+pub const ADDR_ZOMBIE_INITIALIZE: u32 = 0x00522580;
 /// `Zombie::ZombieInitialize` 的签名
 /// 
 /// 仅标注用
@@ -125,6 +125,47 @@ pub extern "stdcall" fn ZombieInitializeWrapper(
     }
 }
 
+/// `Zombie::Update` 构造函数的地址
+pub const ADDR_UPDATE: u32 = 0x0052AE60;
+/// `Zombie::Update` 构造函数的签名
+type SignUpdate = fn(
+    this: *mut Zombie,
+);
+/// `Zombie::Update` 构造函数的跳板
+static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
+
+/// 从非标准调用中提取参数的辅助函数
+#[unsafe(naked)]
+extern "stdcall" fn UpdateHelper() {
+    naked_asm!(
+        // 压栈 eax 作为参数
+        "push eax",
+        // 调用 hook 函数
+        "call {hook}",
+        // 返回
+        "ret",
+
+        // 传入 hook 函数符号地址
+        hook = sym zombie::Update,
+    )
+}
+
+/// 回调辅助函数
+pub extern "stdcall" fn UpdateWrapper(
+    this: *mut Zombie, 
+) {
+    unsafe {
+        asm!(
+            // 把参数放入原函数期望的寄存器中
+            "mov eax, {this}",
+            // 调用原函数
+            "call [{func}]",
+
+            this = in(reg) this,
+            func = in(reg) ORIGINAL_UPDATE.wait(),
+        );
+    }
+}
 
 inventory::submit! {
     HookRegistration(|| {
@@ -134,6 +175,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_ZOMBIE_INITIALIZE.set(
             hook(ADDR_ZOMBIE_INITIALIZE as _, ZombieInitializeHelper as _)?
+        );
+
+        let _ = ORIGINAL_UPDATE.set(
+            hook(ADDR_UPDATE as _, UpdateHelper as _)?
         );
 
         Ok(())

@@ -1,15 +1,16 @@
 pub mod register;
 mod log;
+pub mod callback;
 
 use anyhow::{Context, Result}; // 建议引入 Context 方便报错
 use std::{
-    fs::{self, DirEntry},
-    path::Path,
-    sync::{Arc, LazyLock, Mutex},
+    cell::RefCell, fs::{self, DirEntry}, path::Path, sync::{Arc, LazyLock, Mutex}
 };
 use tracing::{error, info};
 use mlua::{FromLuaMulti, Lua, Result as LuaResult, Table};
 use regex::Regex;
+
+use crate::utils::get_arc_mutex;
 
 const MOD_DIR: &str = "mods";
 const MAIN_FILE: &str = "main.lua";
@@ -19,7 +20,8 @@ pub struct LuaRegistration(pub LuaInitFn);
 
 inventory::collect!(LuaRegistration);
 
-static LUA: LazyLock<Arc<Mutex<Lua>>> = LazyLock::new(|| {
+thread_local! {
+static LUA: LazyLock<RefCell<Lua>> = LazyLock::new(|| {
     info!("初始化 Lua 状态机");
 
     let mut lua = Lua::new();
@@ -46,8 +48,9 @@ static LUA: LazyLock<Arc<Mutex<Lua>>> = LazyLock::new(|| {
         panic!("Lua 初始化时出现错误: {}", e);
     }
 
-    Arc::new(Mutex::new(lua))
+    RefCell::new(lua)
 });
+}
 
 static EXTRACT: LazyLock<Option<Regex>> = LazyLock::new(|| {
     Regex::new(r":\s(.*?):\s").ok()
@@ -58,26 +61,21 @@ where
     F: FnOnce(&mut Lua) -> LuaResult<T>,
     T: FromLuaMulti,
 {
-    match LUA.lock() {
-        Ok(mut lua) => {
-            let result = exec(&mut lua);
+    let result = LUA.with(|lua_cell| {
+        let mut lua = lua_cell.borrow_mut();
+        exec(&mut *lua)
+    });
 
-            if let Err(e) = &result {
-                let error_msg = if let Some(extract) = EXTRACT.as_ref() {
-                    extract.replace(&e.to_string(), ": ").to_string()
-                } else {
-                    e.to_string()
-                };
-                error!("{}", error_msg);
-            }
-
-            result
-        },
-        Err(e) => {
-            error!("Lua 状态机锁错误: {}", e);
-            panic!("Lua 状态机锁错误: {}", e)
-        }
+    if let Err(e) = &result {
+        let error_msg = if let Some(extract) = EXTRACT.as_ref() {
+            extract.replace(&e.to_string(), ": ").to_string()
+        } else {
+            e.to_string()
+        };
+        error!("{}", error_msg);
     }
+
+    result
 }
 
 pub fn load_mods() -> Result<u32> {
@@ -141,7 +139,7 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
     if let Err(e) = result {
         error!("加载 Mod({}) 失败", &path.to_string_lossy());
 
-        return Err(anyhow::anyhow!(e));
+        return Err(anyhow::anyhow!(e.to_string()));
     }
 
     Ok(())

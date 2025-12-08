@@ -1,11 +1,11 @@
 
-use tracing::trace;
+use tracing::{info, trace};
 
 use crate::{
     hook::pvz::widget_manager::{
         KeyDownWrapper, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR
     }, 
-    pvz::lawn_app::LawnApp
+    pvz::{board::board::get_board, lawn_app::lawn_app::{LawnApp, get_lawn_app}}
 };
 
 
@@ -47,6 +47,15 @@ pub extern "stdcall" fn KeyDown(
     key: i32,
 ) -> u8 {
     trace!("按下键码 {:#x}", key);
+
+    unsafe {
+        
+        if let Some(board) = get_board() {
+            // let board = (*app);
+            info!("{:?}", (*board).sun_value);
+        }
+
+    }
 
     KeyDownWrapper(this, key)
 }

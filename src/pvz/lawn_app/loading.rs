@@ -8,7 +8,7 @@ use crate::{
         ORIGINAL_LOADING_THREAD_PROC
     }
 };
-use super::LawnApp;
+use super::lawn_app::LawnApp;
 
 pub extern "thiscall" fn LoadingThreadProc(
     this: *mut LawnApp

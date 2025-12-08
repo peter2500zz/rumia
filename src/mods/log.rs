@@ -1,5 +1,5 @@
 use mlua::prelude::*;
-use tracing::{
+pub(super) use tracing::{
     trace,
     debug,
     info,

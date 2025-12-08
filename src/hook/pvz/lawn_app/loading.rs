@@ -2,7 +2,7 @@
 use std::{ffi::c_char, sync::OnceLock};
 
 use super::{HookRegistration, hook};
-use crate::pvz::lawn_app::{LawnApp, loading::{LoadGroup, LoadingThreadProc}};
+use crate::pvz::lawn_app::{lawn_app::LawnApp, loading::{LoadGroup, LoadingThreadProc}};
 
 /// `LawnApp::LoadingThreadProc` 的地址
 const ADDR_LOADING_THREAD_PROC: u32 = 0x004528E0 as _;

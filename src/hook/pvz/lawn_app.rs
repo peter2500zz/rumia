@@ -3,7 +3,7 @@ pub mod loading;
 use std::sync::OnceLock;
 
 use super::{HookRegistration, hook};
-use crate::pvz::lawn_app::{self, LawnApp};
+use crate::pvz::lawn_app::{self, lawn_app::LawnApp};
 
 /// `LawnApp` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x0044EAA0 as _;
