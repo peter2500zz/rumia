@@ -1,15 +1,13 @@
 pub mod board;
 
+use std::arch::{naked_asm};
 use mlua::prelude::*;
 use tracing::*;
 
 use crate::{
     add_callback, add_field_mut,
     hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP,
-        ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR,
-        ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN,
-        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE
     },
     mods::callback::{POST, PRE, callback, callback_data},
     pvz::{board::board::Board, coin::Coin, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie},
@@ -148,6 +146,77 @@ add_callback!("AT_BOARD_MOUSE_UP", PRE | ADDR_MOUSE_UP);
 pub extern "thiscall" fn Update(this: *mut Board) {
     let delta = get_delta_mgr().update_delta("Board");
     ORIGINAL_UPDATE.wait()(this);
-    callback(ADDR_UPDATE, delta);
+    callback(POST | ADDR_UPDATE, delta);
 }
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
+
+#[unsafe(naked)]
+pub extern "stdcall" fn PixelToGridXKeepOnBoard(
+    this: *mut Board,
+    theX: i32,
+    theY: i32
+) -> i32 {
+    naked_asm!(
+        "push ebp",
+        "mov ebp, esp",
+
+        "push ebx",
+        "push esi",
+
+        "mov ebx, [ebp + 8]",
+        "mov esi, [ebp + 12]",
+        "mov eax, [ebp + 16]",
+
+        "mov edx, {func}",
+        "call edx",
+
+        "pop esi",
+        "pop ebx",
+
+        "mov esp, ebp",
+        "pop ebp",
+        "ret 12",
+
+        func = const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD
+    )
+}
+
+#[unsafe(naked)]
+pub extern "stdcall" fn PixelToGridYKeepOnBoard(
+    this: *mut Board,
+    theX: i32,
+    theY: i32
+) -> i32 {
+    naked_asm!(
+        "push ebp",
+        "mov ebp, esp",
+
+        "push ebx",
+        "push edi",
+
+        "mov ebx, [ebp + 8]",
+        "mov eax, [ebp + 12]",
+        "mov edi, [ebp + 16]",
+
+        "mov edx, {func}",
+        "call edx",
+
+        "pop edi",
+        "pop ebx",
+
+        "mov esp, ebp",
+        "pop ebp",
+        "ret 12",
+
+        func = const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD
+    )
+}
+
+pub fn PixelToGridKeepOnBoard(
+    this: *mut Board,
+    pos: Vec2<i32>,
+) -> Vec2<i32> {
+    let grid_x = PixelToGridXKeepOnBoard(this, pos.x, pos.y);
+    let grid_y = PixelToGridYKeepOnBoard(this, pos.x, pos.y);
+    Vec2::new(grid_x, grid_y)
+}

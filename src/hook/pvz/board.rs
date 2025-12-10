@@ -146,6 +146,13 @@ type SignUpdate = extern "thiscall" fn(this: *mut Board);
 /// `Board::Update` 的跳板
 pub static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 
+/// `Board::PixelToGridX` 的地址
+pub const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD: u32 = 0x0041C530;
+
+/// `Board::PixelToGridY` 的地址
+pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
+
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(

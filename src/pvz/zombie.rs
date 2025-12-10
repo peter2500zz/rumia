@@ -41,7 +41,7 @@ pub extern "stdcall" fn ZombieInitialize(
         let zombie = &mut *this;
 
         callback_data(POST | ADDR_ZOMBIE_INITIALIZE, zombie);
-        trace!("初始化僵尸 {:#x?}", this);
+        trace!("初始化僵尸 {:#x?} {:#x?}", this, (*this).body_anim_id);
     }
 }
 add_callback!("AT_ZOMBIE_INIT", POST | ADDR_ZOMBIE_INITIALIZE);

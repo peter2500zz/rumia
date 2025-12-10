@@ -201,8 +201,5 @@ where
                 this.position.x, this.position.y, this.size.x, this.size.y
             ))
         });
-
-        // 示例：可以添加计算面积的方法
-        // 注意：这需要 T 支持乘法，这里为了演示简化，暂不添加额外的 Math Trait Bounds
     }
 }

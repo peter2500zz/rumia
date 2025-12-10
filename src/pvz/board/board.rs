@@ -5,7 +5,7 @@ use mlua::prelude::*;
 use crate::{
     mods::LuaRegistration,
     pvz::{
-        board::{AddCoin, AddZombieInRow, ArgsAddCoin, ArgsAddZombieInRow},
+        board::{AddCoin, AddZombieInRow, ArgsAddCoin, ArgsAddZombieInRow, PixelToGridKeepOnBoard},
         lawn_app::lawn_app::get_lawn_app,
         zombie::zombie::Zombie,
     },
@@ -141,6 +141,12 @@ impl LuaUserData for Board {
                 );
 
                 unsafe { Ok(ptr::read(coin)) }
+            })
+        });
+
+        methods.add_method("PosToGridKeepOnBoard", |_, _, pos| {
+            with_board(|board| {
+                Ok(PixelToGridKeepOnBoard(board, pos))
             })
         });
     }

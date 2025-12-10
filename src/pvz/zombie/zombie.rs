@@ -1,9 +1,13 @@
 use mlua::prelude::*;
+use tracing::*;
 use std::ffi::c_void;
 use windows::core::BOOL;
 
 use crate::{
-    pvz::board::board::get_board,
+    pvz::board::{
+        PixelToGridYKeepOnBoard,
+        board::{get_board, with_board},
+    },
     utils::{Rect2, Vec2, data_array::HasId},
 };
 
@@ -50,9 +54,9 @@ pub struct Zombie {
     /// 0x54 僵尸闪光倒计时
     pub flash_countdown: i32,
     /// 0x58 2类饰品发光倒计时
-    pub accessory2_glow_countdown: i32,
+    pub shield_glow_countdown: i32,
     /// 0x5C 2类饰品抖动倒计时
-    pub accessory2_shake_countdown: i32,
+    pub shield_shake_countdown: i32,
     /// 0x60 僵尸已存在时间
     pub time_alive: i32,
     /// 0x64 僵尸运动状态
@@ -78,7 +82,7 @@ pub struct Zombie {
     /// 0x8C 中弹判定
     pub hitbox_rect: Rect2<i32>,
     /// 0x9C 攻击判定
-    pub attackbox_rect: Rect2<i32>,
+    pub atkbox_rect: Rect2<i32>,
     /// 0xAC 减速倒计时
     pub slow_countdown: i32,
     /// 0xB0 黄油固定倒计时
@@ -110,7 +114,7 @@ pub struct Zombie {
     /// `0x0052A52D` 如果血量小于血量上限/3且非濒死，死亡
     pub body_hp: i32,
     /// 0xCC 本体血量上限
-    pub body_max_hp: i32,
+    pub body_hp_max: i32,
     /// 0xD0 1类饰品当前血量
     pub helmet_hp: i32,
     /// 0xD4 1类饰品血量上限
@@ -146,7 +150,7 @@ pub struct Zombie {
     /// 0x114 僵王放僵尸倒计时/舞王召唤倒计时/僵尸水族馆生产阳光倒计时/篮球剩余数量
     pub special_countdown: i32,
     /// 0x118 僵尸本体动画ID
-    pub body_anim_id: i32,
+    pub body_anim_id: u32,
     /// 0x11C 大小
     pub scale: f32,
     /// 0x120 [+84]变化量(僵尸纵向偏移速度)/僵尸水族馆中表示角度(弧度制)
@@ -216,17 +220,92 @@ impl LuaUserData for Zombie {
         methods.add_method("GetPos", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.pos))
         });
-
         methods.add_method("SetPos", |_, this, pos| {
+            with_board(|board| {
+                with_zombie(this.id(), |zombie| {
+                    zombie.pos = pos;
+                    zombie.row = PixelToGridYKeepOnBoard(
+                        board,
+                        pos.x as _,
+                        pos.y as i32 + zombie.hitbox_rect.size.y,
+                    );
+                    Ok(())
+                })
+            })
+        });
+        methods.add_method("SetPosRaw", |_, this, pos| {
             with_zombie(this.id(), |zombie| Ok(zombie.pos = pos))
         });
 
-        methods.add_method("GetHitBox", |_, this, ()| {
+        methods.add_method("GetRow", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.row))
+        });
+
+        methods.add_method("SetRow", |_, this, row| {
+            with_zombie(this.id(), |zombie| Ok(zombie.row = row))
+        });
+
+        methods.add_method("GetHitbox", |_, this, ()| {
+            with_zombie(this.id(), |zombie| {
+                let mut hitbox = zombie.hitbox_rect;
+                hitbox.position.x += zombie.pos.x as i32;
+                hitbox.position.y += zombie.pos.y as i32;
+                Ok(hitbox)
+            })
+        });
+        methods.add_method("GetHitboxRelative", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.hitbox_rect))
         });
 
-        methods.add_method("GetAttackBox", |_, this, ()| {
-            with_zombie(this.id(), |zombie| Ok(zombie.attackbox_rect))
+        methods.add_method("GetAtkbox", |_, this, ()| {
+            with_zombie(this.id(), |zombie| {
+                let mut atkbox = zombie.atkbox_rect;
+                atkbox.position.x += zombie.pos.x as i32;
+                atkbox.position.y += zombie.pos.y as i32;
+                Ok(atkbox)
+            })
+        });
+        methods.add_method("GetAtkboxRelative", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.atkbox_rect))
+        });
+
+        methods.add_method("GetBodyHp", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.body_hp))
+        });
+        methods.add_method("SetBodyHp", |_, this, hp| {
+            with_zombie(this.id(), |zombie| Ok(zombie.body_hp = hp))
+        });
+        methods.add_method("GetBodyHpMax", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.body_hp_max))
+        });
+        methods.add_method("SetBodyHpMax", |_, this, hp_max| {
+            with_zombie(this.id(), |zombie| Ok(zombie.body_hp_max = hp_max))
+        });
+
+        methods.add_method("GetHelmetHp", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp))
+        });
+        methods.add_method("SetHelmetHp", |_, this, hp| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp = hp))
+        });
+        methods.add_method("GetHelmetHpMax", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp_max))
+        });
+        methods.add_method("SetHelmetHpMax", |_, this, hp_max| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp_max = hp_max))
+        });
+
+        methods.add_method("GetShieldHp", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_hp))
+        });
+        methods.add_method("SetShieldHp", |_, this, hp| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_hp = hp))
+        });
+        methods.add_method("GetShieldHpMax", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_hp_max))
+        });
+        methods.add_method("SetShieldHpMax", |_, this, hp_max| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_hp_max = hp_max))
         });
     }
 
