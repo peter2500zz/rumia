@@ -193,6 +193,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 [[package]]
 name = "minhook"
 version = "0.8.0"
+source = "git+https://github.com/Jakobzs/minhook#fabd1d56c6ffb0d0f6bfde8750ebbc2fcdf30e0b"
 dependencies = [
  "cc",
  "tracing",
@@ -337,22 +338,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pvz_mod"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "fern",
- "inventory",
- "minhook",
- "mlua",
- "regex",
- "tracing",
- "widestring",
- "windows",
- "windows_wrapper",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -398,6 +383,22 @@ name = "regex-syntax"
 version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
+
+[[package]]
+name = "rumia"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "fern",
+ "inventory",
+ "minhook",
+ "mlua",
+ "regex",
+ "tracing",
+ "widestring",
+ "windows",
+ "windows_wrapper",
+]
 
 [[package]]
 name = "rustc-hash"
@@ -721,6 +722,7 @@ checksum = "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66"
 [[package]]
 name = "windows_wrapper"
 version = "0.1.0"
+source = "git+https://github.com/peter2500zz/windows_wrapper#34e2f82d4f63f897d657ef8d2068385e9a69d64b"
 dependencies = [
  "widestring",
  "windows",

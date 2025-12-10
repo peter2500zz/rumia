@@ -1,5 +1,5 @@
 [package]
-name = "pvz_mod"
+name = "rumia"
 version = "0.1.0"
 edition = "2024"
 
@@ -10,10 +10,10 @@ crate-type = ["cdylib"]
 anyhow = "1.0.100"
 fern = { version = "0.7.1", features = ["colored"] }
 inventory = "0.3.21"
-minhook = { path = "D:\\Files\\Rust\\minhook" }
+minhook = { git = "https://github.com/Jakobzs/minhook" }
 mlua = { version = "0.11.5", features = ["lua54", "vendored", "serialize", "macros", "mlua_derive"] }
 regex = "1.12.2"
 tracing = "0.1.43"
 widestring = "1.2.1"
 windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_WindowsAndMessaging"] }
-windows_wrapper = { path = "D:\\Files\\Rust\\windows_wrapper" }
+windows_wrapper = { git = "https://github.com/peter2500zz/windows_wrapper" }

@@ -7,11 +7,11 @@
 ---函数
     ---将日志写入到终端中
     ---@class Log
-    ---@field info fun(...: any): nil @输出信息级别日志
-    ---@field warn fun(...: any): nil @输出警告级别日志
-    ---@field error fun(...: any): nil @输出错误级别日志
-    ---@field debug fun(...: any): nil @输出调试级别日志
-    ---@field trace fun(...: any): nil @输出追踪级别日志
+    ---@field info fun(...: any) @输出信息级别日志
+    ---@field warn fun(...: any) @输出警告级别日志
+    ---@field error fun(...: any) @输出错误级别日志
+    ---@field debug fun(...: any) @输出调试级别日志
+    ---@field trace fun(...: any) @输出追踪级别日志
     Log = {}
 
     ---注册一个模组 
@@ -41,7 +41,7 @@
     ---@class Mod @模组
     ---@field name string @模组名称
     ---@field priority integer @模组优先级
-    ---@field AddCallback fun(self: Mod, callback: integer, function: CallbackFunction): nil @添加回调函数
+    ---@field AddCallback fun(self: Mod, callback: integer, function: CallbackFunction) @添加回调函数
 
     ---@class Vec2 @二维向量
     ---@field x number
@@ -77,6 +77,7 @@
     ---@field GetZombieById fun(self, id: integer): Zombie? @通过僵尸 id 查询僵尸
     ---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
     ---@field AddCoin fun(self, pos: Vec2, coin_type: integer, coin_motion): Coin @生成一只新的僵尸
+    ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
 
     ---@class Zombie @僵尸
     ---字段
@@ -84,9 +85,29 @@
     ---方法
     ---@field IsValid fun(self): boolean @这个僵尸是否在内存中有效
     ---@field GetPos fun(self): Vec2 @获取僵尸坐标
-    ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标
-    ---@field GetHitBox fun(self): Rect2 @获取僵尸命中判定框
-    ---@field GetAttackBox fun(self): Vec2 @获取僵尸攻击判定框
+    ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标，自动将所在行最接近的行
+    ---@field SetPosRaw fun(self, pos: Vec2) @设定僵尸坐标，不自动设定所在行
+    ---@field GetRow fun(self): integer @获取僵尸所在的行
+    ---@field SetRow fun(self, row: integer) @设定僵尸所在的行
+    ---@field GetHitbox fun(self): Rect2 @获取僵尸命中判定框
+    ---@field GetHitboxRelative fun(self): Rect2 @获取僵尸命中判定框，原点为僵尸坐标
+    ---@field GetAtkbox fun(self): Rect2 @获取僵尸攻击判定框
+    ---@field GetAtkboxRelative fun(self): Rect2 @获取僵尸攻击判定框，原点为僵尸坐标
+    ---
+    ---@field GetBodyHp fun(self): integer @获取僵尸本体血量
+    ---@field SetBodyHp fun(self, hp: integer) @设定僵尸本体血量
+    ---@field GetBodyHpMax fun(self): integer @获取僵尸本体血量上限
+    ---@field SetBodyHpMax fun(self, hp_max: integer) @设定僵尸本体血量上限
+    ---
+    ---@field GetHelmetHp fun(self): integer @获取僵尸头部护具血量
+    ---@field SetHelmetHp fun(self, hp: integer) @设定僵尸头部护具血量
+    ---@field GetHelmetHpMax fun(self): integer @获取僵尸头部护具血量上限
+    ---@field SetHelmetHpMax fun(self, hp_max: integer) @设定僵尸头部护具血量上限
+    ---
+    ---@field GetShieldHp fun(self): integer @获取僵尸身前护具血量
+    ---@field SetShieldHp fun(self, hp: integer) @设定僵尸身前护具血量
+    ---@field GetShieldHpMax fun(self): integer @获取僵尸身前护具血量上限
+    ---@field SetShieldHpMax fun(self, hp_max: integer) @设定僵尸身前护具血量上限
 
     ---@class Coin @掉落物
 
@@ -168,6 +189,7 @@
     ---@field R_CLICK integer @鼠标右键
     ---@field R_DOUBLE_CLICK integer @鼠标右键双击
     ---@field M_CLICK integer @鼠标中键
+    MouseCodes = {}
 
     ---@class KeyCodes @键码
     ---@field MODIFIERS integer @用于从键值中提取修饰键的位掩码
