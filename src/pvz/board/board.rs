@@ -45,6 +45,14 @@ pub struct Board {
 }
 const _: () = assert!(size_of::<Board>() == 0x57B0);
 
+impl Clone for Board {
+    fn clone(&self) -> Self {
+        unsafe {
+            ptr::read(self as *const Self as *mut Self)
+        }
+    }
+}
+
 inventory::submit! {
     LuaRegistration(|lua| {
         let globals = lua.globals();
@@ -80,8 +88,8 @@ pub fn with_board<T>(f: impl FnOnce(&mut Board) -> LuaResult<T>) -> LuaResult<T>
 
 impl LuaUserData for Board {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetDelta", |_, _, ()| {
-            Ok(get_delta_mgr().get_delta("Board").unwrap_or_default())
+        methods.add_method("GetUpdateDelta", |_, _, ()| {
+            Ok(get_delta_mgr().get_delta("Board::Update").unwrap_or_default())
         });
 
         methods.add_method("MousePressing", |_, _, ()| {

@@ -1,17 +1,13 @@
 pub mod board;
 
-use std::arch::{naked_asm};
+use std::{arch::naked_asm, ptr};
 use mlua::prelude::*;
 use tracing::*;
 
 use crate::{
-    add_callback, add_field_mut,
-    hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE
-    },
-    mods::callback::{POST, PRE, callback, callback_data},
-    pvz::{board::board::Board, coin::Coin, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie},
-    utils::{Vec2, delta_mgr::get_delta_mgr},
+    add_callback, add_field_mut, hook::pvz::board::{
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_DRAW, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE
+    }, mods::callback::{POST, PRE, callback, callback_data}, pvz::{board::board::Board, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie}, utils::{Vec2, delta_mgr::get_delta_mgr}
 };
 
 /// 这是 `Board` 的构造函数
@@ -144,9 +140,11 @@ add_callback!("AT_BOARD_MOUSE_UP", PRE | ADDR_MOUSE_UP);
 
 /// 关卡更新
 pub extern "thiscall" fn Update(this: *mut Board) {
-    let delta = get_delta_mgr().update_delta("Board");
+    // info!("<u<");
+    let delta = get_delta_mgr().update_delta("Board::Update");
     ORIGINAL_UPDATE.wait()(this);
     callback(POST | ADDR_UPDATE, delta);
+    // info!(">u>");
 }
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
 
@@ -220,3 +218,21 @@ pub fn PixelToGridKeepOnBoard(
     let grid_y = PixelToGridYKeepOnBoard(this, pos.x, pos.y);
     Vec2::new(grid_x, grid_y)
 }
+
+/// 两次绘制中会有多次更新
+pub extern "thiscall" fn Draw(
+    this: *mut Board,
+    g: *mut Graphics,
+) {
+    // info!("<d<");
+    // pause!();
+    ORIGINAL_DRAW.wait()(
+        this,
+        g
+    );
+    unsafe {
+        callback(POST | ADDR_DRAW, ptr::read(g));
+    }
+    // info!(">d>");
+}
+add_callback!("AT_BOARD_DRAW", POST | ADDR_DRAW);

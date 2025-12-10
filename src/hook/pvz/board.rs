@@ -6,10 +6,7 @@ use std::{
 use super::{HookRegistration, hook};
 use crate::{
     pvz::{
-        board::{self, board::Board},
-        coin::Coin,
-        lawn_app::lawn_app::LawnApp,
-        zombie::zombie::Zombie,
+        board::{self, board::Board}, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie
     },
     utils::Vec2,
 };
@@ -152,6 +149,15 @@ pub const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD: u32 = 0x0041C530;
 /// `Board::PixelToGridY` 的地址
 pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
 
+/// `Board::Draw` 的地址
+pub const ADDR_DRAW: u32 = 0x0041ACF0;
+/// `Board::Draw` 的签名
+type SignDraw = extern "thiscall" fn(
+    this: *mut Board,
+    g: *mut Graphics,
+);
+/// `Board::Draw` 的跳板
+pub static ORIGINAL_DRAW: OnceLock<SignDraw> = OnceLock::new();
 
 inventory::submit! {
     HookRegistration(|| {
@@ -189,6 +195,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_UPDATE.set(
             hook(ADDR_UPDATE as _, board::Update as _)?
+        );
+
+        let _ = ORIGINAL_DRAW.set(
+            hook(ADDR_DRAW as _, board::Draw as _)?
         );
 
         Ok(())

@@ -23,20 +23,6 @@
     ---@return LawnApp? @返回游戏对象
     function GetLawnApp() end
 
-    ---新建 Vec2
-    ---@param x number
-    ---@param y number
-    ---@return Vec2
-    function NewVec2(x, y) end
-
-    ---新建 Rect2
-    ---@param x number
-    ---@param y number
-    ---@param width number
-    ---@param height number
-    ---@return Rect2
-    function NewRect2(x, y, width, height) end
-
 ---模组类定义
     ---@class Mod @模组
     ---@field name string @模组名称
@@ -46,14 +32,28 @@
     ---@class Vec2 @二维向量
     ---@field x number
     ---@field y number
+    ---@field New fun(x: number, y: number): Vec2
+    ---@field Zero fun(): Vec2
+    Vec2 = {}
 
-    ---@class Rect2 @矩形
+    ---@class Rect2 @二维矩形
     ---@field x number
     ---@field y number
     ---@field width number
     ---@field height number
-    ---@field position Vec2
+    ---@field pos Vec2
     ---@field size Vec2
+    ---@field New fun(x: number, y: number, w: number, h: number): Rect2
+    ---@field Zero fun(): Rect2
+    Rect2 = {}
+
+    ---@class Color @颜色
+    ---@field red integer @0-255之外的值无效
+    ---@field green integer @0-255之外的值无效
+    ---@field blue integer @0-255之外的值无效
+    ---@field alpha integer @0-255之外的值无效
+    ---@field New fun(red: integer, green: integer, blue: integer, alpha: integer): Color
+    Color = {}
 
 
 ---游戏类定义
@@ -70,7 +70,7 @@
     ---字段
     ---@field sun integer @关卡内的阳光值
     ---方法
-    ---@field GetDelta fun(self): number @获取距离上一帧的时间
+    ---@field GetUpdateDelta fun(self): number @获取距离上一逻辑帧的时间
     ---@field MousePressing fun(self): boolean @鼠标是否按住（暂停不记录）
     ---@field SetSun fun(self, value: integer) @设置关卡的阳光值
     ---@field GetZombies fun(self): table<integer, Zombie> @返回场上所有僵尸
@@ -78,6 +78,10 @@
     ---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
     ---@field AddCoin fun(self, pos: Vec2, coin_type: integer, coin_motion): Coin @生成一只新的僵尸
     ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
+    
+    ---@class Graphics @图形
+    ---@field SetColor fun(self, color: Color) @设置绘图颜色
+    ---@field DrawRect fun(self, rect: Rect2) @绘制一个空心矩形
 
     ---@class Zombie @僵尸
     ---字段
@@ -133,6 +137,7 @@
     ---@class ModCallbacks @回调点
     ---游戏关卡分类
     ---@field AT_BOARD_UPDATE integer @游戏关卡更新, fun(delta: number): nil
+    ---@field AT_BOARD_DRAW integer @游戏关卡绘制，两次绘制间可能有多次更新, fun(g: Graphics): nil
     ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下, fun(keycode: integer): nil
     ---@field AT_BOARD_MOUSE_DOWN integer @游戏关卡内鼠标点击, fun(mousecode: integer, pos: Vec2): nil
     ---@field AT_BOARD_MOUSE_UP integer @游戏关卡内鼠标松开, fun(mousecode: integer, pos: Vec2): nil

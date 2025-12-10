@@ -53,23 +53,15 @@ inventory::submit! {
     LuaRegistration(|lua| {
         let globals = lua.globals();
 
-        let new_vec2 = lua.create_function(|_, (x, y)| {
-            Ok(Vec2::<f64>::new(x, y))
-        })?;
-
-        let new_rect2 = lua.create_function(|_, (x, y, width, height)| {
-            Ok(Rect2::<f64>::new(x, y, width, height))
-        })?;
-
-        globals.set("NewVec2", new_vec2)?;
-        globals.set("NewRect2", new_rect2)?;
+        globals.set("Vec2", Vec2::<f64>::default())?;
+        globals.set("Rect2", Rect2::<f64>::default())?;
 
         Ok(())
     })
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Vec2<T: Sized + FromLua> {
     pub x: T,
     pub y: T,
@@ -91,11 +83,17 @@ where
     for<'lua> T: FromLua + IntoLua,
 {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        // Getter: x
         fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_set("x", |_, this, value| {
+            this.x = value;
+            Ok(())
+        });
 
-        // Getter: y
         fields.add_field_method_get("y", |_, this| Ok(this.y));
+        fields.add_field_method_set("y", |_, this, value| {
+            this.y = value;
+            Ok(())
+        });
     }
 
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
@@ -103,6 +101,10 @@ where
         methods.add_meta_method(LuaMetaMethod::ToString, |_, this, ()| {
             Ok(format!("Vec2({:?}, {:?})", this.x, this.y))
         });
+
+        methods.add_function("New", |_, (x, y)| Ok(Vec2::<f64>::new(x, y)));
+
+        methods.add_function("Zero", |_, ()| Ok(Vec2::<f64>::default()));
     }
 }
 
@@ -125,7 +127,7 @@ impl<T: FromLua> FromLua for Vec2<T> {
 // ==========================================
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Rect2<T: Sized + FromLua> {
     pub position: Vec2<T>,
     pub size: Vec2<T>,
@@ -170,27 +172,41 @@ where
     for<'lua> T: FromLua + IntoLua,
 {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        // --- 复合属性访问 ---
-
-        // 获取 position (返回一个新的 Vec2 UserData)
-        fields.add_field_method_get("position", |_, this| Ok(this.position));
-
-        // 获取 size
-        fields.add_field_method_get("size", |_, this| Ok(this.size));
-
-        // --- 便捷属性 (快捷访问 x, y, width, height) ---
-
-        // x
         fields.add_field_method_get("x", |_, this| Ok(this.position.x));
+        fields.add_field_method_set("x", |_, this, value| {
+            this.position.x = value;
+            Ok(())
+        });
 
-        // y
         fields.add_field_method_get("y", |_, this| Ok(this.position.y));
+        fields.add_field_method_set("y", |_, this, value| {
+            this.position.y = value;
+            Ok(())
+        });
 
-        // width
         fields.add_field_method_get("width", |_, this| Ok(this.size.x));
+        fields.add_field_method_set("width", |_, this, value| {
+            this.size.x = value;
+            Ok(())
+        });
 
-        // height
         fields.add_field_method_get("height", |_, this| Ok(this.size.y));
+        fields.add_field_method_set("height", |_, this, value| {
+            this.size.y = value;
+            Ok(())
+        });
+
+        fields.add_field_method_get("pos", |_, this| Ok(this.position.clone()));
+        fields.add_field_method_set("pos", |_, this, value| {
+            this.position = value;
+            Ok(())
+        });
+
+        fields.add_field_method_get("size", |_, this| Ok(this.size.clone()));
+        fields.add_field_method_set("size", |_, this, value| {
+            this.size = value;
+            Ok(())
+        });
     }
 
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
@@ -200,6 +216,20 @@ where
                 "Rect2(Pos:({:?}, {:?}), Size:({:?}, {:?}))",
                 this.position.x, this.position.y, this.size.x, this.size.y
             ))
+        });
+
+        methods.add_function("New", |_, (x, y, w, h)| {
+            Ok(Rect2 {
+                position: Vec2::<f64>::new(x, y),
+                size: Vec2::<f64>::new(w, h),
+            })
+        });
+
+        methods.add_function("Zero", |_, ()| {
+            Ok(Rect2 {
+                position: Vec2::<f64>::default(),
+                size: Vec2::<f64>::default(),
+            })
         });
     }
 }

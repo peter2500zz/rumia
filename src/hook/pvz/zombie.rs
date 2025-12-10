@@ -6,7 +6,7 @@ use windows::core::BOOL;
 
 use super::{HookRegistration, hook};
 use crate::{
-    pvz::zombie::{self, zombie::Zombie},
+    pvz::{graphics::graphics::Graphics, zombie::{self, zombie::Zombie}},
     utils::data_array::DataArray,
 };
 
@@ -164,6 +164,54 @@ pub extern "stdcall" fn UpdateWrapper(this: *mut Zombie) {
     }
 }
 
+/// `Zombie::Draw` 构造函数的地址
+pub const ADDR_DRAW: u32 = 0x0052E2E0;
+/// `Zombie::Draw` 构造函数的签名
+type SignDraw = fn(
+    this: *mut Zombie,
+    g: *mut Graphics,
+);
+/// `Zombie::Draw` 构造函数的跳板
+static ORIGINAL_DRAW: OnceLock<SignDraw> = OnceLock::new();
+
+/// 从非标准调用中提取参数的辅助函数
+#[unsafe(naked)]
+extern "stdcall" fn DrawHelper(
+    g: *mut Graphics
+) {
+    naked_asm!(
+        "push [esp + 4]",
+        "push ebx",
+        // 调用 hook 函数
+        "call {hook}",
+        // 返回
+        "ret 4",
+
+        // 传入 hook 函数符号地址
+        hook = sym zombie::Draw,
+    )
+}
+
+/// 回调辅助函数
+pub extern "stdcall" fn DrawWrapper(
+    this: *mut Zombie,
+    g: *mut Graphics
+) {
+    unsafe {
+        asm!(
+            // 把参数放入原函数期望的寄存器中
+            "push {g}",
+            "mov ebx, {this}",
+            // 调用原函数
+            "call [{func}]",
+
+            this = in(reg) this,
+            g = in(reg) g,
+            func = in(reg) ORIGINAL_DRAW.wait(),
+        );
+    }
+}
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_DATA_ARRAY_ALLOC.set(
@@ -176,6 +224,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_UPDATE.set(
             hook(ADDR_UPDATE as _, UpdateHelper as _)?
+        );
+
+        let _ = ORIGINAL_DRAW.set(
+            hook(ADDR_DRAW as _, DrawHelper as _)?
         );
 
         Ok(())

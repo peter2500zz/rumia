@@ -1,0 +1,81 @@
+use std::arch::asm;
+
+use crate::{hook::pvz::graphics::{ADDR_DRAW_RECT, ORIGINAL_CREATE, ORIGINAL_DESTRUCTOR}, pvz::graphics::graphics::{Color, Graphics}, utils::Rect2};
+
+pub mod graphics;
+
+pub extern "stdcall" fn Create(
+    g: *mut Graphics
+) -> *mut Graphics {
+    ORIGINAL_CREATE.wait()(g)
+}
+
+pub extern "thiscall" fn Destructor(
+    g: *mut Graphics
+) {
+    ORIGINAL_DESTRUCTOR.wait()(g)
+}
+
+pub fn SetColor(g: *mut Graphics, color: &Color) {
+    unsafe {
+        let func_addr: usize = 0x00586CC0;
+
+        asm!(
+            "call edx",
+            // 1. 输入绑定：直接告诉 Rust 把变量放在特定寄存器里
+            // 这样 Rust 就不需要先分配随机寄存器再让你 mov 了
+            in("eax") color, // color 是引用，传入的是地址，正是 EAX 需要的
+            in("ecx") g,     // g 是指针，传入的是地址，正是 ECX 需要的
+            in("edx") func_addr,
+            
+            // 2. 关键修复：告诉 Rust 我们破坏了什么
+            // "clobber_abi" 告诉编译器："我进行了一个标准的函数调用"
+            // 编译器会自动处理所有易失性寄存器（EAX, ECX, EDX）和标志位的保存/恢复。
+            clobber_abi("C"), 
+            
+            // 如果你的 Rust 版本较老不支持 clobber_abi，可以用下面的写法替代：
+            // out("eax") _, // 函数返回值通常在 eax，会被覆盖
+            // out("ecx") _, // 也就是告诉 Rust：别指望这些寄存器里的值能活下来
+            // options(nostack) // 如果这个调用不涉及 Rust 栈操作
+        );
+    }
+}
+
+pub fn DrawRect(
+    g: *mut Graphics,
+    rect: Rect2<i32>
+) {
+    unsafe {
+        asm!(
+            // 1. 压栈参数 (注意：汇编 push 顺序通常是反向的，从右到左)
+            "push {height}",
+            "push {width}",
+            "push {y}",
+            "push {x}",
+
+            // 2. 调用函数
+            "call {func}",
+
+            // 3. 【非常重要】栈平衡修正
+            // 如果目标函数是 stdcall (它自己 ret 16)，则删除下面这行。
+            // 如果目标函数是 cdecl (像 C 语言默认那样)，你必须加上这行！
+            // 如果你不确定，看 IDA/Ghidra 里该函数结尾是 ret 还是 ret 0x10。
+            // "add esp, 16",  <-- 如果崩溃，尝试取消注释这行
+
+            // 变量绑定
+            x = in(reg) rect.position.x,
+            y = in(reg) rect.position.y,
+            width = in(reg) rect.size.x,
+            height = in(reg) rect.size.y,
+            
+            // 将 g 放入 eax (根据你的代码逻辑)
+            in("eax") g, 
+            
+            // 函数地址放入寄存器 (让编译器选一个通用的，或者你指定 edx)
+            func = in(reg) ADDR_DRAW_RECT,
+
+            // 标记 ABI 破坏 (保护 eax, ecx, edx, flags)
+            clobber_abi("C"),
+        );
+    }
+}

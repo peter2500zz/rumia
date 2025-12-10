@@ -1,16 +1,16 @@
 pub mod zombie;
 
-use tracing::trace;
+use tracing::*;
 use windows::core::BOOL;
 
 use crate::{
     add_callback,
     hook::pvz::zombie::{
-        ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, UpdateWrapper,
+        ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, DrawWrapper, UpdateWrapper,
         ZombieInitializeWrapper,
     },
     mods::callback::{POST, PRE, callback_data},
-    pvz::zombie::zombie::Zombie,
+    pvz::{graphics::graphics::Graphics, zombie::zombie::Zombie},
     utils::data_array::DataArray,
 };
 
@@ -55,3 +55,9 @@ pub extern "stdcall" fn Update(this: *mut Zombie) {
     UpdateWrapper(this);
 }
 add_callback!("AT_ZOMBIE_UPDATE", PRE | ADDR_UPDATE);
+
+pub extern "stdcall" fn Draw(this: *mut Zombie, g: *mut Graphics) {
+    // let g_0 = g.clone();
+    // }
+    DrawWrapper(this, g)
+}

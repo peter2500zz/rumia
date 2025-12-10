@@ -1,24 +1,17 @@
-pub mod register;
-mod log;
 pub mod callback;
+mod log;
+pub mod register;
 
 use anyhow::{Context, Result}; // 建议引入 Context 方便报错
-use std::{
-    cell::UnsafeCell, 
-    fs::{
-        self, 
-        DirEntry
-    }, 
-    path::Path, 
-    sync::LazyLock
-};
-use tracing::{
-    error, 
-    info
-};
 use mlua::prelude::*;
 use regex::Regex;
-
+use std::{
+    cell::UnsafeCell,
+    fs::{self, DirEntry},
+    path::Path,
+    sync::LazyLock,
+};
+use tracing::{error, info};
 
 const MOD_DIR: &str = "mods";
 const MAIN_FILE: &str = "main.lua";
@@ -60,9 +53,7 @@ static LUA: LazyLock<UnsafeCell<Lua>> = LazyLock::new(|| {
 });
 }
 
-static EXTRACT: LazyLock<Option<Regex>> = LazyLock::new(|| {
-    Regex::new(r":\s(.*?):\s").ok()
-});
+static EXTRACT: LazyLock<Option<Regex>> = LazyLock::new(|| Regex::new(r":\s(.*?):\s").ok());
 
 pub fn with_lua<F, T>(exec: F) -> LuaResult<T>
 where
@@ -105,7 +96,9 @@ pub fn load_mods() -> Result<u32> {
 fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
     let path = entry?.path();
 
-    if !path.is_dir() { return Ok(()) };
+    if !path.is_dir() {
+        return Ok(());
+    };
 
     let path_str = path.to_string_lossy().to_string();
 
@@ -113,11 +106,10 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
 
     let script = fs::read_to_string(&main_file)
         .with_context(|| format!("读取 Mod 主文件失败: {:?}", main_file))?;
-    
+
     let mod_name = path.file_name().unwrap().to_string_lossy().to_string();
 
     let result = with_lua(move |lua| {
-
         info!("正在加载 Mod: {}", mod_name);
 
         // 1. 创建沙盒环境 (Sandbox Table)
@@ -126,7 +118,10 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
         let package: LuaTable = lua.globals().get("package")?;
 
         package.set("path", format!(r"{path_str}\?.lua;{path_str}\?\init.lua"))?;
-        package.set("cpath", format!(r"{path_str}\?.dll;{path_str}\?\loadall.dll"))?;
+        package.set(
+            "cpath",
+            format!(r"{path_str}\?.dll;{path_str}\?\loadall.dll"),
+        )?;
 
         sandbox.set("package", package)?;
 
