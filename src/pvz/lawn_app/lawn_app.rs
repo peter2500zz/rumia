@@ -11,7 +11,7 @@ inventory::submit! {
         let globals = lua.globals();
 
         let lua_get_lawn_app = lua.create_function(move |lua, ()| {
-            if let Some(p_lawn_app) = get_lawn_app() {
+            if let Ok(p_lawn_app) = get_lawn_app() {
                 unsafe {
                     // 强制读取里面的东西
                     let lawn_app = lua.create_userdata(ptr::read(p_lawn_app))?;
@@ -48,20 +48,19 @@ pub struct LawnApp {
 }
 const _: () = assert!(size_of::<LawnApp>() == 0x8C8);
 
-pub fn get_lawn_app() -> Option<*mut LawnApp> {
+pub fn get_lawn_app() -> LuaResult<*mut LawnApp> {
     unsafe {
         if (*(ADDR_LAWN_APP_BASE as *const u32)) == 0 {
-            None
+            Err(LuaError::MemoryError("LawnApp 不可访问".to_string()))
         } else {
-            Some(*(ADDR_LAWN_APP_BASE as *const *mut LawnApp))
+            Ok(*(ADDR_LAWN_APP_BASE as *const *mut LawnApp))
         }
     }
 }
 
-pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> T) -> LuaResult<T> {
+pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> LuaResult<T>) -> LuaResult<T> {
     get_lawn_app()
-        .map(|lawn_app| unsafe { f(&mut *lawn_app) })
-        .ok_or_else(|| LuaError::MemoryError("LawnApp 不可访问".to_string()))
+        .and_then(|lawn_app| unsafe { f(&mut *lawn_app) })
 }
 
 
@@ -70,7 +69,7 @@ impl LuaUserData for LawnApp {
         // 获取窗口尺寸
         methods.add_method("GetWindowSize", |_, _, ()| {
             with_lawn_app(|lawn_app| {
-                lawn_app.window_size
+                Ok(lawn_app.window_size)
             })
         });
 

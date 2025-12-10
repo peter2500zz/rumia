@@ -9,7 +9,7 @@ use crate::{mods::LuaRegistration, pvz::{
         ArgsAddCoin, 
         ArgsAddZombieInRow
     }, 
-    data_array::DataArray, 
+    data_array::{DataArray, HasId}, 
     lawn_app::lawn_app::get_lawn_app, 
     zombie::zombie::Zombie
 }};
@@ -62,33 +62,57 @@ inventory::submit! {
     })
 }
 
-
-pub fn get_board() -> Option<*mut Board> {
+pub fn get_board() -> LuaResult<*mut Board> {
     unsafe {
         get_lawn_app().and_then(|lawn_app| {
             if ((*lawn_app).board as u32) == 0 {
-                None
+                Err(LuaError::MemoryError("Board 不可访问".to_string()))
             } else {
-                Some((*lawn_app).board)
+                Ok((*lawn_app).board)
             }
         })
     }
 }
 
-pub fn with_board<T>(f: impl FnOnce(&mut Board) -> T) -> LuaResult<T> {
+pub fn with_board<T>(f: impl FnOnce(&mut Board) -> LuaResult<T>) -> LuaResult<T> {
     get_board()
-        .map(|board| unsafe { f(&mut *board) })
-        .ok_or_else(|| LuaError::MemoryError("Board 不可访问".to_string()))
+        .and_then(|board| unsafe { f(&mut *board) })
 }
 
 impl LuaUserData for Board {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("MousePressing", |_, _, ()| {
-            with_board(|board| board.mouse_pressing)
+            with_board(|board| Ok(board.mouse_pressing))
         });
 
         methods.add_method("SetSun", |_, _, value: i32| {
-            with_board(|board| board.sun_value = value)
+            with_board(|board| Ok(board.sun_value = value))
+        });
+
+        methods.add_method("GetZombies", |lua, _, ()| {
+            with_board(|board| {
+                let zombies = lua.create_table()?;
+
+                unsafe {
+                    for zombie in board.zombies.iter_ptr() {
+                        zombies.set((*zombie).id(), ptr::read(zombie))?;
+                    }
+                }
+
+                Ok(zombies)
+            })
+        });
+
+        methods.add_method("GetZombieById", |lua, _, id| {
+            with_board(|board| {
+                if let Some(zombie) = board.zombies.get_ptr(id) {
+                    unsafe {
+                        Ok(LuaValue::UserData(lua.create_userdata(ptr::read(zombie))?))
+                    }
+                } else {
+                    Ok(LuaNil)
+                }
+            })
         });
 
         methods.add_method("AddZombie", |_, _, (zombie_type, row, from_wave)| {
@@ -101,7 +125,7 @@ impl LuaUserData for Board {
                 });
 
                 unsafe {
-                    ptr::read(zombie)
+                    Ok(ptr::read(zombie))
                 }
             })
         });
@@ -118,7 +142,7 @@ impl LuaUserData for Board {
                 );
 
                 unsafe {
-                    ptr::read(coin)
+                    Ok(ptr::read(coin))
                 }
             })
         });
@@ -126,11 +150,11 @@ impl LuaUserData for Board {
 
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("sun", |_, _| {
-            with_board(|board| board.sun_value)
+            with_board(|board| Ok(board.sun_value))
         });
 
         fields.add_field_method_set("sun", |_, _, value| {
-            with_board(|board| board.sun_value = value)
+            with_board(|board| Ok(board.sun_value = value))
         });
     }
 }

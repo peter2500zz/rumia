@@ -20,24 +20,28 @@
     function RegisterMod(name) end
 
     ---获取游戏类
-    ---@return LawnApp @返回游戏对象
+    ---@return LawnApp? @返回游戏对象
     function GetLawnApp() end
 
+    ---新建 Vec2
+    ---@param x number
+    ---@param y number
+    ---@return Vec2
+    function NewVec2(x, y) end
+
+    ---新建 Rect2
+    ---@param x number
+    ---@param y number
+    ---@param width number
+    ---@param height number
+    ---@return Rect2
+    function NewRect2(x, y, width, height) end
 
 ---模组类定义
     ---@class Mod @模组
     ---@field name string @模组名称
     ---@field priority integer @模组优先级
     ---@field AddCallback fun(self: Mod, callback: integer, function: CallbackFunction): nil @添加回调函数
-
-    ---@class ModCallbacks @回调点
-    ---游戏关卡分类
-    ---@field AT_BOARD_KEYDOWN integer @游戏关卡内按键按下, fun(keycode: integer): nil
-    ---@field AT_NEW_COIN integer @游戏关卡添加掉落物，fun(args: NewCoinArgs): nil
-    ---@field AT_NEW_ZOMBIE integer @游戏关卡生成僵尸，fun(args: NewZombieArgs): nil
-    ---@field AT_ZOMBIE_INIT integer @僵尸初始化，fun(zombie: Zombie): nil
-    ---@field AT_ZOMBIE_UPDATE integer @僵尸更新，fun(zombie: Zombie): nil
-    ModCallbacks = {}
 
     ---@class Vec2 @二维向量
     ---@field x number
@@ -50,6 +54,7 @@
     ---@field height number
     ---@field position Vec2
     ---@field size Vec2
+
 
 ---游戏类定义
     ---@class LawnApp @游戏
@@ -65,9 +70,12 @@
     ---字段
     ---@field sun integer @关卡内的阳光值
     ---方法
+    ---@field MousePressing fun(self): boolean @鼠标是否按住（暂停不记录）
     ---@field SetSun fun(self, value: integer) @设置关卡的阳光值
+    ---@field GetZombies fun(self): table<integer, Zombie> @返回场上所有僵尸
+    ---@field GetZombieById fun(self, id: integer): Zombie? @通过僵尸 id 查询僵尸
     ---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
-    ---@field AddCoin fun(self, x: integer, y: integer, coin_type: integer, coin_motion): Coin @生成一只新的僵尸
+    ---@field AddCoin fun(self, pos: Vec2, coin_type: integer, coin_motion): Coin @生成一只新的僵尸
 
     ---@class Zombie @僵尸
     ---字段
@@ -75,7 +83,9 @@
     ---方法
     ---@field IsValid fun(self): boolean @这个僵尸是否在内存中有效
     ---@field GetPos fun(self): Vec2 @获取僵尸坐标
-    ---@field SetPos fun(self, x: number, y: number) @设定僵尸坐标
+    ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标
+    ---@field GetHitBox fun(self): Rect2 @获取僵尸命中判定框
+    ---@field GetAttackBox fun(self): Vec2 @获取僵尸攻击判定框
 
     ---@class Coin @掉落物
 
@@ -83,13 +93,267 @@
 ---回调参数定义
     ---AT_NEW_COIN
     ---@class NewCoinArgs
-    ---@field x integer @掉落物产生在x坐标
-    ---@field y integer @到落物产生在y坐标
-    ---@field coin_type integer @掉落物的类型
-    ---@field coin_motion integer @掉落物的运动方式
+    ---@field GetPos fun(self): Vec2 @获取掉落物坐标
+    ---@field SetPos fun(self, pos: Vec2) @设定掉落物坐标
+    ---@field GetCoinType fun(self): integer @获取掉落物类型
+    ---@field SetCoinType fun(self, coin_type: integer) @设定掉落物类型
+    ---@field GetCoinMotion fun(self): integer @获取掉落物运动方式
+    ---@field SetCoinMotion fun(self, coin_motion: integer) @设定掉落物运动方式
 
     ---AT_NEW_ZOMBIE
     ---@class ArgsNewZombie
     ---@field row integer @僵尸所在的行
     ---@field zombie_type integer @僵尸的类型
     ---@field from_wave integer @僵尸来自的波次
+
+
+---枚举
+    ---@class ModCallbacks @回调点
+    ---游戏关卡分类
+    ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下, fun(keycode: integer): nil
+    ---@field AT_BOARD_MOUSE_DOWN integer @游戏关卡内鼠标点击, fun(mousecode: integer, pos: Vec2): nil
+    ---@field AT_BOARD_MOUSE_UP integer @游戏关卡内鼠标松开, fun(mousecode: integer, pos: Vec2): nil
+    ---@field AT_NEW_COIN integer @游戏关卡生成掉落物，fun(args: NewCoinArgs): nil
+    ---@field AT_NEW_ZOMBIE integer @游戏关卡生成僵尸，fun(args: NewZombieArgs): nil
+    ---@field AT_ZOMBIE_INIT integer @僵尸初始化，fun(zombie: Zombie): nil
+    ---@field AT_ZOMBIE_UPDATE integer @僵尸更新，fun(zombie: Zombie): nil
+    ModCallbacks = {}
+
+    ---@class CoinTypes @掉落物类型
+    ---@field SILVER_COIN integer @银币
+    ---@field GOLD_COIN integer @金币
+    ---@field DIAMOND integer @钻石
+    ---@field SUN integer @太阳
+    ---@field SMALL_SUN integer @小太阳
+    ---@field LARGE_SUN integer @大太阳
+    ---@field SEED_PACKET integer @植物卡片
+    ---@field TROPHY integer @奖杯
+    ---@field SHOVEL integer @铲子
+    ---@field ALMANAC integer @图鉴
+    ---@field KEY integer @钥匙
+    ---@field VASE integer @花瓶
+    ---@field WATERING_CAN integer @洒水壶
+    ---@field SANDWICH integer @三明治
+    ---@field NOTE integer @便条/遗书
+    ---@field VANISH_PLACEHOLDER integer @立即消失(占位)
+    ---@field SEEDLING_GIFT integer @花苗礼盒
+    ---@field COIN_BAG integer @金币袋
+    ---@field GIFT_BOX_PERSISTENT integer @礼盒(不消失)
+    ---@field COIN_BAG_PERSISTENT integer @金币袋(不消失)
+    ---@field SILVER_TROPHY integer @银奖杯
+    ---@field GOLD_TROPHY integer @金奖杯
+    ---@field CHOCOLATE integer @巧克力
+    ---@field CHOCOLATE_PERSISTENT integer @巧克力(不消失)
+    ---@field GIFT_BOX_MINI_GAMES integer @礼品盒(小游戏)
+    ---@field GIFT_BOX_PUZZLE integer @礼品盒(解密模式)
+    ---@field GIFT_BOX_SURVIVAL integer @礼品盒(生存模式)
+    CoinTypes = {}
+
+    ---@class CoinMotions @掉落物运动方式
+    ---@field DROP_FROM_XY integer @从坐标落下
+    ---@field SLOW_DROP_FROM_XY integer @从坐标缓慢落下
+    ---@field POP_FROM_BACK integer @从后方跳出
+    ---@field FAST_POP_FROM_BACK integer @从后方快速跳出
+    ---@field COLLECT_IMMEDIATELY integer @直接收集
+    ---@field AUTO_COLLECT_LATER integer @稍后自动收集
+    ---@field POP_FROM_RIGHT integer @从屏幕右侧蹦出
+    ---@field SPAWN_IN_SEED_SLOT integer @在卡槽栏生成
+    CoinMotions = {}
+
+    ---@class MouseCodes @鼠标点击代码
+    ---@field L_CLICK integer @鼠标左键
+    ---@field L_DOUBLE_CLICK integer @鼠标左键双击
+    ---@field R_CLICK integer @鼠标右键
+    ---@field R_DOUBLE_CLICK integer @鼠标右键双击
+    ---@field M_CLICK integer @鼠标中键
+
+    ---@class KeyCodes @键码
+    ---@field MODIFIERS integer @用于从键值中提取修饰键的位掩码
+    ---@field NONE integer @没有按键按下
+    ---@field L_BUTTON integer @鼠标左键
+    ---@field R_BUTTON integer @鼠标右键
+    ---@field LR_BUTTON integer @左右键一起按
+    ---@field M_BUTTON integer @鼠标中键（三键鼠标）
+    ---@field X_BUTTON_1 integer @第一个 X 鼠标键（五键鼠标）
+    ---@field X_BUTTON_2 integer @第二个 X 鼠标键（五键鼠标）
+    ---@field LMR_BUTTON integer @左中右键一起按
+    ---@field BACK integer @BACKSPACE 键
+    ---@field TAB integer @TAB 键
+    ---@field LINE_FEED integer @LINEFEED 键
+    ---@field CLEAR integer @CLEAR 键
+    ---@field ENTER integer @ENTER 键
+    ---@field RETURN integer @RETURN 键
+    ---@field SHIFT_KEY integer @SHIFT 键
+    ---@field CONTROL_KEY integer @CTRL 键
+    ---@field MENU integer @ALT 键
+    ---@field PAUSE integer @PAUSE 键
+    ---@field CAPITAL integer @CAPS LOCK 键
+    ---@field CAPS_LOCK integer @CAPS LOCK 键
+    ---@field HANGUEL_MODE integer @IME Hanguel 模式键（为兼容性而保留；请使用 HangulMode）
+    ---@field HANGUL_MODE integer @IME Hangul 模式键
+    ---@field KANA_MODE integer @IME Kana 模式键
+    ---@field JUNJA_MODE integer @IME Junja 模式键
+    ---@field FINAL_MODE integer @IME Final 模式键
+    ---@field HANJA_MODE integer @IME Hanja 模式键
+    ---@field KANJI_MODE integer @IME Kanji 模式键
+    ---@field ESCAPE integer @ESC 键
+    ---@field IME_CONVERT integer @IME 转换键
+    ---@field IME_NONCONVERT integer @IME 非转换键
+    ---@field IME_ACCEPT integer @IME 接受键，取代了 IMEAceept
+    ---@field IME_ACEEPT integer @IME 接受键已过时，请改用 IMEAccept
+    ---@field IME_MODE_CHANGE integer @IME 模式更改键
+    ---@field SPACE integer @SPACEBAR（空格）键
+    ---@field PAGE_UP integer @PAGE UP（上翻页）键
+    ---@field PRIOR integer @PAGE UP（上翻页）键
+    ---@field NEXT integer @PAGE DOWN（下翻页）键
+    ---@field PAGE_DOWN integer @PAGE DOWN（下翻页）键
+    ---@field END integer @END 键
+    ---@field HOME integer @HOME 键
+    ---@field LEFT integer @LEFT ARROW（左箭头）键
+    ---@field UP integer @UP ARROW（上箭头）键
+    ---@field RIGHT integer @RIGHT ARROW（右箭头）键
+    ---@field DOWN integer @DOWN ARROW（下箭头）键
+    ---@field SELECT integer @SELECT 键
+    ---@field PRINT integer @PRINT 键
+    ---@field EXECUTE integer @EXECUTE 键
+    ---@field PRINT_SCREEN integer @PRINT SCREEN（打印屏幕）键
+    ---@field SNAPSHOT integer @PRINT SCREEN（打印屏幕）键
+    ---@field INSERT integer @INS（插入）键
+    ---@field DELETE integer @DEL（删除）键
+    ---@field HELP integer @HELP（帮助）键
+    ---@field D0 integer @0 键
+    ---@field D1 integer @1 键
+    ---@field D2 integer @2 键
+    ---@field D3 integer @3 键
+    ---@field D4 integer @4 键
+    ---@field D5 integer @5 键
+    ---@field D6 integer @6 键
+    ---@field D7 integer @7 键
+    ---@field D8 integer @8 键
+    ---@field D9 integer @9 键
+    ---@field A integer @A 键
+    ---@field B integer @B 键
+    ---@field C integer @C 键
+    ---@field D integer @D 键
+    ---@field E integer @E 键
+    ---@field F integer @F 键
+    ---@field G integer @G 键
+    ---@field H integer @H 键
+    ---@field I integer @I 键
+    ---@field J integer @J 键
+    ---@field K integer @K 键
+    ---@field L integer @L 键
+    ---@field M integer @M 键
+    ---@field N integer @N 键
+    ---@field O integer @O 键
+    ---@field P integer @P 键
+    ---@field Q integer @Q 键
+    ---@field R integer @R 键
+    ---@field S integer @S 键
+    ---@field T integer @T 键
+    ---@field U integer @U 键
+    ---@field V integer @V 键
+    ---@field W integer @W 键
+    ---@field X integer @X 键
+    ---@field Y integer @Y 键
+    ---@field Z integer @Z 键
+    ---@field L_WIN integer @左 Windows 徽标键（Microsoft 自然键盘）
+    ---@field R_WIN integer @右 Windows 徽标键（Microsoft 自然键盘）
+    ---@field APPS integer @应用程序键（Microsoft 自然键盘）
+    ---@field SLEEP integer @计算机睡眠键
+    ---@field NUM_PAD_0 integer @数字键盘上的 0 键
+    ---@field NUM_PAD_1 integer @数字键盘上的 1 键
+    ---@field NUM_PAD_2 integer @数字键盘上的 2 键
+    ---@field NUM_PAD_3 integer @数字键盘上的 3 键
+    ---@field NUM_PAD_4 integer @数字键盘上的 4 键
+    ---@field NUM_PAD_5 integer @数字键盘上的 5 键
+    ---@field NUM_PAD_6 integer @数字键盘上的 6 键
+    ---@field NUM_PAD_7 integer @数字键盘上的 7 键
+    ---@field NUM_PAD_8 integer @数字键盘上的 8 键
+    ---@field NUM_PAD_9 integer @数字键盘上的 9 键
+    ---@field MULTIPLY integer @乘法键
+    ---@field ADD integer @加法键
+    ---@field SEPARATOR integer @分隔符键
+    ---@field SUBTRACT integer @减法键
+    ---@field DECIMAL integer @小数点键
+    ---@field DIVIDE integer @除法键
+    ---@field F1 integer @F1 键
+    ---@field F2 integer @F2 键
+    ---@field F3 integer @F3 键
+    ---@field F4 integer @F4 键
+    ---@field F5 integer @F5 键
+    ---@field F6 integer @F6 键
+    ---@field F7 integer @F7 键
+    ---@field F8 integer @F8 键
+    ---@field F9 integer @F9 键
+    ---@field F10 integer @F10 键
+    ---@field F11 integer @F11 键
+    ---@field F12 integer @F12 键
+    ---@field F13 integer @F13 键
+    ---@field F14 integer @F14 键
+    ---@field F15 integer @F15 键
+    ---@field F16 integer @F16 键
+    ---@field F17 integer @F17 键
+    ---@field F18 integer @F18 键
+    ---@field F19 integer @F19 键
+    ---@field F20 integer @F20 键
+    ---@field F21 integer @F21 键
+    ---@field F22 integer @F22 键
+    ---@field F23 integer @F23 键
+    ---@field F24 integer @F24 键
+    ---@field NUM_LOCK integer @NUM LOCK 键
+    ---@field SCROLL integer @SCROLL LOCK 键
+    ---@field L_SHIFT_KEY integer @左 SHIFT 键
+    ---@field R_SHIFT_KEY integer @右 SHIFT 键
+    ---@field L_CONTROL_KEY integer @左 CTRL 键
+    ---@field R_CONTROL_KEY integer @右 CTRL 键
+    ---@field L_MENU integer @左 ALT 键
+    ---@field R_MENU integer @右 ALT 键
+    ---@field BROWSER_BACK integer @浏览器后退键
+    ---@field BROWSER_FORWARD integer @浏览器前进键
+    ---@field BROWSER_REFRESH integer @浏览器刷新键
+    ---@field BROWSER_STOP integer @浏览器停止键
+    ---@field BROWSER_SEARCH integer @浏览器搜索键
+    ---@field BROWSER_FAVORITES integer @浏览器收藏夹键
+    ---@field BROWSER_HOME integer @浏览器主页键
+    ---@field VOLUME_MUTE integer @静音键
+    ---@field VOLUME_DOWN integer @降低音量键
+    ---@field VOLUME_UP integer @增大音量键
+    ---@field MEDIA_NEXT_TRACK integer @媒体下一曲键
+    ---@field MEDIA_PREVIOUS_TRACK integer @媒体上一曲键
+    ---@field MEDIA_STOP integer @媒体停止键
+    ---@field MEDIA_PLAY_PAUSE integer @媒体播放/暂停键
+    ---@field LAUNCH_MAIL integer @启动邮件键
+    ---@field SELECT_MEDIA integer @选择媒体键
+    ---@field LAUNCH_APPLICATION_1 integer @启动应用程序一键
+    ---@field LAUNCH_APPLICATION_2 integer @启动应用程序二键
+    ---@field OEM_1 integer @OEM 1 键
+    ---@field OEM_SEMICOLON integer @US 标准键盘上的 OEM 分号键
+    ---@field OEM_PLUS integer @任何国家/地区键盘上的 OEM 加号键
+    ---@field OEM_COMMA integer @任何国家/地区键盘上的 OEM 逗号键
+    ---@field OEM_MINUS integer @任何国家/地区键盘上的 OEM 减号键
+    ---@field OEM_PERIOD integer @任何国家/地区键盘上的 OEM 句点键
+    ---@field OEM_2 integer @OEM 2 键
+    ---@field OEM_QUESTION integer @US 标准键盘上的 OEM 问号键
+    ---@field OEM_3 integer @OEM 3 键
+    ---@field OEM_TILDE integer @US 标准键盘上的 OEM 波浪号键
+    ---@field OEM_4 integer @OEM 4 键
+    ---@field OEM_OPEN_BRACKETS integer @US 标准键盘上的 OEM 左中括号键
+    ---@field OEM_5 integer @OEM 5 键
+    ---@field OEM_PIPE integer @US 标准键盘上的 OEM 竖线键
+    ---@field OEM_6 integer @OEM 6 键
+    ---@field OEM_CLOSE_BRACKETS integer @US 标准键盘上的 OEM 右中括号键
+    ---@field OEM_7 integer @OEM 7 键
+    ---@field OEM_QUOTES integer @US 标准键盘上的 OEM 单引号/双引号键
+    ---@field OEM_8 integer @OEM 8 键
+    ---@field OEM_102 integer @OEM 102 键
+    ---@field OEM_BACKSLASH integer @RT 102 键键盘上的 OEM 尖括号或反斜杠键
+    ---@field PROCESS_KEY integer @PROCESS KEY 键
+    ---@field PACKET integer @用于传递 Unicode 字符，如同它们是按键一样
+    ---@field ATTN integer @ATTN 键
+    ---@field CRSEL integer @CRSEL 键
+    ---@field EXSEL integer @EXSEL 键
+    ---@field ERASE_EOF integer @ERASE EOF 键
+    ---@field PLAY integer @PLAY 键
+    ---@field ZOOM integer @ZOOM 键
+    ---@field NO_NAME integer @保留供将�

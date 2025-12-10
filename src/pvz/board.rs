@@ -1,6 +1,6 @@
 pub mod board;
 
-use tracing::trace;
+use tracing::*;
 use mlua::prelude::*;
 
 use crate::{

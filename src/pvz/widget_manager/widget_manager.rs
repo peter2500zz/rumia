@@ -220,30 +220,27 @@ inventory::submit! {
     })
 }
 
-pub fn get_widget_manager() -> Option<*mut WidgetManager> {
+pub fn get_widget_manager() -> LuaResult<*mut WidgetManager> {
     unsafe {
         get_lawn_app().and_then(|lawn_app| {
             if ((*lawn_app).widget_manager as u32) == 0 {
-                None
+                Err(LuaError::MemoryError("WidgetManager 不可访问".to_string()))
             } else {
-                Some((*lawn_app).widget_manager)
+                Ok((*lawn_app).widget_manager)
             }
         })
     }
 }
 
-pub fn with_widget_manager<T>(f: impl FnOnce(&mut WidgetManager) -> T) -> LuaResult<T> {
+pub fn with_widget_manager<T>(f: impl FnOnce(&mut WidgetManager) -> LuaResult<T>) -> LuaResult<T> {
     get_widget_manager()
-        .map(|widget_manager| unsafe { f(&mut *widget_manager) })
-        .ok_or_else(|| LuaError::MemoryError("WidgetManager 不可访问".to_string()))
+        .and_then(|widget_manager| unsafe { f(&mut *widget_manager) })
 }
 
 impl LuaUserData for WidgetManager {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetMousePos", |_, _, ()| {
-            with_widget_manager(|wm| {
-                wm.mouse_pos
-            })
+            with_widget_manager(|wm| Ok(wm.mouse_pos))
         });
     }
 }

@@ -193,47 +193,52 @@ impl HasId for Zombie {
 /// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸指针
 /// 
 /// 如果无法访问僵尸会返回 None
-pub fn get_zombie(id: i32) -> Option<*mut Zombie> {
+pub fn get_zombie(id: i32) -> LuaResult<*mut Zombie> {
     get_board().and_then(|board| unsafe {
-        (*board).zombies.get_mut(id).map(|zombie| zombie as *mut Zombie)
+        if let Some(zombie) = (*board).zombies.get_ptr(id) {
+            Ok(zombie)
+        } else {
+            Err(LuaError::MemoryError(format!("Zombie({}) 不可访问", id)))
+        }
     })
 }
 
 /// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸并执行操作
 /// 
 /// 如果无法访问僵尸会返回错误
-pub fn with_zombie<T>(id: i32, f: impl FnOnce(&mut Zombie) -> T) -> LuaResult<T> {
+pub fn with_zombie<T>(id: i32, f: impl FnOnce(&mut Zombie) -> LuaResult<T>) -> LuaResult<T> {
     get_zombie(id)
-        .map(|zombie| unsafe { f(&mut *zombie) })
-        .ok_or_else(|| LuaError::MemoryError(format!("Zombie({}) 不可访问", id)))
+        .and_then(|zombie| unsafe { f(&mut *zombie) })
 }
 
 impl LuaUserData for Zombie {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         // 如果僵尸被从内存里清理掉了，就给 false
         methods.add_method("IsValid", |_, this, ()| {
-            Ok(get_zombie(this.id()).is_some())
+            Ok(get_zombie(this.id()).is_ok())
         });
 
         methods.add_method("GetPos", |_, this, ()| {
-            with_zombie(this.id(), |zombie| {
-                zombie.pos
-            })
+            with_zombie(this.id(), |zombie| Ok(zombie.pos))
         });
 
         methods.add_method("SetPos", |_, this, pos| {
-            with_zombie(this.id(), |zombie| {
-                zombie.pos = pos;
-            })
+            with_zombie(this.id(), |zombie| Ok(zombie.pos = pos))
+        });
+
+        methods.add_method("GetHitBox", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.hitbox_rect))
+        });
+
+        methods.add_method("GetAttackBox", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.attackbox_rect))
         });
     }
 
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         // 由于 UserData 给 Lua 后会锁定状态，虽然对大多数字段不合适，但 this.id 不变，太棒了
         fields.add_field_method_get("body_hp", |_, this| {
-            with_zombie(this.id(), |zombie| {
-                zombie.body_hp
-            })
+            with_zombie(this.id(), |zombie| Ok(zombie.body_hp))
         });
 
 
