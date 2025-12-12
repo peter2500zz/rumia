@@ -4,7 +4,10 @@ use mlua::prelude::*;
 
 use crate::{
     mods::LuaRegistration,
-    pvz::{board::board::Board, resource_manager::ResourceManager, widget_manager::widget_manager::WidgetManager},
+    pvz::{
+        board::board::Board, resource_manager::ResourceManager,
+        widget_manager::widget_manager::WidgetManager,
+    },
     utils::Vec2,
 };
 
@@ -15,15 +18,8 @@ inventory::submit! {
         let globals = lua.globals();
 
         let lua_get_lawn_app = lua.create_function(move |lua, ()| {
-            if let Ok(p_lawn_app) = get_lawn_app() {
-                unsafe {
-                    // 强制读取里面的东西
-                    let lawn_app = lua.create_userdata(ptr::read(p_lawn_app))?;
-
-                    Ok(mlua::Value::UserData(lawn_app))
-                }
-            } else {
-                Ok(mlua::Value::Nil)
+            unsafe {
+                Ok(mlua::Value::UserData(lua.create_userdata(ptr::read(get_lawn_app()?))?))
             }
         })?;
 

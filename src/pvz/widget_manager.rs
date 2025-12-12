@@ -5,7 +5,7 @@ use tracing::trace;
 use crate::{
     add_callback,
     hook::pvz::widget_manager::{
-        ADDR_KEY_DOWN, ADDR_KEY_UP, ADDR_POST_DRAW_SCREEN, KeyDownWrapper, KeyUpWrapper,
+        ADDR_KEY_DOWN, ADDR_KEY_UP, ADDR_PRE_DRAW_SCREEN, KeyDownWrapper, KeyUpWrapper,
         ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR,
     },
     mods::callback::{POST, PRE, callback},
@@ -13,12 +13,16 @@ use crate::{
         board::board::get_board,
         graphics::{
             TodDrawStringWrapped,
-            graphics::{Color, Graphics, GraphicsHandle},
+            graphics::{Color, Graphics, Render},
         },
         lawn_app::lawn_app::LawnApp,
         widget_manager::widget_manager::WidgetManager,
     },
-    utils::{Rect2, msvc_string::MsvcString},
+    utils::{
+        Rect2,
+        msvc_string::MsvcString,
+        render_manager::{RenderLayer, execute_layer_render, finish_render_frame},
+    },
 };
 
 /// 这是 `WidgetManager` 的构造函数
@@ -63,25 +67,32 @@ pub extern "stdcall" fn KeyUp(this: *mut WidgetManager, key: i32) {
 add_callback!("AT_GAME_KEY_UP", PRE | ADDR_KEY_UP);
 add_callback!("AT_BOARD_KEY_UP", POST | ADDR_KEY_UP);
 
+pub fn PreDrawScreen() {
+    callback(PRE | ADDR_PRE_DRAW_SCREEN, Render(RenderLayer::UI));
+}
+add_callback!("AT_DRAW", PRE | ADDR_PRE_DRAW_SCREEN);
+
 pub extern "stdcall" fn PostDrawScreen(g: *mut Graphics) {
     // 不要使用 ptr::read(g)！
     // 直接创建一个 Handle，传递指针
     // GraphicsHandle 实现了 Copy/Clone，可以直接传给 callback
-    callback(POST | ADDR_POST_DRAW_SCREEN, GraphicsHandle(g));
-    unsafe {
-        if *(0x006A7224 as *const u32) == 0 {
-            return;
-        }
 
-        TodDrawStringWrapped(
-            g,
-            &MsvcString::from("234"),
-            &Rect2::new(0, 0, 255, 255),
-            *( 0x006A7224 as *mut *mut _),
-            &Color::new(255, 0, 0, 255),
-            0,
-        );
-    }
-    
+    execute_layer_render(RenderLayer::UI, g);
+
+    finish_render_frame();
+
+    // unsafe {
+    //     if *(0x006A7224 as *const u32) == 0 {
+    //         return;
+    //     }
+
+    //     TodDrawStringWrapped(
+    //         g,
+    //         &MsvcString::from("234"),
+    //         &Rect2::new(0, 0, 255, 255),
+    //         *( 0x006A7224 as *mut *mut _),
+    //         &Color::new(255, 0, 0, 255),
+    //         0,
+    //     );
+    // }
 }
-add_callback!("AT_GAME_DRAW", POST | ADDR_POST_DRAW_SCREEN);

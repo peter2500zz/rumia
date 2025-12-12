@@ -3,7 +3,7 @@ use mlua::prelude::*;
 use crate::{
     mods::LuaRegistration,
     pvz::graphics::{DrawRect, FillRect, SetColor},
-    utils::Vec2,
+    utils::{Vec2, render_manager::submit_render_task},
 };
 
 #[repr(C)]
@@ -119,38 +119,37 @@ pub struct Graphics {
 const _: () = assert!(size_of::<Graphics>() == 0x68);
 
 #[derive(Clone, Copy)]
-pub struct GraphicsHandle(pub *mut Graphics);
+pub struct Render(pub i64);
 
 // 2. 为这个包装器实现 LuaUserData
-impl LuaUserData for GraphicsHandle {
+impl LuaUserData for Render {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        // 方法实现中，通过 self.0 获取原始指针
         methods.add_method("SetColor", |_, this, color: Color| {
-            if this.0.is_null() {
-                return Ok(());
-            }
+            submit_render_task(this.0, move |g| {
+                SetColor(g, &color);
+            });
 
-            SetColor(this.0, &color);
+            Ok(())
+        });
+
+        methods.add_method_mut("SetLayer", |_, this, layer| {
+            this.0 = layer;
 
             Ok(())
         });
 
         methods.add_method("FillRect", |_, this, rect| {
-            if this.0.is_null() {
-                return Ok(());
-            }
-
-            FillRect(this.0, rect);
+            submit_render_task(this.0, move |g| {
+                FillRect(g, rect);
+            });
 
             Ok(())
         });
 
         methods.add_method("DrawRect", |_, this, rect| {
-            if this.0.is_null() {
-                return Ok(());
-            }
-
-            DrawRect(this.0, rect);
+            submit_render_task(this.0, move |g| {
+                DrawRect(g, rect);
+            });
 
             Ok(())
         });

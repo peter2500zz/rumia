@@ -9,7 +9,7 @@ use std::{
 use super::{HookRegistration, hook};
 use crate::pvz::{
     lawn_app::lawn_app::LawnApp,
-    widget_manager::{self, PostDrawScreen, widget_manager::WidgetManager},
+    widget_manager::{self, PostDrawScreen, PreDrawScreen, widget_manager::WidgetManager},
 };
 
 /// `WidgetManager` 构造函数的地址
@@ -121,12 +121,34 @@ pub extern "stdcall" fn KeyUpWrapper(this: *mut WidgetManager, key: i32) -> u8 {
     }
 }
 
+/// 笑死根本不在乎逻辑
+pub const ADDR_PRE_DRAW_SCREEN: u32 = 0x00538EB0;
+static ORIGINAL_PRE_DRAW_SCREEN: AtomicUsize = AtomicUsize::new(0);
+
+#[unsafe(naked)]
+pub extern "stdcall" fn PreDrawScreenHelper() {
+    naked_asm!(
+        "pushad",
+        "pushfd",
+        "call {hook}",
+        "popfd",
+        "popad",
+
+        "mov edx, [{func}]",
+
+        "jmp edx",
+
+        hook = sym PreDrawScreen,
+        func = sym ORIGINAL_PRE_DRAW_SCREEN
+    );
+}
+
 /// 诡异包装 用于函数中劫持 g
 pub const ADDR_POST_DRAW_SCREEN: u32 = 0x0053910A;
 static ORIGINAL_POST_DRAW_SCREEN: AtomicUsize = AtomicUsize::new(0);
 
 #[unsafe(naked)]
-pub extern "thiscall" fn PostDrawScreenHelper() {
+pub extern "stdcall" fn PostDrawScreenHelper() {
     naked_asm!(
         "pushad",
         "pushfd",
@@ -163,6 +185,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_KEY_UP.set(
             hook(ADDR_KEY_UP as _, KeyUpHelper as _)?
+        );
+
+        let _ = ORIGINAL_PRE_DRAW_SCREEN.store(
+            hook(ADDR_PRE_DRAW_SCREEN as _, PreDrawScreenHelper as _)?, Ordering::SeqCst
         );
 
         let _ = ORIGINAL_POST_DRAW_SCREEN.store(

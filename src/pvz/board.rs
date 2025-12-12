@@ -7,21 +7,22 @@ use tracing::*;
 use crate::{
     add_callback, add_field_mut,
     hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_DRAW, ADDR_KEYDOWN, ADDR_MOUSE_DOWN,
-        ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD,
-        ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR,
-        ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN,
-        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP,
+        ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE,
+        AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR,
+        ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN,
+        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
     },
     mods::callback::{POST, PRE, callback, callback_data},
     pvz::{
-        board::board::Board,
-        coin::Coin,
-        graphics::graphics::{Graphics, GraphicsHandle},
-        lawn_app::lawn_app::LawnApp,
+        board::board::Board, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp,
         zombie::zombie::Zombie,
     },
-    utils::{Vec2, delta_mgr::get_delta_mgr},
+    utils::{
+        Vec2,
+        delta_mgr::get_delta_mgr,
+        render_manager::{RenderLayer, execute_layer_render},
+    },
 };
 
 /// 这是 `Board` 的构造函数
@@ -228,8 +229,7 @@ pub extern "thiscall" fn Draw(this: *mut Board, g: *mut Graphics) {
     // pause!();
     ORIGINAL_DRAW.wait()(this, g);
 
-    callback(POST | ADDR_DRAW, GraphicsHandle(g));
+    execute_layer_render(RenderLayer::Board, g);
 
     // info!(">d>");
 }
-add_callback!("AT_BOARD_DRAW", POST | ADDR_DRAW);

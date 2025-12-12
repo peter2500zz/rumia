@@ -1,14 +1,14 @@
 pub mod lawn_app;
 pub mod loading;
 
-use tracing::{debug, trace};
+use tracing::{debug, error, info, trace};
 
 use crate::{hook::pvz::lawn_app::{
     ORIGINAL_CONSTRUCTOR, 
     ORIGINAL_DESTRUCTOR, 
     ORIGINAL_INIT, 
     ORIGINAL_LOST_FOCUS
-}, pvz::lawn_app::lawn_app::LawnApp};
+}, mods::load_mods, pvz::lawn_app::lawn_app::LawnApp};
 
 /// 这是 `LawnApp` 的构造函数
 pub extern "stdcall" fn Constructor(
@@ -26,6 +26,17 @@ pub extern "stdcall" fn Constructor(
     );
 
     trace!("地址 {:#x?}", this);
+
+    match load_mods() {
+        Ok(loaded) => {
+            if loaded != 0 {
+                info!("共加载 {} 个 Mod", loaded);
+            }
+        },
+        Err(e) => {
+            error!("加载 Mod 时出现错误: {}", e)
+        }
+    }
 
     this
 }

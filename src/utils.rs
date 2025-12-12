@@ -3,6 +3,7 @@ pub mod data_array;
 pub mod delta_mgr;
 #[allow(unused)]
 pub mod msvc_string;
+pub mod render_manager;
 
 use mlua::prelude::*;
 use std::fmt::Debug;
