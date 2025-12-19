@@ -1,7 +1,8 @@
 pub mod board;
 
+use anyhow::{Result, anyhow};
 use mlua::prelude::*;
-use std::arch::naked_asm;
+use std::{arch::naked_asm, fs::File};
 use tracing::*;
 
 use crate::{
@@ -15,12 +16,15 @@ use crate::{
     },
     mods::callback::{POST, PRE, callback, callback_data},
     pvz::{
-        board::board::Board, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp,
+        board::board::Board,
+        coin::Coin,
+        graphics::graphics::Graphics,
+        lawn_app::lawn_app::{LawnApp, get_lawn_app},
         zombie::zombie::Zombie,
     },
+    save::{PROFILE_MANAGER, SAVES_DIR},
     utils::{
         Vec2,
-        data_array::HasId,
         delta_mgr::get_delta_mgr,
         msvc_string::MsvcString,
         render_manager::{RenderLayer, execute_layer_render},
@@ -244,12 +248,31 @@ pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcS
 
     let mut success = LawnLoadGameWrapper(this, theFilePath);
 
-    if success {
-        unsafe {
-            for zombie in (*this).zombies.iter() {
-                debug!("读取僵尸 {:#x}", zombie.id())
+    let load_custom_profile = || -> Result<()> {
+        if let Ok(the_app) = get_lawn_app() {
+            unsafe {
+                let json_path = format!(
+                    "{}/user{}.json",
+                    SAVES_DIR,
+                    (*(*the_app).player_info).save_slot
+                );
+                let maybe_a_file = File::open(&json_path);
+
+                if let Ok(file) = maybe_a_file {
+                    debug!("从 {} 读取模组数据", json_path);
+                    let mut profile = PROFILE_MANAGER.lock().unwrap();
+                    *profile = serde_json::from_reader(file)?;
+                }
             }
+
+            Ok(())
+        } else {
+            Err(anyhow!("can not get LawnApp"))
         }
+    };
+
+    if success {
+        success = load_custom_profile().is_ok();
     }
 
     success
@@ -261,5 +284,31 @@ pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcS
         debug!("保存存档至 {}", (*theFilePath).to_string());
     }
 
-    LawnSaveGameWrapper(this, theFilePath)
+    let mut success = LawnSaveGameWrapper(this, theFilePath);
+
+    let save_custom_profile = || -> Result<()> {
+        if let Ok(the_app) = get_lawn_app() {
+            unsafe {
+                let json_path = format!(
+                    "{}/user{}.json",
+                    SAVES_DIR,
+                    (*(*the_app).player_info).save_slot
+                );
+                let file = File::create(&json_path)?;
+
+                let profile = PROFILE_MANAGER.lock().unwrap();
+                serde_json::to_writer_pretty(file, &*profile)?;
+            }
+
+            Ok(())
+        } else {
+            Err(anyhow!("can not get LawnApp"))
+        }
+    };
+
+    if success {
+        success = save_custom_profile().is_ok();
+    }
+
+    success
 }

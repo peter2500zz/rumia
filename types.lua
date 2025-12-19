@@ -160,7 +160,7 @@
 ---枚举
     ---@class ModCallbacks @回调点
     ---回调分类
-    ---@field AT_GAME_DRAW integer @游戏层面绘制
+    ---@field AT_DRAW integer @游戏层面绘制
         ---
         ---回调函数签名
         ---- `fun(g: Graphics)`
@@ -194,13 +194,6 @@
         ---
         ---参数
         ---- `delta` : 距离上一逻辑帧过去的时间（秒）
-    ---@field AT_BOARD_DRAW integer @游戏关卡绘制，两次绘制间可能有多次更新
-        ---
-        ---回调函数签名
-        ---- `fun(g: Graphics)`
-        ---
-        ---参数
-        ---- `g` : 图形类
     ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下
         ---
         ---回调函数签名

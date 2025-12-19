@@ -4,22 +4,22 @@ use serde_json::Value;
 use tracing::trace;
 use std::{collections::HashMap, sync::{LazyLock, Mutex}};
 
-use crate::pvz::board::board::Board;
-
 pub static PROFILE_MANAGER: LazyLock<Mutex<Profile>> = LazyLock::new(|| {
     Mutex::new(Profile::default())
 });
+
+pub const SAVES_DIR: &str = "saves/userdata";
 
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Profile {
     zombies: HashMap<i32, HashMap<String, Value>>,
 }
 
-impl Profile {
-    pub fn fix_board(&self, board: *mut Board) {
-        // 还原僵尸数据
-    }
+pub trait ProfileData {
+    const KEY: &str;
+}
 
+impl Profile {
     pub fn set_zombie_attr(&mut self, id: i32, key: String, value: LuaValue) -> LuaResult<()> {
         let zombie_data = self.zombies.entry(id).or_insert(HashMap::new());
 
@@ -48,5 +48,9 @@ impl Profile {
         {
             zombie_data.remove(&key);
         }
+    }
+
+    pub fn remove_zombie(&mut self, id: i32) {
+        self.zombies.remove(&id);
     }
 }
