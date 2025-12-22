@@ -16,12 +16,16 @@ theme:
     - navigation.tabs.sticky # 顶部导航粘连
     - navigation.indexes # 导航index页面支持
     - navigation.sections # 全部展开(非折叠状态)
-    - navigation.expand # 子目录展开
+    # - navigation.expand # 子目录展开
     - navigation.top # 返回顶部按钮
     - toc.follow # 页面目录支持
 
   icon:
     logo: logo
+
+extra:
+  search:
+    language: 'jp'
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -39,5 +43,63 @@ nav:
   - 快速开始: 
     - 创建你的第一个 Mod:
       - quick-start/index.md
-  - API: ""
+  - API:
+    - API: api/index.md
+    - 全局变量:
+      - 全局变量: api/global/index.md
+      - RegisterMod: api/global/RegisterMod.md
+      - Log: api/global/Log.md
+    - 回调点:
+      - 回调点: api/callback/index.md
+      - 渲染:
+        - AT_DRAW: api/callback/AT_DRAW.md
+      - 键鼠输入:
+        - AT_GAME_KEY_DOWN: api/callback/AT_GAME_KEY_DOWN.md
+        - AT_GAME_KEY_UP: api/callback/AT_GAME_KEY_UP.md
+        - AT_BOARD_KEY_DOWN: api/callback/AT_BOARD_KEY_DOWN.md
+        - AT_BOARD_KEY_UP: api/callback/AT_BOARD_KEY_UP.md
+        - AT_BOARD_MOUSE_DOWN: api/callback/AT_BOARD_MOUSE_DOWN.md
+        - AT_BOARD_MOUSE_UP: api/callback/AT_BOARD_MOUSE_UP.md
+      - 更新:
+        - AT_BOARD_UPDATE: ...
+      - 游戏元素:
+        - 僵尸:
+          - AT_NEW_ZOMBIE: ...
+          - AT_ZOMBIE_INIT: ...
+          - AT_ZOMBIE_DIE: ...
+        - 掉落物:
+          - AT_NEW_COIN: ...
+    - 类:
+      - 类: api/class/index.md
+      - Mod: ...
+      - 渲染:
+        - Graphics: ...
+        - Color: ...
+      - 数据结构:
+        - Vec2: ...
+        - Rect2: ...
+      - 游戏:
+        - LawnApp: ...
+        - WidgetManager: ...
+        - Board: ...
+        - Zombie: ...
+        - Coin: ...
+    - 枚举:
+      - 枚举: api/enum/index.md
+      - 渲染:
+        - RenderLayers: ...
+      - 键鼠输入:
+        - KeyCodes: api/enum/KeyCodes.md
+      - 游戏元素:
+        - 掉落物:
+          - CoinTypes: api/enum/CoinTypes.md
+          - CoinMotions: ...
+    - 别名:
+      - 别名: api/alias/index.md
+      - ModCallback: api/alias/ModCallback.md
+      - CallbackFunction: api/alias/CallbackFunction.md
+      - Serializable: api/alias/Serializable.md
+      - MouseCode: api/alias/MouseCode.md
+      - KeyCode: api/alias/KeyCode.md
+      - RenderLayer: api/alias/RenderLayer.md
   - 配置文件: configures/index.md

@@ -3,9 +3,9 @@
 
 在本节中，将介绍如何创建一个简单的僵尸碰撞箱绘制 Mod，并在游戏里查看它的效果。
 
-!!! note "关于配置文件"
+!!! info "关于配置文件"
 
-    鉴于我们将进行 Mod 的开发与调试，你最好在[配置文件](/configures)中打开终端显示，并设置一个合理的日志级别。
+    鉴于我们将进行 Mod 的开发与调试，你最好在[配置文件](../configures/index.md)中打开终端显示，并设置一个合理的日志级别。
 
     以下是一个用于开发的日志配置，将内容保存为 `conf.yml`，然后就可以在弹出的终端或者 `pvz.log` 文件中查看日志。
 
@@ -34,7 +34,7 @@ Log.info("Hello world!")
 
     对于所有可用的函数与类定义，可以参考仓库根目录的 [types.lua](https://github.com/peter2500zz/rumia/blob/master/types.lua) 文件。类似 EmmyLua 的插件可以识别其中的语法，并在编写 Mod 时提供帮助。
 
-    你也可以查看 [API](/api) 页面来检索所有可用的函数与类定义。
+    你也可以查看 [API](../api/index.md) 页面来检索所有可用的函数与类定义。
 
 保存这个文件，然后启动 Rumia，你应该会看到这样的日志。
 
@@ -70,7 +70,7 @@ mod:AddCallback(ModCallbacks.AT_DRAW, atDraw)
 
     有些回调会向回调函数传递参数，这些参数大多与回调有关，比如僵尸初始化的回调会传入僵尸，且同一个 Mod 的同一个回调点只能注册一个回调函数。
 
-    关于回调函数的参数与返回值，请参考 [types.lua](https://github.com/peter2500zz/rumia/blob/master/types.lua)，或者 [API](/api) 页面。
+    关于回调函数的参数与返回值，请参考 [types.lua](https://github.com/peter2500zz/rumia/blob/master/types.lua)，或者 [API](../api/index.md) 页面。
 
 如果你在这个函数里加入 `Log.info("drawing...")`，那么很显然，控制台会被刷屏。如果你想要观察到有效日志，建议减少在高频回调中记录日志，或者调整你的日志显示级别。
 
@@ -114,7 +114,7 @@ end
 
 ## 下一步做什么？
 
-👉[API](/api) 这个页面中记录了 Rumia 目前提供的所有 API，翻翻它，看看有什么有意思的函数。
+👉[API](../api/index.md) 这个页面中记录了 Rumia 目前提供的所有 API，翻翻它，看看有什么有意思的函数。
 
 或者你可以看看这个由 AI 攥写的僵尸拖拽 Mod，它允许你用左键拖动僵尸。
 
