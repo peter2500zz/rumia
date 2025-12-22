@@ -37,7 +37,7 @@ impl Profile {
 
         match serde_json::to_value(&value) {
             Ok(json_value) => {
-                trace!("set val {:?} for {} {:#x}", json_value, T::NAMESPACE, entity.id());
+                // trace!("set val {:?} for {} {:#x}", json_value, T::NAMESPACE, entity.id());
                 entity_data.insert(key, json_value);
                 Ok(())
             }
@@ -47,11 +47,11 @@ impl Profile {
 
     // 4. 泛型化的 Get 方法
     pub fn get_attr<T: HasId>(&self, lua: &Lua, entity: &T, key: String) -> LuaValue {
-        trace!("namespace level: {}", T::NAMESPACE);
+        // trace!("namespace level: {}", T::NAMESPACE);
         if let Some(namespace_data) = self.data.get(T::NAMESPACE) {
-            trace!("entity level: {}", entity.id());
+            // trace!("entity level: {}", entity.id());
             if let Some(entity_data) = namespace_data.get(&entity.id()) {
-                trace!("data level: {}", key);
+                // trace!("data level: {}", key);
                 if let Some(data) = entity_data.get(&key) {
                     return lua.to_value(data).unwrap_or(LuaNil);
                 }

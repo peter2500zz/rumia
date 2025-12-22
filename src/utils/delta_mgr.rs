@@ -30,8 +30,14 @@ pub fn get_delta_mgr() -> std::sync::MutexGuard<'static, DeltaManager> {
 /// - 使用字符串字面量作为唯一标识符
 /// - 零拷贝的键访问
 pub struct DeltaManager {
-    deltas: HashMap<&'static str, Instant>,
+    deltas: HashMap<&'static str, DeltaEntry>,
 }
+
+struct DeltaEntry {
+    last: Instant,
+    delta: Duration,
+}
+
 
 impl DeltaManager {
     /// 创建新的 Delta 管理器
@@ -48,59 +54,66 @@ impl DeltaManager {
         }
     }
 
-    /// 获取 delta 时间(秒),不更新时间戳
-    ///
-    /// # 参数
-    /// * `key` - 更新函数的唯一标识符(字符串字面量)
-    ///
-    /// # 返回
-    /// 如果存在该键,返回 Some(秒数),否则返回 None
     #[inline]
     pub fn get_delta(&self, key: &'static str) -> Option<f32> {
         self.deltas
             .get(key)
-            .map(|instant| instant.elapsed().as_secs_f32())
+            .map(|e| e.delta.as_secs_f32())
     }
 
-    /// 获取 delta 时间(Duration),不更新时间戳
     #[inline]
     pub fn get_delta_duration(&self, key: &'static str) -> Option<Duration> {
-        self.deltas.get(key).map(|instant| instant.elapsed())
+        self.deltas.get(key).map(|e| e.delta)
     }
 
-    /// 更新 delta 时间戳并返回经过的时间(秒)
-    ///
-    /// # 参数
-    /// * `key` - 更新函数的唯一标识符
-    ///
-    /// # 返回
-    /// 返回自上次更新以来的秒数,如果是首次更新返回 0.0
+
     #[inline]
     pub fn update_delta(&mut self, key: &'static str) -> f32 {
         let now = Instant::now();
 
-        if let Some(last_instant) = self.deltas.get_mut(key) {
-            let delta = last_instant.elapsed().as_secs_f32();
-            *last_instant = now;
-            delta
-        } else {
-            self.deltas.insert(key, now);
-            0.0
+        match self.deltas.get_mut(key) {
+            Some(entry) => {
+                let d = now - entry.last;
+                entry.last = now;
+                entry.delta = d;
+                d.as_secs_f32()
+            }
+            None => {
+                self.deltas.insert(
+                    key,
+                    DeltaEntry {
+                        last: now,
+                        delta: Duration::ZERO,
+                    },
+                );
+                0.0
+            }
         }
     }
+
 
     /// 更新 delta 时间戳并返回 Duration
     #[inline]
     pub fn update_delta_duration(&mut self, key: &'static str) -> Duration {
         let now = Instant::now();
 
-        if let Some(last_instant) = self.deltas.get_mut(key) {
-            let delta = last_instant.elapsed();
-            *last_instant = now;
-            delta
-        } else {
-            self.deltas.insert(key, now);
-            Duration::ZERO
+        match self.deltas.get_mut(key) {
+            Some(entry) => {
+                let d = now - entry.last;
+                entry.last = now;
+                entry.delta = d;
+                d
+            }
+            None => {
+                self.deltas.insert(
+                    key,
+                    DeltaEntry {
+                        last: now,
+                        delta: Duration::ZERO,
+                    },
+                );
+                Duration::ZERO
+            }
         }
     }
 
@@ -113,7 +126,7 @@ impl DeltaManager {
     /// 重置某个键的时间戳为当前时间
     #[inline]
     pub fn reset(&mut self, key: &'static str) {
-        self.deltas.insert(key, Instant::now());
+        self.deltas.insert(key, DeltaEntry { last: Instant::now(), delta: Duration::ZERO });
     }
 
     /// 移除某个键

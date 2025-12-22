@@ -6,9 +6,11 @@ use inventory;
 use minhook::MinHook;
 use std::ffi::c_void;
 use tracing::{
-    trace,
-    error
+    debug, error, trace
 };
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static HOOKED_FUNC_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
     unsafe {
@@ -17,6 +19,7 @@ fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
         match &trampoline {
             Ok(trampoline) => {
                 trace!("Hook {:#x?} -> {:#x?}", target, detour);
+                HOOKED_FUNC_COUNT.fetch_add(1, Ordering::Relaxed);
 
                 Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
             },
@@ -44,6 +47,7 @@ where
         match &trampoline {
             Ok(trampoline) => {
                 trace!("Hook API {}::{} -> {:#x?}", module_name.as_ref(), proc_name.as_ref(), detour);
+                HOOKED_FUNC_COUNT.fetch_add(1, Ordering::Relaxed);
 
                 Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
             },
@@ -72,6 +76,8 @@ pub fn init_hook() -> Result<()> {
     unsafe {
         MinHook::enable_all_hooks()?;
     }
+
+    debug!("共 {} 个 Hook", HOOKED_FUNC_COUNT.load(Ordering::Relaxed));
 
     Ok(())
 }

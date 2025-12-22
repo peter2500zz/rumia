@@ -9,9 +9,11 @@ use std::{
     cell::UnsafeCell,
     fs::{self, DirEntry},
     path::Path,
-    sync::LazyLock,
+    sync::{LazyLock, atomic::Ordering},
 };
-use tracing::{error, info};
+use tracing::{debug, error, info};
+
+use crate::mods::register::MOD_CALLBACK_COUNT;
 
 const MOD_DIR: &str = "mods";
 const MAIN_FILE: &str = "main.lua";
@@ -89,6 +91,8 @@ pub fn load_mods() -> Result<u32> {
             Err(_) => (),
         }
     }
+
+    debug!("共 {} 个函数创建回调", MOD_CALLBACK_COUNT.load(Ordering::Relaxed));
 
     Ok(success)
 }

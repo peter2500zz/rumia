@@ -22,7 +22,7 @@ use crate::{
         lawn_app::lawn_app::{LawnApp, get_lawn_app},
         zombie::zombie::Zombie,
     },
-    save::{PROFILE_MANAGER, Profile, SAVES_DIR},
+    save::{PROFILE_MANAGER, SAVES_DIR},
     utils::{
         Vec2,
         delta_mgr::get_delta_mgr,

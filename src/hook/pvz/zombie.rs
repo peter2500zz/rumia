@@ -10,11 +10,11 @@ use crate::{
     utils::data_array::DataArray,
 };
 
-/// `DataArray<Zombie>::DataArrayAlloc` 构造函数的地址
+/// `DataArray<Zombie>::DataArrayAlloc` 函数的地址
 const ADDR_DATA_ARRAY_ALLOC: u32 = 0x0041DDA0;
-/// `DataArray<Zombie>::DataArrayAlloc` 构造函数的签名
+/// `DataArray<Zombie>::DataArrayAlloc` 函数的签名
 type SignDataArrayAlloc = fn(this: *mut DataArray<Zombie>) -> *mut Zombie;
-/// `DataArray<Zombie>::DataArrayAlloc` 构造函数的跳板
+/// `DataArray<Zombie>::DataArrayAlloc` 函数的跳板
 static ORIGINAL_DATA_ARRAY_ALLOC: OnceLock<SignDataArrayAlloc> = OnceLock::new();
 
 /// 从非标准调用中提取参数的辅助函数
@@ -212,6 +212,13 @@ pub extern "stdcall" fn DrawWrapper(
     }
 }
 
+/// `Zombie::DieNoLoot` 的地址
+pub const ADDR_DIE_NO_LOOT: u32 = 0x00530510;
+/// `Zombie::DieNoLoot` 的签名
+type SignDieNoLoot = extern "thiscall" fn(this: *mut Zombie);
+/// `Zombie::DieNoLoot` 的跳板
+pub static ORIGINAL_DIE_NO_LOOT: OnceLock<SignDieNoLoot> = OnceLock::new();
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_DATA_ARRAY_ALLOC.set(
@@ -228,6 +235,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_DRAW.set(
             hook(ADDR_DRAW as _, DrawHelper as _)?
+        );
+
+        let _ = ORIGINAL_DIE_NO_LOOT.set(
+            hook(ADDR_DIE_NO_LOOT as _, zombie::DieNoLoot as _)?
         );
 
         Ok(())

@@ -101,7 +101,7 @@
     ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
 
     ---@class Graphics @图形
-    ---@field SetLayer fun(self, layer: RenderLayers) @设置渲染层
+    ---@field SetLayer fun(self, layer: RenderLayer) @设置渲染层
     ---@field SetColor fun(self, color: Color) @设置绘图颜色
     ---@field DrawRect fun(self, rect: Rect2) @绘制一个空心矩形
     ---@field FillRect fun(self, rect: Rect2) @绘制一个实心矩形
@@ -239,6 +239,13 @@
     ---@field AT_NEW_COIN ModCallback @游戏关卡生成掉落物，fun(args: NewCoinArgs)
     ---@field AT_NEW_ZOMBIE ModCallback @游戏关卡生成僵尸，fun(args: NewZombieArgs)
     ---@field AT_ZOMBIE_INIT ModCallback @僵尸初始化，fun(zombie: Zombie)
+    ---@field AT_ZOMBIE_DIE ModCallback @僵尸死亡，函数内此僵尸仍然被视为有效，自定数据将在所有此类回调函数结束后被清理
+        ---
+        ---回调函数签名
+        ---- `fun(zombie: Zombie)`
+        ---
+        ---参数
+        ---- `zombie` : 死亡的僵尸
     ---@field AT_ZOMBIE_UPDATE ModCallback @僵尸更新，fun(zombie: Zombie)
     ModCallbacks = {}
 
@@ -287,6 +294,7 @@
     ---@field Debug RenderLayer @调试层，会尽可能在所有层上渲染
     ---@field UI RenderLayer @UI层，会在游戏UI绘制后渲染
     ---@field Board RenderLayer @关卡层，会在关卡元素绘制后渲染
+    RenderLayers = {}
 
     ---@class MouseCodes @鼠标点击代码
     ---@field L_CLICK MouseCode @鼠标左键

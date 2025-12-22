@@ -6,11 +6,11 @@ use windows::core::BOOL;
 use crate::{
     add_callback,
     hook::pvz::zombie::{
-        ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, DrawWrapper, UpdateWrapper,
-        ZombieInitializeWrapper,
+        ADDR_DIE_NO_LOOT, ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, DrawWrapper, ORIGINAL_DIE_NO_LOOT, UpdateWrapper, ZombieInitializeWrapper
     },
     mods::callback::{POST, PRE, callback_data},
     pvz::{graphics::graphics::Graphics, zombie::zombie::Zombie},
+    save::PROFILE_MANAGER,
     utils::data_array::{DataArray, HasId},
 };
 
@@ -61,3 +61,16 @@ pub extern "stdcall" fn Draw(this: *mut Zombie, g: *mut Graphics) {
     // }
     DrawWrapper(this, g)
 }
+
+pub extern "thiscall" fn DieNoLoot(this: *mut Zombie) {
+    unsafe {
+        let zombie = &mut *this;
+
+        callback_data(PRE | ADDR_DIE_NO_LOOT, zombie);
+
+        PROFILE_MANAGER.lock().unwrap().remove_entity(zombie);
+    }
+    ORIGINAL_DIE_NO_LOOT.wait()(this);
+    trace!("僵尸死亡")
+}
+add_callback!("AT_ZOMBIE_DIE", PRE | ADDR_DIE_NO_LOOT);

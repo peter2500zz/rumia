@@ -1,5 +1,8 @@
 use mlua::prelude::*;
 use tracing::trace;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+pub(super) static MOD_CALLBACK_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 use super::LuaRegistration;
 
@@ -30,6 +33,8 @@ inventory::submit! {
                 let callback_point: LuaTable = callbacks.get(callback)?;
 
                 trace!("Mod({}) 添加了回调函数，位置 {}", &name, format!("{} 0x{:08x}", if (callback >> 31) == 0 { "Pre" } else { "Post" }, (callback & (u32::MAX >> 1))));
+
+                MOD_CALLBACK_COUNT.fetch_add(1, Ordering::Relaxed);
 
                 callback_point.raw_push(function)?;
 
