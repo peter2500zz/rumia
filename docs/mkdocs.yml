@@ -1,4 +1,4 @@
-site_name: Rumia API 使用文档
+site_name: Rumia 使用文档
 site_author: peter2500zz
 
 repo_name: peter2500zz/rumia
@@ -31,6 +31,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
 
 
 nav:
@@ -38,4 +39,5 @@ nav:
   - 快速开始: 
     - 创建你的第一个 Mod:
       - quick-start/index.md
-      - quick-start/mod-entry.md
+  - API: ""
+  - 配置文件: configures/index.md

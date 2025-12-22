@@ -12,10 +12,10 @@ local function helloWorld()
     Log.info("Hello world!")
 end
 
--- 注册回调，以便于在加载完毕时调用 helloWorld 函数
+-- 注册回调，在加载完毕时调用 helloWorld 函数
 mod:AddCallback(ModCallbacks.AT_GAME_INIT, helloWorld)
 ```
 
-上面这个 Mod 几乎什么也没做，只是游戏初始化完成时在控制台（如果设置显示的话）输出 `Hello world!`
+上面这个 Mod 几乎什么也没做，只是在游戏初始化完成时输出 `Hello world!` 到日志
 
 Rumia 支持的回调点正在逐渐更新，且目前已经有许多好用的回调点。
