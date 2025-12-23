@@ -45,6 +45,7 @@ nav:
       - quick-start/index.md
   - API:
     - API: api/index.md
+    - Mod与环境隔离: api/sandbox.md
     - 全局变量:
       - 全局变量: api/global/index.md
       - RegisterMod: api/global/RegisterMod.md
@@ -73,14 +74,14 @@ nav:
           - AT_NEW_COIN: ...
     - 类:
       - 类: api/class/index.md
-      - Mod: ...
+      - Mod: api/class/Mod.md
       - Log: api/class/Log.md
       - 渲染:
         - Graphics: ...
         - Color: api/class/Color.md
       - 数据结构:
         - Vec2: api/class/Vec2.md
-        - Rect2: ...
+        - Rect2: api/class/Rect2.md
       - 游戏:
         - LawnApp: api/class/LawnApp.md
         - Board: api/class/Board.md
@@ -95,7 +96,7 @@ nav:
       - 游戏元素:
         - 掉落物:
           - CoinTypes: api/enum/CoinTypes.md
-          - CoinMotions: ...
+          - CoinMotions: api/enum/CoinMotions.md
     - 别名:
       - 别名: api/alias/index.md
       - ModCallback: api/alias/ModCallback.md
@@ -104,4 +105,6 @@ nav:
       - MouseCode: api/alias/MouseCode.md
       - KeyCode: api/alias/KeyCode.md
       - RenderLayer: api/alias/RenderLayer.md
+      - CoinType: api/alias/CoinType.md
+      - CoinMotion: api/alias/CoinMotion.md
   - 配置文件: configures/index.md

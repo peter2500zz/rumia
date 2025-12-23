@@ -1,6 +1,6 @@
 # CoinTypes
 
-定义游戏内掉落物的类型。
+定义游戏内掉落物的类型，它们全部是 [CoinType](../alias/CoinType.md) 类型。
 
 以下是全部可用枚举值:
 

@@ -7,6 +7,8 @@
     ---@alias MouseCode integer
     ---@alias KeyCode integer
     ---@alias RenderLayer integer
+    ---@alias CoinType integer
+    ---@alias CoinMotion integer
 
 ---函数
     ---将日志写入到终端中
@@ -31,7 +33,7 @@
     ---@class Mod @模组
     ---@field name string @模组名称
     ---@field priority integer @模组优先级
-    ---@field AddCallback fun(self: Mod, callback: ModCallback, function: CallbackFunction) @添加回调函数
+    ---@field AddCallback fun(self, callback: ModCallback, function: CallbackFunction) @添加回调函数
 
     ---@class Vec2 @二维向量
     ---@field x number
@@ -63,9 +65,10 @@
     ---@field height number
     ---@field pos Vec2
     ---@field size Vec2
-    ---@field Contains fun(self, pos: Vec2): boolean @判断一个二维向量是否在自身范围内
     ---@field New fun(x: number, y: number, w: number, h: number): Rect2
     ---@field Zero fun(): Rect2
+    ---@field Contains fun(self, pos: Vec2): boolean @判断一个二维向量是否在自身范围内
+    ---@field Collides fun(self, other: Rect2): boolean @判断自身是否与给定矩形碰撞（相交）
     Rect2 = {}
 
     ---@class Color @颜色
@@ -94,7 +97,7 @@
     ---@field GetZombies fun(self): table<integer, Zombie> @返回场上所有僵尸
     ---@field GetZombieById fun(self, id: integer): Zombie? @通过僵尸 id 查询僵尸
     ---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
-    ---@field AddCoin fun(self, pos: Vec2, coin_type: integer, coin_motion): Coin @生成一只新的僵尸
+    ---@field AddCoin fun(self, pos: Vec2, coin_type: CoinType, coin_motion: CoinMotion): Coin @生成一只新的僵尸
     ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
 
     ---@class Graphics @图形
@@ -143,9 +146,9 @@
     ---@field GetPos fun(self): Vec2 @获取掉落物坐标
     ---@field SetPos fun(self, pos: Vec2) @设定掉落物坐标
     ---@field GetCoinType fun(self): integer @获取掉落物类型
-    ---@field SetCoinType fun(self, coin_type: integer) @设定掉落物类型
+    ---@field SetCoinType fun(self, coin_type: CoinType) @设定掉落物类型
     ---@field GetCoinMotion fun(self): integer @获取掉落物运动方式
-    ---@field SetCoinMotion fun(self, coin_motion: integer) @设定掉落物运动方式
+    ---@field SetCoinMotion fun(self, coin_motion: CoinMotion) @设定掉落物运动方式
 
     ---AT_NEW_ZOMBIE
     ---@class ArgsNewZombie
@@ -247,44 +250,44 @@
     ModCallbacks = {}
 
     ---@class CoinTypes @掉落物类型
-    ---@field SILVER_COIN integer @银币
-    ---@field GOLD_COIN integer @金币
-    ---@field DIAMOND integer @钻石
-    ---@field SUN integer @太阳
-    ---@field SMALL_SUN integer @小太阳
-    ---@field LARGE_SUN integer @大太阳
-    ---@field SEED_PACKET integer @植物卡片
-    ---@field TROPHY integer @奖杯
-    ---@field SHOVEL integer @铲子
-    ---@field ALMANAC integer @图鉴
-    ---@field KEY integer @钥匙
-    ---@field VASE integer @花瓶
-    ---@field WATERING_CAN integer @洒水壶
-    ---@field SANDWICH integer @三明治
-    ---@field NOTE integer @便条
-    ---@field VANISH_PLACEHOLDER integer @立即消失(占位)
-    ---@field SEEDLING_GIFT integer @花苗礼盒
-    ---@field COIN_BAG integer @金币袋
-    ---@field GIFT_BOX_PERSISTENT integer @礼盒(不消失)
-    ---@field COIN_BAG_PERSISTENT integer @金币袋(不消失)
-    ---@field SILVER_TROPHY integer @银奖杯
-    ---@field GOLD_TROPHY integer @金奖杯
-    ---@field CHOCOLATE integer @巧克力
-    ---@field CHOCOLATE_PERSISTENT integer @巧克力(不消失)
-    ---@field GIFT_BOX_MINI_GAMES integer @礼品盒(小游戏)
-    ---@field GIFT_BOX_PUZZLE integer @礼品盒(解密模式)
-    ---@field GIFT_BOX_SURVIVAL integer @礼品盒(生存模式)
+    ---@field SILVER_COIN CoinType @银币
+    ---@field GOLD_COIN CoinType @金币
+    ---@field DIAMOND CoinType @钻石
+    ---@field SUN CoinType @太阳
+    ---@field SMALL_SUN CoinType @小太阳
+    ---@field LARGE_SUN CoinType @大太阳
+    ---@field SEED_PACKET CoinType @植物卡片
+    ---@field TROPHY CoinType @奖杯
+    ---@field SHOVEL CoinType @铲子
+    ---@field ALMANAC CoinType @图鉴
+    ---@field KEY CoinType @钥匙
+    ---@field VASE CoinType @花瓶
+    ---@field WATERING_CAN CoinType @洒水壶
+    ---@field SANDWICH CoinType @三明治
+    ---@field NOTE CoinType @便条
+    ---@field VANISH_PLACEHOLDER CoinType @立即消失(占位)
+    ---@field SEEDLING_GIFT CoinType @花苗礼盒
+    ---@field COIN_BAG CoinType @金币袋
+    ---@field GIFT_BOX_PERSISTENT CoinType @礼盒(不消失)
+    ---@field COIN_BAG_PERSISTENT CoinType @金币袋(不消失)
+    ---@field SILVER_TROPHY CoinType @银奖杯
+    ---@field GOLD_TROPHY CoinType @金奖杯
+    ---@field CHOCOLATE CoinType @巧克力
+    ---@field CHOCOLATE_PERSISTENT CoinType @巧克力(不消失)
+    ---@field GIFT_BOX_MINI_GAMES CoinType @礼品盒(小游戏)
+    ---@field GIFT_BOX_PUZZLE CoinType @礼品盒(解密模式)
+    ---@field GIFT_BOX_SURVIVAL CoinType @礼品盒(生存模式)
     CoinTypes = {}
 
     ---@class CoinMotions @掉落物运动方式
-    ---@field DROP_FROM_XY integer @从坐标落下
-    ---@field SLOW_DROP_FROM_XY integer @从坐标缓慢落下
-    ---@field POP_FROM_BACK integer @从后方跳出
-    ---@field FAST_POP_FROM_BACK integer @从后方快速跳出
-    ---@field COLLECT_IMMEDIATELY integer @直接收集
-    ---@field AUTO_COLLECT_LATER integer @稍后自动收集
-    ---@field POP_FROM_RIGHT integer @从屏幕右侧蹦出
-    ---@field SPAWN_IN_SEED_SLOT integer @在卡槽栏生成
+    ---@field DROP_FROM_XY CoinMotion @从坐标落下
+    ---@field SLOW_DROP_FROM_XY CoinMotion @从坐标缓慢落下
+    ---@field POP_FROM_BACK CoinMotion @从后方跳出
+    ---@field FAST_POP_FROM_BACK CoinMotion @从后方快速跳出
+    ---@field COLLECT_IMMEDIATELY CoinMotion @直接收集
+    ---@field AUTO_COLLECT_LATER CoinMotion @稍后自动收集
+    ---@field POP_FROM_RIGHT CoinMotion @从屏幕右侧蹦出
+    ---@field SPAWN_IN_SEED_SLOT CoinMotion @在卡槽栏生成
     CoinMotions = {}
 
     ---@class RenderLayers @渲染层

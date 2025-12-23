@@ -1,6 +1,6 @@
 # KeyCodes
 
-定义所有键码。
+定义所有键码，它们全部是 [KeyCode](../alias/KeyCode.md) 类型。
 
 可以从[微软的文档](https://learn.microsoft.com/zh-cn/windows/win32/inputdev/virtual-key-codes)中找到同样的内容，Rumia 只是定义了枚举方便调用。
 

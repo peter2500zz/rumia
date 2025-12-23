@@ -125,14 +125,14 @@ fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie
 函数签名:
 
 ```lua
-fun(self, pos: Vec2, coin_type: integer, coin_motion: integer): Coin
+fun(self, pos: Vec2, coin_type: CoinType, coin_motion: CoinMotion): Coin
 ```
 
 参数:
 
 - `pos` [Vec2](../class/Vec2.md): 掉落物的坐标
-- `coin_type` integer: 掉落物类型
-- `coin_motion` integer: 掉落物运动方式
+- `coin_type` [CoinType](../alias/CoinType.md): 掉落物类型
+- `coin_motion` [CoinMotion](../alias/CoinMotion.md): 掉落物运动方式
 
 返回值:
 
