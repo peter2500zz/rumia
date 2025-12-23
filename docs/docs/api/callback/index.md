@@ -8,4 +8,4 @@ Rumia 使用回调来执行自定义的函数。
 
     同一个 Mod 中，相同的回调只能注册一个回调函数。同时，回调函数可能接收参数，函数的函数值也会影响特定的回调。
 
-    比较典型的例子是 `ModCallbacks.AT_GAME_KEY_DOWN` 回调，[此回调](AT_GAME_KEY_DOWN.md) 接收[键码](...)作为参数，返回布尔值以控制是否消费事件。
+    比较典型的例子是 [ModCallbacks.AT_GAME_KEY_DOWN](AT_GAME_KEY_DOWN.md) 回调。它接收[键码](../alias/KeyCode.md)作为参数，返回布尔值以控制是否消费事件。

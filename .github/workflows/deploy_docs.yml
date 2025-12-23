@@ -23,7 +23,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install mkdocs-material
+          pip install mkdocs-material jieba
       
       - name: Build documentation
         run: |

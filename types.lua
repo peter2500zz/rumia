@@ -261,7 +261,7 @@
     ---@field VASE integer @花瓶
     ---@field WATERING_CAN integer @洒水壶
     ---@field SANDWICH integer @三明治
-    ---@field NOTE integer @便条/遗书
+    ---@field NOTE integer @便条
     ---@field VANISH_PLACEHOLDER integer @立即消失(占位)
     ---@field SEEDLING_GIFT integer @花苗礼盒
     ---@field COIN_BAG integer @金币袋

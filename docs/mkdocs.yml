@@ -23,9 +23,9 @@ theme:
   icon:
     logo: logo
 
-extra:
-  search:
-    language: 'jp'
+plugins:
+  - search:
+      separator: '[\s\u200b\-]'
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -83,7 +83,7 @@ nav:
         - Rect2: ...
       - 游戏:
         - LawnApp: api/class/LawnApp.md
-        - Board: ...
+        - Board: api/class/Board.md
         - Zombie: ...
         - Coin: ...
     - 枚举:
