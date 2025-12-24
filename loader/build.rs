@@ -1,8 +1,19 @@
 use std::env;
 use std::path::PathBuf;
 use std::process::Command;
+use winres::WindowsResource;
 
 fn main() {
+    let mut res = WindowsResource::new();
+
+    res.set_icon("assets/logo.ico");
+
+    res.set("ProductName", "Rumia loader");
+    res.set("FileDescription", "Run Plants vs Zombies with Rumia.");
+    res.set("CompanyName", "GO+");
+
+    res.compile().expect("Failed to compile Windows resources");
+
     println!("cargo:rerun-if-changed=third_party/Detours");
 
     // 获取当前 crate 的清单文件所在目录

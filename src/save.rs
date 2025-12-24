@@ -1,7 +1,6 @@
 use mlua::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tracing::trace;
 use std::{collections::HashMap, sync::{LazyLock, Mutex}};
 
 use crate::utils::data_array::HasId;

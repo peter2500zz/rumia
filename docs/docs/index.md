@@ -1,4 +1,4 @@
-# 什么是 Rumia
+# Rumia
 
 Rumia 是一个为《植物大战僵尸》 v1.0.0.1051 版本提供 Lua mod 加载能力的插件。
 这个词来自于 [露米娅](https://thwiki.cc/%E9%9C%B2%E7%B1%B3%E5%A8%85)，或者某种 Rust 和 Lua 的组合词。

@@ -1,5 +1,10 @@
 
-## Rumia
+<div align="center">
+    <p>
+        <img src="docs/docs/assets/logo.png" height="200"/>
+    </p>
+    <h1>Rumia</h1>
+</div>
 
 [文档](https://rumia.docs.mygo.plus/)
 

@@ -7,6 +7,8 @@ repo_url: https://github.com/peter2500zz/rumia
 theme:
   name: material
 
+  favicon: assets/logo.png
+
   language: zh
 
   features:
