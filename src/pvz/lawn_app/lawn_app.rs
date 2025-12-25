@@ -1,5 +1,6 @@
 use std::ptr;
 use mlua::prelude::*;
+use windows::Win32::Foundation::HWND;
 
 use crate::{
     debug::tigger_handler, mods::LuaRegistration, pvz::{
@@ -38,7 +39,10 @@ pub struct LawnApp {
     _pad_0xC8_0x320: [u8; 0x320 - 0xC8],
     /// 0x320 控件管理器
     pub widget_manager: *mut WidgetManager,
-    _pad_0x324_0x634: [u8; 0x634 - 0x324],
+    _pad_0x324_0x350: [u8; 0x350 - 0x324],
+    /// 0x350 窗口句柄
+    pub hwnd: HWND,
+    _pad_0x354_0x634: [u8; 0x634 - 0x354],
     /// 0x638 资源管理器
     pub resource_manager: *mut ResourceManager,
     _pad_0x638_0x768: [u8; 0x768 - 0x638],

@@ -3,11 +3,18 @@ pub mod loading;
 pub mod save;
 
 use tracing::{debug, error, info, trace};
+use windows::{Win32::UI::WindowsAndMessaging::SetWindowTextW, core::w};
 
 use crate::{
-    add_callback, hook::pvz::lawn_app::{
-        ADDR_INIT, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS
-    }, mods::{callback::{POST, callback}, load_mods}, pvz::lawn_app::lawn_app::LawnApp
+    add_callback,
+    hook::pvz::lawn_app::{
+        ADDR_INIT, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS,
+    },
+    mods::{
+        callback::{POST, callback},
+        load_mods,
+    },
+    pvz::lawn_app::lawn_app::LawnApp,
 };
 
 /// 这是 `LawnApp` 的构造函数
@@ -40,6 +47,10 @@ pub extern "thiscall" fn Init(this: *mut LawnApp) {
     trace!("初始化 LawnApp");
 
     ORIGINAL_INIT.wait()(this);
+
+    unsafe {
+        let _ = SetWindowTextW((*this).hwnd, w!("Plants vs. Zombies with Rumia"));
+    }
 
     match load_mods() {
         Ok(loaded) => {
@@ -74,4 +85,3 @@ pub extern "thiscall" fn LostFocus(this: *mut LawnApp) {
     //     this
     // );
 }
-
