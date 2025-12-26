@@ -3,11 +3,12 @@ pub mod coin;
 pub mod debug;
 pub mod graphics;
 pub mod lawn_app;
-pub mod widget_manager;
-pub mod widget_container;
-pub mod zombie;
-pub mod resource_manager;
+pub mod plant;
 pub mod player_info;
+pub mod resource_manager;
+pub mod widget_container;
+pub mod widget_manager;
+pub mod zombie;
 
 use tracing::{debug, info};
 use windows::{

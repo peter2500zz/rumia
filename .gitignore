@@ -4,3 +4,4 @@ pvz.log
 /test
 main.lua
 /.vscode
+build-docs.bat

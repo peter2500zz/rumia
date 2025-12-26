@@ -7,6 +7,7 @@ pub mod zombie;
 pub mod coin;
 pub mod graphics;
 pub mod resource_manager;
+pub mod plant;
 
 use inventory;
 use std::sync::OnceLock;

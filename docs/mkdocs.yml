@@ -42,7 +42,7 @@ markdown_extensions:
 
 nav:
   - 简介:
-    - Rumia: rumia.md
+    - 简介: index.md
     - Rumia Loader: loader.md
   - 快速开始: 
     - 启动游戏: quick-start/wanna-play.md
@@ -91,8 +91,9 @@ nav:
       - 游戏:
         - LawnApp: api/class/LawnApp.md
         - Board: api/class/Board.md
-        - Zombie: ...
-        - Coin: ...
+        - Plant: api/class/Plant.md
+        - Zombie: api/class/Zombie.md
+        - Coin: api/class/Coin.md
     - 枚举:
       - 枚举: api/enum/index.md
       - 渲染:
