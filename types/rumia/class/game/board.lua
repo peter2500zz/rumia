@@ -10,3 +10,5 @@
 ---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
 ---@field AddCoin fun(self, pos: Vec2, coin_type: CoinType, coin_motion: CoinMotion): Coin @生成一只新的僵尸
 ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
+---@field GetPlants fun(self): table<integer, Plant> @返回场上所有植物
+---@field GetPlantById fun(self, id: integer): Plant? @通过植物 id 查询植物

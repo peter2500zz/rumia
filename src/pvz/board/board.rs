@@ -5,9 +5,7 @@ use mlua::prelude::*;
 use crate::{
     mods::LuaRegistration,
     pvz::{
-        board::{AddCoin, AddZombieInRow, PixelToGridKeepOnBoard},
-        lawn_app::lawn_app::get_lawn_app,
-        zombie::zombie::Zombie,
+        board::{AddCoin, AddZombieInRow, PixelToGridKeepOnBoard}, lawn_app::lawn_app::get_lawn_app, plant::plant::Plant, zombie::zombie::Zombie
     },
     utils::{
         data_array::{DataArray, HasId},
@@ -38,7 +36,9 @@ pub struct Board {
     _pad_0x59_0x90: [u8; 0x90 - 0x59],
     /// 0x90 僵尸数据
     pub zombies: DataArray<Zombie>,
-    _pad_0xAC_0x5560: [u8; 0x5560 - 0xAC],
+    /// 0xAC 植物数据
+    pub plants: DataArray<Plant>,
+    _pad_0xC8_0x5560: [u8; 0x5560 - 0xC8],
     /// 0x5560 阳光值
     pub sun_value: i32,
     _pad_0x5564_0x5600: [u8; 0x5600 - 0x5564],
@@ -148,6 +148,30 @@ impl LuaUserData for Board {
 
         methods.add_method("PosToGridKeepOnBoard", |_, _, pos| {
             with_board(|board| Ok(PixelToGridKeepOnBoard(board, pos)))
+        });
+
+        methods.add_method("GetPlants", |lua, _, ()| {
+            with_board(|board| {
+                let plants = lua.create_table()?;
+
+                unsafe {
+                    for plant in board.plants.iter_ptr() {
+                        plants.set((*plant).id(), ptr::read(plant))?;
+                    }
+                }
+
+                Ok(plants)
+            })
+        });
+
+        methods.add_method("GetPlantById", |lua, _, id| {
+            with_board(|board| {
+                if let Some(plant) = board.plants.get_ptr(id) {
+                    unsafe { Ok(LuaValue::UserData(lua.create_userdata(ptr::read(plant))?)) }
+                } else {
+                    Ok(LuaNil)
+                }
+            })
         });
     }
 }

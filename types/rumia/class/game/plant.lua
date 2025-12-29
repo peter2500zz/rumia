@@ -5,3 +5,5 @@
 ---@field SetAttr fun(self, key: string, value: Serializable) @设定自定义植物数据
 ---@field GetAttr fun(self, key: string): Serializable? @获取自定义植物数据
 ---@field RemoveAttr fun(self, key: string) @删除自定义植物数据
+---@field IsValid fun(self): boolean @这个植物是否在内存中有效
+---@field GetHitbox fun(self): Rect2 @获取植物判定框

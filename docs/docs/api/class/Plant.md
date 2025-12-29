@@ -60,3 +60,37 @@ fun(self, key: string)
 参数:
 
 - `key` string: 被删除数据的键。
+
+---
+
+### IsValid
+
+判断这个植物实例当前是否仍然在内存中有效。
+
+当植物被移除、死亡或对象失效后，该函数将返回 false。
+
+函数签名:
+
+```lua
+fun(self): boolean
+```
+
+返回值:
+
+- `boolean`: 植物是否有效。
+
+---
+
+### GetHitbox
+
+获取植物的判定框。
+
+函数签名:
+
+```lua
+fun(self): Rect2
+```
+
+返回值:
+
+- [Rect2](../class/Rect2.md): 植物的判定区域。

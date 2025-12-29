@@ -72,7 +72,7 @@ fun(self): table<integer, Zombie>
 
 返回值:
 
-- 一个表，键是僵尸的 id，值是 [Zombie](../class/Zombie.md) 类
+- 一个表，键是僵尸的 id，值是 [Zombie](../class/Zombie.md) 实例
 
 ---
 
@@ -92,7 +92,7 @@ fun(self, id: integer): Zombie?
 
 返回值:
 
-- 如果此僵尸存在，返回 [Zombie](../class/Zombie.md) 类，否则返回 nil
+- 如果此僵尸存在，返回 [Zombie](../class/Zombie.md) 实例，否则返回 nil
 
 ---
 
@@ -114,7 +114,7 @@ fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie
 
 返回值:
 
-- 返回创建僵尸的 [Zombie](../class/Zombie.md) 类
+- 返回创建僵尸的 [Zombie](../class/Zombie.md) 实例
 
 ---
 
@@ -136,7 +136,7 @@ fun(self, pos: Vec2, coin_type: CoinType, coin_motion: CoinMotion): Coin
 
 返回值:
 
-- 返回生成掉落物的 [Coin](../class/Coin.md) 类
+- 返回生成掉落物的 [Coin](../class/Coin.md) 实例
 
 ---
 
@@ -158,3 +158,38 @@ fun(self, pos: Vec2): Vec2
 
 - 游戏关卡内网格坐标的 [Vec2](../class/Vec2.md)
 
+---
+
+### GetPlants
+
+获取场上所有的植物。
+
+函数签名:
+
+```lua
+fun(self): table<integer, Plant>
+```
+
+返回值:
+
+- 一个表，键是植物的 id，值是 [Plant](../class/Plant.md) 实例
+
+---
+
+### GetPlantById
+
+通过植物 id 查询获取特定植物，如果没有此 id 的植物则返回 nil。
+
+函数签名:
+
+```lua
+fun(self, id: integer): Plant?
+```
+
+参数:
+
+- `id` integer: 植物的 id
+
+返回值:
+
+- 如果此植物存在，返回 [Plant](../class/Plant.md) 实例，否则返回 nil

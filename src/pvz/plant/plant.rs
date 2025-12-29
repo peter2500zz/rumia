@@ -1,7 +1,11 @@
-use std::ffi::c_void;
 use mlua::prelude::*;
+use std::ffi::c_void;
 
-use crate::{save::PROFILE_MANAGER, utils::{Rect2, Vec2, data_array::HasId}};
+use crate::{
+    pvz::board::board::get_board,
+    save::PROFILE_MANAGER,
+    utils::{Rect2, Vec2, data_array::HasId},
+};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -10,8 +14,8 @@ pub struct Plant {
     pub base_address: *mut c_void,
     /// 0x4 当前游戏信息和对象
     pub current_game_info: *mut c_void,
-    /// 0x8 植物矩形
-    pub rect: Rect2<i32>,
+    /// 0x8 植物碰撞箱
+    pub hitbox: Rect2<i32>,
     /// 0x18 为true时可见
     pub is_visible: bool,
     _padding_19: [u8; 3],
@@ -123,7 +127,6 @@ pub struct Plant {
     /// 0x148 植物ID(结构为[序列号,编号],序列号与编号各占2字节)
     id: i32,
 }
-
 const _: () = assert!(std::mem::size_of::<Plant>() == 0x14C);
 
 impl HasId for Plant {
@@ -132,6 +135,26 @@ impl HasId for Plant {
     fn id(&self) -> i32 {
         self.id
     }
+}
+
+/// 尝试通过索引从 Board 中的 plants 对象池中获取植物指针
+///
+/// 如果无法访问植物会返回 None
+pub fn get_plant(id: i32) -> LuaResult<*mut Plant> {
+    get_board().and_then(|board| unsafe {
+        if let Some(plant) = (*board).plants.get_ptr(id) {
+            Ok(plant)
+        } else {
+            Err(LuaError::MemoryError(format!("Plant({}) 不可访问", id)))
+        }
+    })
+}
+
+/// 尝试通过索引从 Board 中的 plants 对象池中获取植物并执行操作
+///
+/// 如果无法访问植物会返回错误
+pub fn with_plant<T>(id: i32, f: impl FnOnce(&mut Plant) -> LuaResult<T>) -> LuaResult<T> {
+    get_plant(id).and_then(|plant| unsafe { f(&mut *plant) })
 }
 
 impl LuaUserData for Plant {
@@ -147,6 +170,13 @@ impl LuaUserData for Plant {
             Ok(PROFILE_MANAGER.lock().unwrap().remove_attr(this, key))
         });
 
-        
+        // 如果植物被从内存里清理掉了，就给 false
+        methods.add_method("IsValid", |_, this, ()| Ok(get_plant(this.id()).is_ok()));
+
+        methods.add_method("GetHitbox", |_, this, ()| {
+            with_plant(this.id(), |plant| {
+                Ok(plant.hitbox)
+            })
+        });
     }
 }
