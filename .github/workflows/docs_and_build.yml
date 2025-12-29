@@ -2,9 +2,9 @@ name: Docs + Windows x86 Debug Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,29 +20,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      
+
       - name: Install dependencies
         run: |
-          pip install mkdocs-material jieba
-      
+          pip install mkdocs-material jieba mkdocs-minify-plugin mkdocs-meta-descriptions-plugin
+
       - name: Build documentation
         run: |
           cd docs
           mkdocs build
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs/site'
-      
+          path: "docs/site"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
@@ -52,39 +52,39 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    # 1. 安装 MSVC 构建工具 (包含 x86 的 nmake)
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x86
+      # 1. 安装 MSVC 构建工具 (包含 x86 的 nmake)
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
 
-    # 2. 安装 Rust 与 i686-pc-windows-msvc
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: i686-pc-windows-msvc
+      # 2. 安装 Rust 与 i686-pc-windows-msvc
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: i686-pc-windows-msvc
 
-    # 3. 编译rumia
-    - name: Build rumia
-      run: cargo build --verbose --target i686-pc-windows-msvc
+      # 3. 编译rumia
+      - name: Build rumia
+        run: cargo build --verbose --target i686-pc-windows-msvc
 
-    # 4. 编译加载器
-    - name: Build loader
-      run: cargo build -p loader -vv --target i686-pc-windows-msvc
+      # 4. 编译加载器
+      - name: Build loader
+        run: cargo build -p loader -vv --target i686-pc-windows-msvc
 
-    # 5. 上传 DLL 文件作为 Artifact
-    - name: Upload DLLs
-      uses: actions/upload-artifact@v4
-      with:
-        name: rumia-auto-debug-build
-        # 使用 glob 模式匹配编译好的文件
-        path: |
-          target/i686-pc-windows-msvc/debug/*.dll
-          target/i686-pc-windows-msvc/debug/*.exe
-          target/i686-pc-windows-msvc/debug/*.pdb
-        # 如果没有找到文件，发出警告而不是报错
-        if-no-files-found: warn
+      # 5. 上传 DLL 文件作为 Artifact
+      - name: Upload DLLs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rumia-auto-debug-build
+          # 使用 glob 模式匹配编译好的文件
+          path: |
+            target/i686-pc-windows-msvc/debug/*.dll
+            target/i686-pc-windows-msvc/debug/*.exe
+            target/i686-pc-windows-msvc/debug/*.pdb
+          # 如果没有找到文件，发出警告而不是报错
+          if-no-files-found: warn

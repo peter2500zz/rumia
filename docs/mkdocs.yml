@@ -1,5 +1,6 @@
 site_name: Rumia 使用文档
 site_author: peter2500zz
+site_url: https://rumia.docs.mygo.plus/
 
 repo_name: peter2500zz/rumia
 repo_url: https://github.com/peter2500zz/rumia
@@ -28,6 +29,11 @@ theme:
 plugins:
   - search:
       separator: '[\s\u200b\-]'
+  - minify:
+      minify_html: true
+      minify_css: true
+      minify_js: true
+  - meta-descriptions
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -39,80 +45,79 @@ markdown_extensions:
   - pymdownx.superfences
   - admonition
 
-
 nav:
   - 简介:
-    - 简介: index.md
-    - Rumia Loader: loader.md
-  - 快速开始: 
-    - 启动游戏: quick-start/wanna-play.md
-    - 创建你的第一个 Mod: quick-start/dev-first-mod.md
+      - 简介: index.md
+      - Rumia Loader: loader.md
+  - 快速开始:
+      - 启动游戏: quick-start/wanna-play.md
+      - 创建你的第一个 Mod: quick-start/dev-first-mod.md
   - API:
-    - API: api/index.md
-    - Mod与环境隔离: api/sandbox.md
-    - 全局变量:
-      - 全局变量: api/global/index.md
-      - RegisterMod: api/global/RegisterMod.md
-      - Log: api/global/Log.md
-      - Vec2: api/global/Vec2.md
-      - Rect2: api/global/Rect2.md
-      - Color: api/global/Color.md
-      - GetLawnApp: api/global/GetLawnApp.md
-    - 回调点:
-      - 回调点: api/callback/index.md
-      - 渲染:
-        - AT_DRAW: api/callback/AT_DRAW.md
-      - 键鼠输入:
-        - AT_GAME_KEY_DOWN: api/callback/AT_GAME_KEY_DOWN.md
-        - AT_GAME_KEY_UP: api/callback/AT_GAME_KEY_UP.md
-        - AT_BOARD_KEY_DOWN: api/callback/AT_BOARD_KEY_DOWN.md
-        - AT_BOARD_KEY_UP: api/callback/AT_BOARD_KEY_UP.md
-        - AT_BOARD_MOUSE_DOWN: api/callback/AT_BOARD_MOUSE_DOWN.md
-        - AT_BOARD_MOUSE_UP: api/callback/AT_BOARD_MOUSE_UP.md
-      - 更新:
-        - AT_BOARD_UPDATE: api/callback/AT_BOARD_UPDATE.md
-      - 游戏元素:
-        - 僵尸:
-          - AT_ZOMBIE_INIT: api/callback/AT_ZOMBIE_INIT.md
-          - AT_ZOMBIE_DIE: api/callback/AT_ZOMBIE_DIE.md
-    - 类:
-      - 类: api/class/index.md
-      - Mod: api/class/Mod.md
-      - Log: api/class/Log.md
-      - 渲染:
-        - Graphics: api/class/Graphics.md
-        - Color: api/class/Color.md
-      - 数据结构:
-        - Vec2: api/class/Vec2.md
-        - Rect2: api/class/Rect2.md
-      - 游戏:
-        - LawnApp: api/class/LawnApp.md
-        - Board: api/class/Board.md
-        - Plant: api/class/Plant.md
-        - Zombie: api/class/Zombie.md
-        - Coin: api/class/Coin.md
-    - 枚举:
-      - 枚举: api/enum/index.md
-      - 渲染:
-        - RenderLayers: api/enum/RenderLayers.md
-      - 键鼠输入:
-        - KeyCodes: api/enum/KeyCodes.md
-        - MouseCodes: api/enum/MouseCodes.md
-      - 游戏元素:
-        - 掉落物:
-          - CoinTypes: api/enum/CoinTypes.md
-          - CoinMotions: api/enum/CoinMotions.md
-    - 别名:
-      - 别名: api/alias/index.md
-      - ModCallback: api/alias/ModCallback.md
-      - CallbackFunction: api/alias/CallbackFunction.md
-      - Serializable: api/alias/Serializable.md
-      - MouseCode: api/alias/MouseCode.md
-      - KeyCode: api/alias/KeyCode.md
-      - RenderLayer: api/alias/RenderLayer.md
-      - CoinType: api/alias/CoinType.md
-      - CoinMotion: api/alias/CoinMotion.md
-  - 配置文件: 
-    - 配置文件: configures/index.md
-    - Rumia: configures/rumia.md
-    - Rumia Loader: configures/loader.md
+      - API: api/index.md
+      - Mod与环境隔离: api/sandbox.md
+      - 全局变量:
+          - 全局变量: api/global/index.md
+          - RegisterMod: api/global/RegisterMod.md
+          - Log: api/global/Log.md
+          - Vec2: api/global/Vec2.md
+          - Rect2: api/global/Rect2.md
+          - Color: api/global/Color.md
+          - GetLawnApp: api/global/GetLawnApp.md
+      - 回调点:
+          - 回调点: api/callback/index.md
+          - 渲染:
+              - AT_DRAW: api/callback/AT_DRAW.md
+          - 键鼠输入:
+              - AT_GAME_KEY_DOWN: api/callback/AT_GAME_KEY_DOWN.md
+              - AT_GAME_KEY_UP: api/callback/AT_GAME_KEY_UP.md
+              - AT_BOARD_KEY_DOWN: api/callback/AT_BOARD_KEY_DOWN.md
+              - AT_BOARD_KEY_UP: api/callback/AT_BOARD_KEY_UP.md
+              - AT_BOARD_MOUSE_DOWN: api/callback/AT_BOARD_MOUSE_DOWN.md
+              - AT_BOARD_MOUSE_UP: api/callback/AT_BOARD_MOUSE_UP.md
+          - 更新:
+              - AT_BOARD_UPDATE: api/callback/AT_BOARD_UPDATE.md
+          - 游戏元素:
+              - 僵尸:
+                  - AT_ZOMBIE_INIT: api/callback/AT_ZOMBIE_INIT.md
+                  - AT_ZOMBIE_DIE: api/callback/AT_ZOMBIE_DIE.md
+      - 类:
+          - 类: api/class/index.md
+          - Mod: api/class/Mod.md
+          - Log: api/class/Log.md
+          - 渲染:
+              - Graphics: api/class/Graphics.md
+              - Color: api/class/Color.md
+          - 数据结构:
+              - Vec2: api/class/Vec2.md
+              - Rect2: api/class/Rect2.md
+          - 游戏:
+              - LawnApp: api/class/LawnApp.md
+              - Board: api/class/Board.md
+              - Plant: api/class/Plant.md
+              - Zombie: api/class/Zombie.md
+              - Coin: api/class/Coin.md
+      - 枚举:
+          - 枚举: api/enum/index.md
+          - 渲染:
+              - RenderLayers: api/enum/RenderLayers.md
+          - 键鼠输入:
+              - KeyCodes: api/enum/KeyCodes.md
+              - MouseCodes: api/enum/MouseCodes.md
+          - 游戏元素:
+              - 掉落物:
+                  - CoinTypes: api/enum/CoinTypes.md
+                  - CoinMotions: api/enum/CoinMotions.md
+      - 别名:
+          - 别名: api/alias/index.md
+          - ModCallback: api/alias/ModCallback.md
+          - CallbackFunction: api/alias/CallbackFunction.md
+          - Serializable: api/alias/Serializable.md
+          - MouseCode: api/alias/MouseCode.md
+          - KeyCode: api/alias/KeyCode.md
+          - RenderLayer: api/alias/RenderLayer.md
+          - CoinType: api/alias/CoinType.md
+          - CoinMotion: api/alias/CoinMotion.md
+  - 配置文件:
+      - 配置文件: configures/index.md
+      - Rumia: configures/rumia.md
+      - Rumia Loader: configures/loader.md
