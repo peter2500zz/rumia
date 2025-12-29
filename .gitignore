@@ -6,3 +6,4 @@ main.lua
 /.vscode
 build-docs.bat
 work.bat
+auto-sum.*

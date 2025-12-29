@@ -9,13 +9,13 @@ use crate::{
     hook::pvz::board::{
         ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
         ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper,
-        LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR,
-        ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN,
-        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        GetPlantsOnLawnWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
+        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
+        ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
-        board::board::Board,
+        board::board::{Board, PlantsOnLawn},
         coin::Coin,
         graphics::graphics::Graphics,
         lawn_app::lawn_app::{LawnApp, get_lawn_app},
@@ -278,4 +278,18 @@ pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcS
     }
 
     success
+}
+
+/// 获取特定格内的植物
+pub extern "stdcall" fn GetPlantsOnLawn(
+    this: *mut Board,
+    thePlantOnLawn: *mut PlantsOnLawn,
+    theGridX: i32,
+    theGridY: i32,
+) {
+    // unsafe {
+    //     debug!("{:?} {:?} {:?} {:?}", this, (*thePlantOnLawn), theGridX, theGridY);
+    // }
+
+    GetPlantsOnLawnWrapper(this, thePlantOnLawn, theGridX, theGridY);
 }

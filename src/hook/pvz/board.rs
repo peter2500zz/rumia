@@ -9,7 +9,10 @@ use std::{
 use super::{HookRegistration, hook};
 use crate::{
     pvz::{
-        board::{self, board::Board},
+        board::{
+            self,
+            board::{Board, PlantsOnLawn},
+        },
         coin::Coin,
         graphics::graphics::Graphics,
         lawn_app::lawn_app::LawnApp,
@@ -241,6 +244,56 @@ pub fn LawnSaveGameWrapper(this: *mut Board, theFilePath: *const MsvcString) -> 
     }
 }
 
+/// `Board::GetPlantsOnLawn` 的函数地址
+pub const ADDR_GET_PLANTS_ON_LAWN: u32 = 0x0040D2A0;
+/// `Board::GetPlantsOnLawn` 的函数签名
+type SignGetPlantsOnLawn =
+    fn(this: *mut Board, thePlantOnLawn: *mut PlantsOnLawn, theGridX: i32, theGridY: i32);
+static ORIGINAL_GET_PLANTS_ON_LAWN: OnceLock<SignGetPlantsOnLawn> = OnceLock::new();
+
+#[unsafe(naked)]
+extern "stdcall" fn GetPlantsOnLawnHelper() {
+    naked_asm!(
+        // 合移位
+        "mov eax, [esp+8]",
+        "xchg eax, [esp+4]",
+        "xchg eax, [esp]",
+        "mov [esp+8], eax",
+
+        "push ebx",
+        "push edx",
+
+        "call {hook}",
+
+        "ret",
+
+        hook = sym board::GetPlantsOnLawn
+    )
+}
+
+pub fn GetPlantsOnLawnWrapper(
+    this: *mut Board,
+    thePlantOnLawn: *mut PlantsOnLawn,
+    theGridX: i32,
+    theGridY: i32,
+) {
+    unsafe {
+        asm!(
+            "push {theGridY}",
+            "push {theGridX}",
+
+            "call [{func}]",
+
+            in("ebx") thePlantOnLawn,
+            in("edx") this,
+            theGridY = in(reg) theGridY,
+            theGridX = in(reg) theGridX,
+            func = in(reg) ORIGINAL_GET_PLANTS_ON_LAWN.wait(),
+            clobber_abi("C")
+        )
+    }
+}
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(
@@ -289,6 +342,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_LAWN_SAVE_GAME.store(
             hook(ADDR_LAWN_SAVE_GAME as _, LawnSaveGameHelper as _)?, Ordering::SeqCst
+        );
+
+        let _ = ORIGINAL_GET_PLANTS_ON_LAWN.set(
+            hook(ADDR_GET_PLANTS_ON_LAWN as _, GetPlantsOnLawnHelper as _)?
         );
 
         Ok(())

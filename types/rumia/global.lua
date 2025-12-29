@@ -6,7 +6,7 @@
 function RegisterMod(name) end
 
 ---获取游戏类
----@return LawnApp @返回游戏对象
+---@return LawnApp @返回游戏对象，一定能够获取。
 function GetLawnApp() end
 
 ---@type Log
