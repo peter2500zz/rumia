@@ -5,7 +5,10 @@ use std::{
 
 use crate::{
     hook::{HookRegistration, hook},
-    pvz::plant::{self, plant::Plant},
+    pvz::{
+        plant::{self, plant::Plant},
+        zombie::zombie::Zombie,
+    },
 };
 
 /// `Plant::PlantInitialize` 的函数地址
@@ -61,10 +64,29 @@ pub fn PlantInitializeWrapper(
     }
 }
 
+/// `Plant::Fire` 的函数地址
+pub const ADDR_FIRE: u32 = 0x00466E00;
+/// `Plant::Fire` 的函数签名
+type SignFire = extern "stdcall" fn(
+    this: *mut Plant,
+    theTargetZombie: *mut Zombie,
+    theRow: i32,
+    thePlantWeapon: i32,
+);
+/// `Plant::Fire` 的函数跳板
+pub static ORIGINAL_FIRE: OnceLock<SignFire> = OnceLock::new();
+
+/// 跳过了目标检测的 `Plant::FindTargetAndFire` 地址
+pub const ADDR_FIRE_WITHOUT_TARGET: u32 = 0x0045EF38;
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_PLANT_INITIALIZE.set(
             hook(ADDR_PLANT_INITIALIZE as _, PlantInitializeHelper as _)?
+        );
+
+        let _ = ORIGINAL_FIRE.set(
+            hook(ADDR_FIRE as _, plant::Fire as _)?
         );
 
         Ok(())

@@ -4,7 +4,11 @@ use serde::Deserialize;
 use tracing::debug;
 use windows::Win32::System::Console::AllocConsole;
 
-use crate::{CONFIG, pvz::lawn_app::lawn_app::with_lawn_app, save::PROFILE_MANAGER};
+use crate::{
+    CONFIG,
+    pvz::{board::board::with_board, lawn_app::lawn_app::with_lawn_app},
+    save::PROFILE_MANAGER,
+};
 
 #[derive(Deserialize)]
 struct Config {
@@ -51,6 +55,20 @@ pub fn tigger_handler(flag: String) {
                 if let Ok(pm) = PROFILE_MANAGER.lock() {
                     debug!("{:#?}", pm);
                 }
+            }
+
+            "shoot" => {
+                debug!("cool!");
+                let _ = with_board(|board| {
+                    for plant in board.plants.iter_mut() {
+                        if !plant.plant_subtype == 1 {
+                            continue;
+                        }
+                        crate::pvz::plant::FireWithoutTarget(plant, plant.row, 0);
+                    }
+
+                    Ok(())
+                });
             }
 
             _ => {

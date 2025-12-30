@@ -13,7 +13,7 @@ use windows::{
 };
 use windows_wrapper::formatw;
 
-pub const RUMIA_DLL: &str = "rumia.dll";
+pub const RUMIA_DLL: &str = "rumia.dll\0";
 
 pub fn launch_pvz(path: String) -> Option<PROCESS_INFORMATION> {
     unsafe {
