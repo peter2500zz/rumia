@@ -2,7 +2,10 @@ use mlua::prelude::*;
 use std::ffi::c_void;
 
 use crate::{
-    pvz::board::board::get_board,
+    pvz::{
+        board::board::get_board,
+        plant::{Fire, FireWithoutTarget},
+    },
     save::PROFILE_MANAGER,
     utils::{Rect2, Vec2, data_array::HasId},
 };
@@ -174,8 +177,22 @@ impl LuaUserData for Plant {
         methods.add_method("IsValid", |_, this, ()| Ok(get_plant(this.id()).is_ok()));
 
         methods.add_method("GetHitbox", |_, this, ()| {
+            with_plant(this.id(), |plant| Ok(plant.hitbox))
+        });
+
+        methods.add_method("Shoot", |_, this, ()| {
             with_plant(this.id(), |plant| {
-                Ok(plant.hitbox)
+                FireWithoutTarget(plant, this.row, 0);
+
+                Ok(())
+            })
+        });
+
+        methods.add_method("ShootRaw", |_, this, ()| {
+            with_plant(this.id(), |plant| {
+                Fire(plant, 0 as _, this.row, 0);
+
+                Ok(())
             })
         });
     }
