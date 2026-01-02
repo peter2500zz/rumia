@@ -1,11 +1,13 @@
 use std::marker::PhantomData;
 use std::os::raw::c_char;
 
+pub type DataArrayId = i32;
+
 pub trait HasId {
     const NAMESPACE: &'static str;
 
     /// 获取对象的当前 ID
-    fn id(&self) -> i32;
+    fn id(&self) -> DataArrayId;
 }
 
 #[repr(C)]
@@ -40,7 +42,7 @@ impl<T: HasId> DataArray<T> {
     ///   else
     ///     return 0;
     /// }
-    pub fn get(&self, id: i32) -> Option<&T> {
+    pub fn get(&self, id: DataArrayId) -> Option<&T> {
         // 汇编: if ( a1 && ... )
         // ID 为 0 永远是无效的
         if id == 0 {
@@ -83,7 +85,7 @@ impl<T: HasId> DataArray<T> {
     }
 
     /// 获取可变引用 (逻辑同上)
-    pub fn get_mut(&mut self, id: i32) -> Option<&mut T> {
+    pub fn get_mut(&mut self, id: DataArrayId) -> Option<&mut T> {
         if id == 0 {
             return None;
         }
@@ -111,7 +113,7 @@ impl<T: HasId> DataArray<T> {
     }
 
     /// 获取可变指针
-    pub fn get_ptr(&mut self, id: i32) -> Option<*mut T> {
+    pub fn get_ptr(&mut self, id: DataArrayId) -> Option<*mut T> {
         if id == 0 {
             return None;
         }

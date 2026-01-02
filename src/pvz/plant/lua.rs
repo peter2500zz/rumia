@@ -7,11 +7,11 @@ use crate::{
         plant::{Plant, get_plant, with_plant},
     },
     save::PROFILE_MANAGER,
-    utils::data_array::HasId,
+    utils::data_array::{DataArrayId, HasId},
 };
 
 /// 给 Lua 的安全包装
-struct LuaPlant(i32);
+struct LuaPlant(DataArrayId);
 
 impl ToLua for Plant {
     fn to_lua(&self, lua: &Lua) -> LuaResult<LuaValue> {
@@ -24,7 +24,7 @@ impl LuaUserData for LuaPlant {
         // 外部数据
         methods.add_method("SetAttr", |_, this, (key, value)| {
             with_plant(this.0, |plant| {
-                Ok(PROFILE_MANAGER.lock().unwrap().set_attr(plant, key, value))
+                PROFILE_MANAGER.lock().unwrap().set_attr(plant, key, value)
             })
         });
         methods.add_method("GetAttr", |lua, this, key| {

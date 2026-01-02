@@ -123,10 +123,8 @@ impl LuaUserData for Board {
             with_board(|board| {
                 let zombies = lua.create_table()?;
 
-                unsafe {
-                    for zombie in board.zombies.iter_ptr() {
-                        zombies.set((*zombie).id(), ptr::read(zombie))?;
-                    }
+                for zombie in board.zombies.iter() {
+                    zombies.set(zombie.id(), zombie.to_lua(lua)?)?;
                 }
 
                 Ok(zombies)
@@ -135,19 +133,19 @@ impl LuaUserData for Board {
 
         methods.add_method("GetZombieById", |lua, _, id| {
             with_board(|board| {
-                if let Some(zombie) = board.zombies.get_ptr(id) {
-                    unsafe { Ok(LuaValue::UserData(lua.create_userdata(ptr::read(zombie))?)) }
+                if let Some(zombie) = board.zombies.get(id) {
+                    zombie.to_lua(lua)
                 } else {
                     Ok(LuaNil)
                 }
             })
         });
 
-        methods.add_method("AddZombie", |_, _, (zombie_type, row, from_wave)| {
+        methods.add_method("AddZombie", |lua, _, (zombie_type, row, from_wave)| {
             with_board(|board| {
                 let zombie = AddZombieInRow(zombie_type, from_wave, board, row);
 
-                unsafe { Ok(ptr::read(zombie)) }
+                unsafe { (*zombie).to_lua(lua) }
             })
         });
 
@@ -167,10 +165,8 @@ impl LuaUserData for Board {
             with_board(|board| {
                 let plants = lua.create_table()?;
 
-                unsafe {
-                    for plant in board.plants.iter_ptr() {
-                        plants.set((*plant).id(), (*plant).to_lua(lua)?)?;
-                    }
+                for plant in board.plants.iter() {
+                    plants.set(plant.id(), plant.to_lua(lua)?)?;
                 }
 
                 Ok(plants)
@@ -179,8 +175,8 @@ impl LuaUserData for Board {
 
         methods.add_method("GetPlantById", |lua, _, id| {
             with_board(|board| {
-                if let Some(plant) = board.plants.get_ptr(id) {
-                    unsafe { (*plant).to_lua(lua) }
+                if let Some(plant) = board.plants.get(id) {
+                    plant.to_lua(lua)
                 } else {
                     Ok(LuaNil)
                 }

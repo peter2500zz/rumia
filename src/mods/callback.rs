@@ -1,7 +1,7 @@
 use mlua::prelude::*;
 
 use super::log::*;
-use crate::mods::with_lua;
+use crate::mods::{ToLua, with_lua};
 
 pub const PRE: u32 = 0 << 31;
 pub const POST: u32 = 1 << 31;
@@ -80,11 +80,10 @@ where
     }
 }
 
-// 修改点 1: 这里的 args 类型变为 &mut T，且不再有返回值
-// 约束 T 必须实现 UserData (因为我们要把它暴露给 Lua)
-pub fn callback_data<T>(at: u32, args: &mut T)
+
+pub fn callback_data<T>(at: u32, data: &mut T)
 where 
-    T: LuaUserData + 'static,
+    T: ToLua,
 {
     // 假设这是你获取全局 Lua 实例的方式
     let _ = with_lua(|lua| {
@@ -120,23 +119,13 @@ where
             }
         }
 
-        // --- 步骤 2: 核心修改 - 使用 Scope 传递引用 ---
-        // 使用 scope 是为了绕过 Rust 的生命周期检查，安全地将 &mut T 借给 Lua
-        lua.scope(|scope| {
-            // 关键：创建一个指向 args 的可变 UserData 引用
-            // 这不会发生 Clone，它只是包装了指针
-            let userdata_ref = scope.create_userdata_ref_mut(args)?;
-
-            for func in funcs {
-                // 调用 Lua 函数
-                // 我们传入 userdata_ref (它是一个 Handle，clone 它很廉价，不会复制底层数据)
-                // 这里的范型 <_, ()> 表示参数是 UserData，返回值为空(我们不需要 Lua 返回任何东西)
-                if let Err(e) = func.call::<()>(userdata_ref.clone()) {
-                    error!("Lua callback execution failed: {}", e);
-                    // 即使某个回调报错，是否继续执行下一个？这里选择了继续，你可以加 break
-                }
+        for func in funcs {
+            match func.call::<bool>(data.to_lua(lua)) {
+                Ok(result) => if result { return Ok(result); },
+                Err(e) => error!("Lua callback execution failed: {}", e),
             }
-            Ok(())
-        })
+        }
+
+        Ok(false)
     });
 }

@@ -1,4 +1,5 @@
 pub mod zombie;
+pub mod lua;
 
 use tracing::*;
 use windows::core::BOOL;
