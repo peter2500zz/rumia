@@ -1,12 +1,17 @@
-use std::ptr;
 use mlua::prelude::*;
+use std::ptr;
 use windows::Win32::Foundation::HWND;
 
 use crate::{
-    debug::tigger_handler, mods::LuaRegistration, pvz::{
-        board::board::Board, player_info::PlayerInfo, resource_manager::ResourceManager,
+    debug::tigger_handler,
+    mods::{LuaRegistration, ToLua},
+    pvz::{
+        board::board::Board,
+        player_info::PlayerInfo,
+        resource_manager::ResourceManager,
         widget_manager::widget_manager::{WidgetManager, with_widget_manager},
-    }, utils::Vec2
+    },
+    utils::Vec2,
 };
 
 const ADDR_LAWN_APP_BASE: u32 = 0x006A9EC0;
@@ -87,11 +92,7 @@ impl LuaUserData for LawnApp {
             if this.board as u32 == 0 {
                 Ok(LuaNil)
             } else {
-                unsafe {
-                    let lawn_app = lua.create_userdata(ptr::read(this.board))?;
-
-                    Ok(mlua::Value::UserData(lawn_app))
-                }
+                unsafe { (*this.board).to_lua(lua) }
             }
         });
 

@@ -1,4 +1,5 @@
 pub mod board;
+pub mod lua;
 
 use anyhow::{Result, anyhow};
 use std::{arch::naked_asm, fs::File};
