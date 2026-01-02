@@ -3,7 +3,7 @@ use std::ptr;
 use mlua::prelude::*;
 
 use crate::{
-    mods::LuaRegistration,
+    mods::{LuaRegistration, ToLua},
     pvz::{
         board::{AddCoin, AddZombieInRow, GetPlantsOnLawn, PixelToGridKeepOnBoard},
         lawn_app::lawn_app::get_lawn_app,
@@ -169,7 +169,7 @@ impl LuaUserData for Board {
 
                 unsafe {
                     for plant in board.plants.iter_ptr() {
-                        plants.set((*plant).id(), ptr::read(plant))?;
+                        plants.set((*plant).id(), (*plant).to_lua(lua)?)?;
                     }
                 }
 
@@ -180,7 +180,7 @@ impl LuaUserData for Board {
         methods.add_method("GetPlantById", |lua, _, id| {
             with_board(|board| {
                 if let Some(plant) = board.plants.get_ptr(id) {
-                    unsafe { Ok(LuaValue::UserData(lua.create_userdata(ptr::read(plant))?)) }
+                    unsafe { (*plant).to_lua(lua) }
                 } else {
                     Ok(LuaNil)
                 }
@@ -198,22 +198,22 @@ impl LuaUserData for Board {
                         if plants.normal.is_null() {
                             LuaNil
                         } else {
-                            LuaValue::UserData(lua.create_userdata(ptr::read(plants.normal))?)
+                            (*plants.normal).to_lua(lua)?
                         },
                         if plants.buttom.is_null() {
                             LuaNil
                         } else {
-                            LuaValue::UserData(lua.create_userdata(ptr::read(plants.buttom))?)
+                            (*plants.buttom).to_lua(lua)?
                         },
                         if plants.outer.is_null() {
                             LuaNil
                         } else {
-                            LuaValue::UserData(lua.create_userdata(ptr::read(plants.outer))?)
+                            (*plants.outer).to_lua(lua)?
                         },
                         if plants.flying.is_null() {
                             LuaNil
                         } else {
-                            LuaValue::UserData(lua.create_userdata(ptr::read(plants.flying))?)
+                            (*plants.flying).to_lua(lua)?
                         },
                     ))
                 }

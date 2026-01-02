@@ -1,13 +1,13 @@
-use std::arch::naked_asm;
+pub mod plant;
+pub mod lua;
 
+use std::arch::naked_asm;
 use tracing::trace;
 
 use crate::{
     hook::pvz::plant::{ADDR_FIRE_WITHOUT_TARGET, ORIGINAL_FIRE, PlantInitializeWrapper},
     pvz::{plant::plant::Plant, zombie::zombie::Zombie},
 };
-
-pub mod plant;
 
 pub extern "stdcall" fn PlantInitialize(
     theGridX: i32,

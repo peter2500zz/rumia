@@ -2,11 +2,7 @@ use mlua::prelude::*;
 use std::ffi::c_void;
 
 use crate::{
-    pvz::{
-        board::board::get_board,
-        plant::{Fire, FireWithoutTarget},
-    },
-    save::PROFILE_MANAGER,
+    pvz::board::board::get_board,
     utils::{Rect2, Vec2, data_array::HasId},
 };
 
@@ -132,14 +128,6 @@ pub struct Plant {
 }
 const _: () = assert!(std::mem::size_of::<Plant>() == 0x14C);
 
-impl HasId for Plant {
-    const NAMESPACE: &'static str = "Plant";
-
-    fn id(&self) -> i32 {
-        self.id
-    }
-}
-
 /// 尝试通过索引从 Board 中的 plants 对象池中获取植物指针
 ///
 /// 如果无法访问植物会返回 None
@@ -160,40 +148,10 @@ pub fn with_plant<T>(id: i32, f: impl FnOnce(&mut Plant) -> LuaResult<T>) -> Lua
     get_plant(id).and_then(|plant| unsafe { f(&mut *plant) })
 }
 
-impl LuaUserData for Plant {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        // 外部数据
-        methods.add_method("SetAttr", |_, this, (key, value)| {
-            PROFILE_MANAGER.lock().unwrap().set_attr(this, key, value)
-        });
-        methods.add_method("GetAttr", |lua, this, key| {
-            Ok(PROFILE_MANAGER.lock().unwrap().get_attr(lua, this, key))
-        });
-        methods.add_method("RemoveAttr", |_, this, key| {
-            Ok(PROFILE_MANAGER.lock().unwrap().remove_attr(this, key))
-        });
+impl HasId for Plant {
+    const NAMESPACE: &'static str = "Plant";
 
-        // 如果植物被从内存里清理掉了，就给 false
-        methods.add_method("IsValid", |_, this, ()| Ok(get_plant(this.id()).is_ok()));
-
-        methods.add_method("GetHitbox", |_, this, ()| {
-            with_plant(this.id(), |plant| Ok(plant.hitbox))
-        });
-
-        methods.add_method("Shoot", |_, this, ()| {
-            with_plant(this.id(), |plant| {
-                FireWithoutTarget(plant, this.row, 0);
-
-                Ok(())
-            })
-        });
-
-        methods.add_method("ShootRaw", |_, this, ()| {
-            with_plant(this.id(), |plant| {
-                Fire(plant, 0 as _, this.row, 0);
-
-                Ok(())
-            })
-        });
+    fn id(&self) -> i32 {
+        self.id
     }
 }

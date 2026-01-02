@@ -151,3 +151,7 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
 
     Ok(())
 }
+
+pub trait ToLua {
+    fn to_lua(&self, lua: &Lua) -> LuaResult<LuaValue>;
+}
