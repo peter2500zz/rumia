@@ -1,15 +1,11 @@
 use mlua::prelude::*;
-use std::ptr;
 use windows::Win32::Foundation::HWND;
 
 use crate::{
-    debug::tigger_handler,
     mods::{LuaRegistration, ToLua},
     pvz::{
-        board::board::Board,
-        player_info::PlayerInfo,
-        resource_manager::ResourceManager,
-        widget_manager::widget_manager::{WidgetManager, with_widget_manager},
+        board::board::Board, player_info::PlayerInfo, resource_manager::ResourceManager,
+        widget_manager::widget_manager::WidgetManager,
     },
     utils::Vec2,
 };
@@ -22,7 +18,7 @@ inventory::submit! {
 
         let lua_get_lawn_app = lua.create_function(move |lua, ()| {
             unsafe {
-                Ok(mlua::Value::UserData(lua.create_userdata(ptr::read(get_lawn_app()?))?))
+                (*get_lawn_app()?).to_lua(lua)
             }
         })?;
 
@@ -72,33 +68,4 @@ pub fn get_lawn_app() -> LuaResult<*mut LawnApp> {
 
 pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> LuaResult<T>) -> LuaResult<T> {
     get_lawn_app().and_then(|lawn_app| unsafe { f(&mut *lawn_app) })
-}
-
-impl LuaUserData for LawnApp {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_function("tigger", |_, flag| {
-            tigger_handler(flag);
-
-            Ok(())
-        });
-
-        // 获取窗口尺寸
-        methods.add_method("GetWindowSize", |_, _, ()| {
-            with_lawn_app(|lawn_app| Ok(lawn_app.window_size))
-        });
-
-        // 获取关卡
-        methods.add_method("GetBoard", |lua, this, ()| {
-            if this.board as u32 == 0 {
-                Ok(LuaNil)
-            } else {
-                unsafe { (*this.board).to_lua(lua) }
-            }
-        });
-
-        // 获取鼠标坐标
-        methods.add_method("GetMousePos", |_, _, ()| {
-            with_widget_manager(|wm| Ok(wm.mouse_pos))
-        });
-    }
 }

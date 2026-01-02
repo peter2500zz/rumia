@@ -223,7 +223,7 @@ inventory::submit! {
 pub fn get_widget_manager() -> LuaResult<*mut WidgetManager> {
     unsafe {
         get_lawn_app().and_then(|lawn_app| {
-            if ((*lawn_app).widget_manager as u32) == 0 {
+            if (*lawn_app).widget_manager.is_null() {
                 Err(LuaError::MemoryError("WidgetManager 不可访问".to_string()))
             } else {
                 Ok((*lawn_app).widget_manager)
