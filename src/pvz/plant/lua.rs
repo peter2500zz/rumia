@@ -47,6 +47,13 @@ impl LuaUserData for LuaPlant {
 
         methods.add_method("Shoot", |_, this, ()| {
             with_plant(this.0, |plant| {
+                if plant.plant_subtype != 1 {
+                    return Err(LuaError::RuntimeError(format!(
+                        "Plant type {} has subtype {}, which cannot shoot!",
+                        plant.plant_type, plant.plant_subtype
+                    )));
+                }
+
                 FireWithoutTarget(plant, plant.row, 0);
 
                 Ok(())
@@ -55,6 +62,13 @@ impl LuaUserData for LuaPlant {
 
         methods.add_method("ShootRaw", |_, this, ()| {
             with_plant(this.0, |plant| {
+                if plant.plant_subtype != 1 {
+                    return Err(LuaError::RuntimeError(format!(
+                        "Plant type {} has subtype {}, which cannot shoot!",
+                        plant.plant_type, plant.plant_subtype
+                    )));
+                }
+
                 Fire(plant, 0 as _, plant.row, 0);
 
                 Ok(())

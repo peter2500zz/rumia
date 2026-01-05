@@ -61,10 +61,10 @@ pub fn tigger_handler(flag: String) {
                 debug!("cool!");
                 let _ = with_board(|board| {
                     for plant in board.plants.iter_mut() {
-                        if !plant.plant_subtype == 1 {
-                            continue;
+                        if plant.plant_subtype == 1 {
+                            debug!("good plant shoot shoot shoot");
+                            crate::pvz::plant::FireWithoutTarget(plant, plant.row, 0);
                         }
-                        crate::pvz::plant::FireWithoutTarget(plant, plant.row, 0);
                     }
 
                     Ok(())
