@@ -12,7 +12,8 @@ use crate::{
         ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper,
         GetPlantsOnLawnWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
         ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
-        ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS, ORIGINAL_MOUSE_DOWN,
+        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
@@ -293,4 +294,27 @@ pub extern "stdcall" fn GetPlantsOnLawn(
     // }
 
     GetPlantsOnLawnWrapper(this, thePlantOnLawn, theGridX, theGridY);
+}
+
+pub extern "stdcall" fn KillAllZombiesInRadius(
+    this: *mut Board,
+    theRow: i32,
+    theX: i32,
+    theY: i32,
+    theRadius: i32,
+    theRowRange: i32,
+    theBurn: bool,
+    theDamageRangeFlags: i32,
+) {
+    trace!("boooooooom!!!");
+    ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS.wait()(
+        this,
+        theRow,
+        theX,
+        theY,
+        theRadius,
+        theRowRange,
+        theBurn,
+        theDamageRangeFlags,
+    )
 }

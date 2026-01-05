@@ -294,6 +294,23 @@ pub fn GetPlantsOnLawnWrapper(
     }
 }
 
+/// `Board::KillAllZombiesInRadius` 的地址
+pub const ADDR_KILL_ALL_ZOMBIES_IN_RADIUS: u32 = 0x0041D8A0;
+/// `Board::KillAllZombiesInRadius` 的签名
+type SignKillAllZombiesInRadius = extern "stdcall" fn(
+    this: *mut Board,
+    theRow: i32,
+    theX: i32,
+    theY: i32,
+    theRadius: i32,
+    theRowRange: i32,
+    theBurn: bool,
+    theDamageRangeFlags: i32,
+);
+/// `Board::KillAllZombiesInRadius` 的跳板
+pub static ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS: OnceLock<SignKillAllZombiesInRadius> =
+    OnceLock::new();
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(
@@ -346,6 +363,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_GET_PLANTS_ON_LAWN.set(
             hook(ADDR_GET_PLANTS_ON_LAWN as _, GetPlantsOnLawnHelper as _)?
+        );
+
+        let _ = ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS.set(
+            hook(ADDR_KILL_ALL_ZOMBIES_IN_RADIUS as _, board::KillAllZombiesInRadius as _)?
         );
 
         Ok(())

@@ -68,7 +68,7 @@ inventory::submit! {
 pub fn get_board() -> LuaResult<*mut Board> {
     unsafe {
         get_lawn_app().and_then(|lawn_app| {
-            if ((*lawn_app).board as u32) == 0 {
+            if (*lawn_app).board.is_null() {
                 Err(LuaError::MemoryError("Board 不可访问".to_string()))
             } else {
                 Ok((*lawn_app).board)
