@@ -2,6 +2,10 @@
 name = "rumia"
 version = "0.1.0"
 edition = "2024"
+authors = ["peter2500zz"]
+homepage = "https://rumia.docs.mygo.plus/"
+repository = "https://github.com/peter2500zz/rumia"
+license = "GPL-3.0-or-later"
 
 [lib]
 crate-type = ["cdylib"]
