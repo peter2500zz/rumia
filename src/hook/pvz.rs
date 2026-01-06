@@ -8,6 +8,7 @@ pub mod coin;
 pub mod graphics;
 pub mod resource_manager;
 pub mod plant;
+pub mod effect_system;
 
 use inventory;
 use std::sync::OnceLock;

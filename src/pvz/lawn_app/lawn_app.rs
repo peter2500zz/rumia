@@ -4,8 +4,8 @@ use windows::Win32::Foundation::HWND;
 use crate::{
     mods::{LuaRegistration, ToLua},
     pvz::{
-        board::board::Board, player_info::PlayerInfo, resource_manager::ResourceManager,
-        widget_manager::widget_manager::WidgetManager,
+        board::board::Board, effect_system::EffectSystem, player_info::PlayerInfo,
+        resource_manager::ResourceManager, widget_manager::widget_manager::WidgetManager,
     },
     utils::Vec2,
 };
@@ -49,7 +49,10 @@ pub struct LawnApp {
     _pad_0x638_0x768: [u8; 0x768 - 0x638],
     /// 0x768 游戏关卡
     pub board: *mut Board,
-    _pad_0x76C_0x82C: [u8; 0x82C - 0x76C],
+    _pad_0x76C_0x820: [u8; 0x820 - 0x76C],
+    /// 0x820 动画系统
+    pub effect_system: *mut EffectSystem,
+    _pad_0x824_0x82C: [u8; 0x82C - 0x824],
     /// 0x82C 用户档案与存档
     pub player_info: *mut PlayerInfo,
     _pad_0x830_0x8C8: [u8; 0x8C8 - 0x830],

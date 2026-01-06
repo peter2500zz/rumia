@@ -119,6 +119,21 @@ pub fn tigger_handler(flag: String) {
                 });
             }
 
+            "effsys" => {
+                let _ = with_lawn_app(|lawn_app| {
+                    let effsys = &*lawn_app.effect_system;
+                    let psys = &*effsys.particle;
+                    debug!("ps: {}", psys.systems.debug_name_to_string());
+                    debug!("pe: {}", psys.emitters.debug_name_to_string());
+                    debug!("pp: {}", psys.particles.debug_name_to_string());
+                    debug!("t: {}", (*effsys.trails).debug_name_to_string());
+                    debug!("r: {}", (*effsys.reanims).debug_name_to_string());
+                    debug!("a: {}", (*effsys.attach).debug_name_to_string());
+
+                    Ok(())
+                });
+            }
+
             _ => {
                 debug!("无效调试标志");
             }

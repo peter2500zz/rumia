@@ -1,3 +1,4 @@
+use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::os::raw::c_char;
 
@@ -29,6 +30,16 @@ pub struct DataArray<T> {
     pub id_counter: i32,
     /// +18: 调试名称
     pub debug_name: *const c_char,
+}
+
+impl<T> DataArray<T> {
+    pub fn debug_name_to_string(&self) -> String {
+        unsafe {
+            CStr::from_ptr(self.debug_name)
+                .to_string_lossy()
+                .to_string()
+        }
+    }
 }
 
 impl<T: HasId> DataArray<T> {
