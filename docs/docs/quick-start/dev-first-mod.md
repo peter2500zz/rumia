@@ -36,7 +36,7 @@ Log.info("Hello world!")
 
 !!! note
 
-    对于所有可用的函数与类定义，可以参考仓库根目录的 [types.lua](https://github.com/peter2500zz/rumia/blob/master/types.lua) 文件。类似 EmmyLua 的插件可以识别其中的语法，并在编写 Mod 时提供帮助。
+    对于所有可用的函数与类定义，可以参考仓库根目录的 [types/rumia](https://github.com/peter2500zz/rumia/blob/master/types/rumia) 文件夹。类似 EmmyLua 的插件可以识别其中的语法，并在编写 Mod 时提供帮助。
 
     你也可以查看 [API](../api/index.md) 页面来检索所有可用的函数与类定义。
 
@@ -213,8 +213,7 @@ mod:AddCallback(ModCallbacks.AT_BOARD_UPDATE, function(delta)
 
     -- 获取当前鼠标位置
     -- 注意：Update 回调不带鼠标参数，需要从 WidgetManager 获取
-    local widgetMgr = app:GetWidgetManager()
-    local currentMousePos = widgetMgr:GetMousePos()
+    local currentMousePos = app:GetMousePos()
 
     -- 计算新坐标：当前鼠标位置 + 初始偏移量
     local newX = currentMousePos.x + dragOffset.x
