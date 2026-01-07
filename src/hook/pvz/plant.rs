@@ -9,6 +9,7 @@ use crate::{
         plant::{self, plant::Plant},
         zombie::zombie::Zombie,
     },
+    utils::asm::stack_rotate,
 };
 
 /// `Plant::PlantInitialize` 的函数地址
@@ -22,11 +23,9 @@ static ORIGINAL_PLANT_INITIALIZE: OnceLock<SignPlantInitialize> = OnceLock::new(
 #[unsafe(naked)]
 extern "stdcall" fn PlantInitializeHelper() {
     naked_asm!(
-        "mov edx, [esp+12]",
-        "xchg edx, [esp+8]",
-        "xchg edx, [esp+4]",
-        "xchg edx, [esp]",
-        "mov [esp+12], edx",
+        "push 4",
+        "call {stack_rotate}",
+
         "push eax",
         "push ecx",
 
@@ -34,6 +33,7 @@ extern "stdcall" fn PlantInitializeHelper() {
 
         "ret",
 
+        stack_rotate = sym stack_rotate,
         hook = sym plant::PlantInitialize
     )
 }

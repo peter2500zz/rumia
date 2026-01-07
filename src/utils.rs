@@ -4,6 +4,7 @@ pub mod delta_mgr;
 #[allow(unused)]
 pub mod msvc_string;
 pub mod render_manager;
+pub mod asm;
 
 use mlua::prelude::*;
 use std::{env, fmt::Debug, path::PathBuf};
