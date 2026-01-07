@@ -1,23 +1,21 @@
 use std::sync::OnceLock;
 
-use crate::{hook::{HookRegistration, hook}, pvz::graphics::{self, graphics::Graphics}};
-
+use crate::{
+    hook::{HookRegistration, hook},
+    pvz::graphics::{self, graphics::Graphics},
+};
 
 /// `Graphics::Create` 的地址
 pub const ADDR_CREATE: u32 = 0x00586C30;
 /// `Graphics::Create` 的签名
-type SignCreate = extern "stdcall" fn(
-    this: *mut Graphics,
-) -> *mut Graphics;
+type SignCreate = extern "stdcall" fn(this: *mut Graphics) -> *mut Graphics;
 /// `Graphics::Create` 的跳板
 pub static ORIGINAL_CREATE: OnceLock<SignCreate> = OnceLock::new();
 
 /// `Graphics::Destructor` 的地址
 pub const ADDR_DESTRUCTOR: u32 = 0x00586B10;
 /// `Graphics::Destructor` 的签名
-type SignDestructor = extern "thiscall" fn(
-    this: *mut Graphics,
-);
+type SignDestructor = extern "thiscall" fn(this: *mut Graphics);
 /// `Graphics::Destructor` 的跳板
 pub static ORIGINAL_DESTRUCTOR: OnceLock<SignDestructor> = OnceLock::new();
 
@@ -43,4 +41,3 @@ inventory::submit! {
         Ok(())
     })
 }
-

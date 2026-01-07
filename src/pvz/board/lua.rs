@@ -103,7 +103,7 @@ impl LuaUserData for LuaBoard {
             with_board(|board| {
                 let mut plants = PlantsOnLawn::default();
 
-                GetPlantsOnLawn(board, &mut plants, grid.x, grid.y);
+                GetPlantsOnLawn(board, &mut plants, grid);
 
                 unsafe {
                     Ok((

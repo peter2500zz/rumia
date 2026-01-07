@@ -3,10 +3,10 @@ use fern::{
     Dispatch,
     colors::{Color, ColoredLevelConfig},
 };
-use tracing::{log::LevelFilter};
 use serde::Deserialize;
+use tracing::log::LevelFilter;
 
-use crate::{CONFIG};
+use crate::CONFIG;
 
 const DEFAULT_LOG_PATH: &str = "pvz.log";
 const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
@@ -65,7 +65,9 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .chain(fern::log_file(cfg.log_path.unwrap_or(DEFAULT_LOG_PATH.to_string()))?);
+        .chain(fern::log_file(
+            cfg.log_path.unwrap_or(DEFAULT_LOG_PATH.to_string()),
+        )?);
 
     // 合并两个 dispatch
     Dispatch::new()
@@ -81,7 +83,6 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .chain(stdout_dispatch)
         .chain(file_dispatch)
         .apply()?;
-
 
     Ok(())
 }

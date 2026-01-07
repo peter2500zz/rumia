@@ -1,4 +1,7 @@
-use std::arch::{asm, naked_asm};
+use std::{
+    arch::{asm, naked_asm},
+    ffi::c_int,
+};
 
 use crate::{
     hook::pvz::graphics::{
@@ -41,7 +44,7 @@ pub fn SetColor(g: *mut Graphics, color: &Color) {
     }
 }
 
-pub fn DrawRect(g: *mut Graphics, rect: Rect2<i32>) {
+pub fn DrawRect(g: *mut Graphics, rect: Rect2<c_int>) {
     unsafe {
         asm!(
             // 1. 压栈参数 (注意：汇编 push 顺序通常是反向的，从右到左)
@@ -77,7 +80,7 @@ pub fn DrawRect(g: *mut Graphics, rect: Rect2<i32>) {
     }
 }
 
-pub fn FillRect(g: *mut Graphics, rect: Rect2<i32>) {
+pub fn FillRect(g: *mut Graphics, rect: Rect2<c_int>) {
     unsafe {
         asm!(
             // 1. 压栈参数 (注意：汇编 push 顺序通常是反向的，从右到左)
@@ -109,10 +112,10 @@ pub fn FillRect(g: *mut Graphics, rect: Rect2<i32>) {
 pub extern "stdcall" fn TodDrawStringWrapped(
     g: *mut Graphics,
     theText: *const MsvcString,
-    theRect: *const Rect2<i32>,
+    theRect: *const Rect2<c_int>,
     theFont: *mut Font,
     theColor: *const Color,
-    theJustification: i32,
+    theJustification: c_int,
 ) {
     naked_asm!(
         // 函数序言 (prologue)

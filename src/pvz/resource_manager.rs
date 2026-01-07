@@ -1,7 +1,9 @@
 use std::arch::asm;
 
-use crate::{hook::pvz::resource_manager::ADDR_LOAD_FONT, pvz::graphics::graphics::Font, utils::msvc_string::MsvcString};
-
+use crate::{
+    hook::pvz::resource_manager::ADDR_LOAD_FONT, pvz::graphics::graphics::Font,
+    utils::msvc_string::MsvcString,
+};
 
 #[repr(C)]
 pub struct ResourceManager {
@@ -12,11 +14,7 @@ pub struct ResourceManager {
 }
 const _: () = assert!(size_of::<ResourceManager>() == 0xCC);
 
-
-pub fn LoadFont(
-    this: *mut ResourceManager,
-    theName: &MsvcString
-) -> Option<*mut Font> {
+pub fn LoadFont(this: *mut ResourceManager, theName: &MsvcString) -> Option<*mut Font> {
     unsafe {
         let result: *mut Font;
 

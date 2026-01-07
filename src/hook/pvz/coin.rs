@@ -1,12 +1,13 @@
 use std::{
     arch::{asm, naked_asm},
+    ffi::c_int,
     sync::OnceLock,
 };
 
 use super::{HookRegistration, hook};
 use crate::{
     pvz::coin::{self, Coin},
-    utils::{asm::stack_rotate, data_array::DataArray},
+    utils::{Vec2, asm::stack_rotate, data_array::DataArray},
 };
 
 /// `DataArray<Coin>::DataArrayAlloc` 构造函数的地址
@@ -62,7 +63,7 @@ pub const ADDR_COIN_INITIALIZE: u32 = 0x0042FF60;
 ///
 /// 仅标注用
 type SignCoinInitialize =
-    fn(this: *mut Coin, theX: i32, theY: i32, theCoinType: i32, theCoinMotion: i32);
+    fn(this: *mut Coin, thePos: Vec2<c_int>, theCoinType: c_int, theCoinMotion: c_int);
 /// `Coin::CoinInitialize` 的跳板
 static ORIGINAL_COIN_INITIALIZE: OnceLock<SignCoinInitialize> = OnceLock::new();
 
@@ -90,10 +91,9 @@ extern "stdcall" fn CoinInitializeHelper() {
 /// 回调辅助函数
 pub extern "stdcall" fn CoinInitializeWrapper(
     this: *mut Coin,
-    theX: i32,
-    theY: i32,
-    theCoinType: i32,
-    theCoinMotion: i32,
+    thePos: Vec2<c_int>,
+    theCoinType: c_int,
+    theCoinMotion: c_int,
 ) {
     // 获取原函数的指针
     let func = ORIGINAL_COIN_INITIALIZE.wait();
@@ -103,8 +103,8 @@ pub extern "stdcall" fn CoinInitializeWrapper(
             "push {}",
             "push {}",
             "push {}",
-            in(reg) theY,
-            in(reg) theX,
+            in(reg) thePos.y,
+            in(reg) thePos.x,
             in(reg) this,
         );
         asm!(

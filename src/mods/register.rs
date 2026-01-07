@@ -1,11 +1,10 @@
 use mlua::prelude::*;
-use tracing::trace;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use tracing::trace;
 
 pub(super) static MOD_CALLBACK_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 use super::LuaRegistration;
-
 
 inventory::submit! {
     LuaRegistration(|lua| {

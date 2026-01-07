@@ -11,15 +11,11 @@ use crate::{
     mods::callback::{POST, PRE, callback},
     pvz::{
         board::board::get_board,
-        graphics::{
-            graphics::{Graphics, Render},
-        },
+        graphics::graphics::{Graphics, Render},
         lawn_app::lawn_app::LawnApp,
         widget_manager::widget_manager::WidgetManager,
     },
-    utils::{
-        render_manager::{RenderLayer, execute_layer_render, finish_render_frame},
-    },
+    utils::render_manager::{RenderLayer, execute_layer_render, finish_render_frame},
 };
 
 /// 这是 `WidgetManager` 的构造函数

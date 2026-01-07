@@ -1,12 +1,16 @@
 use std::{
     arch::{asm, naked_asm},
+    ffi::c_int,
     sync::OnceLock,
 };
 use windows::core::BOOL;
 
 use super::{HookRegistration, hook};
 use crate::{
-    pvz::{graphics::graphics::Graphics, zombie::{self, zombie::Zombie}},
+    pvz::{
+        graphics::graphics::Graphics,
+        zombie::{self, zombie::Zombie},
+    },
     utils::{asm::stack_rotate, data_array::DataArray},
 };
 
@@ -64,11 +68,11 @@ pub const ADDR_ZOMBIE_INITIALIZE: u32 = 0x00522580;
 /// 仅标注用
 type SignZombieInitialize = fn(
     this: *mut Zombie,
-    theRow: i32,
-    theZombieType: i32,
+    theRow: c_int,
+    theZombieType: c_int,
     theVariant: BOOL,
     theParentZombie: *mut Zombie,
-    theFromWave: i32,
+    theFromWave: c_int,
 );
 /// `Zombie::ZombieInitialize` 的跳板
 static ORIGINAL_ZOMBIE_INITIALIZE: OnceLock<SignZombieInitialize> = OnceLock::new();
@@ -95,11 +99,11 @@ extern "stdcall" fn ZombieInitializeHelper() {
 /// 回调辅助函数
 pub extern "stdcall" fn ZombieInitializeWrapper(
     this: *mut Zombie,
-    theRow: i32,
-    theZombieType: i32,
+    theRow: c_int,
+    theZombieType: c_int,
     theVariant: BOOL,
     theParentZombie: *mut Zombie,
-    theFromWave: i32,
+    theFromWave: c_int,
 ) {
     // 获取原函数的指针
     let func = ORIGINAL_ZOMBIE_INITIALIZE.wait();
@@ -168,18 +172,13 @@ pub extern "stdcall" fn UpdateWrapper(this: *mut Zombie) {
 /// `Zombie::Draw` 构造函数的地址
 pub const ADDR_DRAW: u32 = 0x0052E2E0;
 /// `Zombie::Draw` 构造函数的签名
-type SignDraw = fn(
-    this: *mut Zombie,
-    g: *mut Graphics,
-);
+type SignDraw = fn(this: *mut Zombie, g: *mut Graphics);
 /// `Zombie::Draw` 构造函数的跳板
 static ORIGINAL_DRAW: OnceLock<SignDraw> = OnceLock::new();
 
 /// 从非标准调用中提取参数的辅助函数
 #[unsafe(naked)]
-extern "stdcall" fn DrawHelper(
-    g: *mut Graphics
-) {
+extern "stdcall" fn DrawHelper(g: *mut Graphics) {
     naked_asm!(
         "push [esp + 4]",
         "push ebx",
@@ -194,10 +193,7 @@ extern "stdcall" fn DrawHelper(
 }
 
 /// 回调辅助函数
-pub extern "stdcall" fn DrawWrapper(
-    this: *mut Zombie,
-    g: *mut Graphics
-) {
+pub extern "stdcall" fn DrawWrapper(this: *mut Zombie, g: *mut Graphics) {
     unsafe {
         asm!(
             // 把参数放入原函数期望的寄存器中

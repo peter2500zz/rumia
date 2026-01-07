@@ -60,7 +60,11 @@ pub extern "system" fn DllMain(
                     ""
                 };
 
-                mb!("初始化时遇到问题。\nAn issue occurred during initialization.\n{}{}", e, extra_msg);
+                mb!(
+                    "初始化时遇到问题。\nAn issue occurred during initialization.\n{}{}",
+                    e,
+                    extra_msg
+                );
 
                 false
             }

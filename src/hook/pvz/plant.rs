@@ -1,5 +1,6 @@
 use std::{
     arch::{asm, naked_asm},
+    ffi::c_int,
     sync::OnceLock,
 };
 
@@ -9,14 +10,14 @@ use crate::{
         plant::{self, plant::Plant},
         zombie::zombie::Zombie,
     },
-    utils::asm::stack_rotate,
+    utils::{Vec2, asm::stack_rotate},
 };
 
 /// `Plant::PlantInitialize` 的函数地址
 pub const ADDR_PLANT_INITIALIZE: u32 = 0x0045DB60;
 /// `Plant::PlantInitialize` 的函数签名
 type SignPlantInitialize =
-    fn(this: *mut Plant, theGridX: i32, theGridY: i32, theSeedType: i32, theImitaterType: i32);
+    fn(this: *mut Plant, theGridPos: Vec2<c_int>, theSeedType: c_int, theImitaterType: c_int);
 static ORIGINAL_PLANT_INITIALIZE: OnceLock<SignPlantInitialize> = OnceLock::new();
 
 /// 一次过 哦耶
@@ -40,10 +41,9 @@ extern "stdcall" fn PlantInitializeHelper() {
 
 pub fn PlantInitializeWrapper(
     this: *mut Plant,
-    theGridX: i32,
-    theGridY: i32,
-    theSeedType: i32,
-    theImitaterType: i32,
+    theGridPos: Vec2<c_int>,
+    theSeedType: c_int,
+    theImitaterType: c_int,
 ) {
     unsafe {
         asm!(
@@ -53,8 +53,8 @@ pub fn PlantInitializeWrapper(
 
             "call [{func}]",
 
-            in("eax") theGridY,
-            in("ecx") theGridX,
+            in("eax") theGridPos.y,
+            in("ecx") theGridPos.x,
             theImitaterType = in(reg) theImitaterType,
             theSeedType = in(reg) theSeedType,
             this = in(reg) this,
@@ -70,8 +70,8 @@ pub const ADDR_FIRE: u32 = 0x00466E00;
 type SignFire = extern "stdcall" fn(
     this: *mut Plant,
     theTargetZombie: *mut Zombie,
-    theRow: i32,
-    thePlantWeapon: i32,
+    theRow: c_int,
+    thePlantWeapon: c_int,
 );
 /// `Plant::Fire` 的函数跳板
 pub static ORIGINAL_FIRE: OnceLock<SignFire> = OnceLock::new();

@@ -1,13 +1,15 @@
 use mlua::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{collections::HashMap, sync::{LazyLock, Mutex}};
+use std::{
+    collections::HashMap,
+    sync::{LazyLock, Mutex},
+};
 
 use crate::utils::data_array::HasId;
 
-pub static PROFILE_MANAGER: LazyLock<Mutex<Profile>> = LazyLock::new(|| {
-    Mutex::new(Profile::default())
-});
+pub static PROFILE_MANAGER: LazyLock<Mutex<Profile>> =
+    LazyLock::new(|| Mutex::new(Profile::default()));
 
 pub const SAVES_DIR: &str = "saves/userdata";
 
@@ -25,13 +27,21 @@ impl Profile {
     }
 
     // 3. 泛型化的 Set 方法
-    pub fn set_attr<T: HasId>(&mut self, entity: &T, key: String, value: LuaValue) -> LuaResult<()> {
+    pub fn set_attr<T: HasId>(
+        &mut self,
+        entity: &T,
+        key: String,
+        value: LuaValue,
+    ) -> LuaResult<()> {
         // 第一步：找到 Namespace 对应的 Map (如果没有则创建)
-        let namespace_data = self.data.entry(T::NAMESPACE.to_string())
+        let namespace_data = self
+            .data
+            .entry(T::NAMESPACE.to_string())
             .or_insert_with(HashMap::new);
-        
+
         // 第二步：找到 ID 对应的 Map (如果没有则创建)
-        let entity_data = namespace_data.entry(entity.id())
+        let entity_data = namespace_data
+            .entry(entity.id())
             .or_insert_with(HashMap::new);
 
         match serde_json::to_value(&value) {

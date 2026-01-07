@@ -1,13 +1,15 @@
-pub mod zombie;
 pub mod lua;
+pub mod zombie;
 
+use std::ffi::c_int;
 use tracing::*;
 use windows::core::BOOL;
 
 use crate::{
     add_callback,
     hook::pvz::zombie::{
-        ADDR_DIE_NO_LOOT, ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, DrawWrapper, ORIGINAL_DIE_NO_LOOT, UpdateWrapper, ZombieInitializeWrapper
+        ADDR_DIE_NO_LOOT, ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, DrawWrapper,
+        ORIGINAL_DIE_NO_LOOT, UpdateWrapper, ZombieInitializeWrapper,
     },
     mods::callback::{POST, PRE, callback_data},
     pvz::{graphics::graphics::Graphics, zombie::zombie::Zombie},
@@ -23,11 +25,11 @@ pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Zombie>) -> *mut Zom
 
 pub extern "thiscall" fn ZombieInitialize(
     this: *mut Zombie,
-    theRow: i32,
-    theZombieType: i32,
+    theRow: c_int,
+    theZombieType: c_int,
     theVariant: BOOL,
     theParentZombie: *mut Zombie,
-    theFromWave: i32,
+    theFromWave: c_int,
 ) {
     // trace!("初始化 行 {} 类型 {} 来自第 {} 波", theRow, theZombieType, theFromWave);
     ZombieInitializeWrapper(

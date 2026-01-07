@@ -1,26 +1,23 @@
-pub mod plant;
 pub mod lua;
+pub mod plant;
 
-use std::arch::naked_asm;
+use std::{arch::naked_asm, ffi::c_int};
 use tracing::trace;
 
 use crate::{
     hook::pvz::plant::{ADDR_FIRE_WITHOUT_TARGET, ORIGINAL_FIRE, PlantInitializeWrapper},
     pvz::{plant::plant::Plant, zombie::zombie::Zombie},
+    utils::Vec2,
 };
 
 pub extern "stdcall" fn PlantInitialize(
-    theGridX: i32,
-    theGridY: i32,
+    theGridPos: Vec2<c_int>,
     this: *mut Plant,
-    theSeedType: i32,
-    theImitaterType: i32,
+    theSeedType: c_int,
+    theImitaterType: c_int,
 ) {
-    trace!(
-        "plant {} initialized at ({}, {})",
-        theSeedType, theGridX, theGridY
-    );
-    PlantInitializeWrapper(this, theGridX, theGridY, theSeedType, theImitaterType);
+    trace!("plant {} initialized at {:?}", theSeedType, theGridPos);
+    PlantInitializeWrapper(this, theGridPos, theSeedType, theImitaterType);
 
     unsafe {
         trace!("{}", (*this).plant_subtype);
@@ -30,14 +27,14 @@ pub extern "stdcall" fn PlantInitialize(
 pub extern "stdcall" fn Fire(
     this: *mut Plant,
     theTargetZombie: *mut Zombie,
-    theRow: i32,
-    thePlantWeapon: i32,
+    theRow: c_int,
+    thePlantWeapon: c_int,
 ) {
     ORIGINAL_FIRE.wait()(this, theTargetZombie, theRow, thePlantWeapon)
 }
 
 #[unsafe(naked)]
-pub extern "thiscall" fn FireWithoutTarget(this: *mut Plant, theRow: i32, thePlantWeapon: i32) {
+pub extern "thiscall" fn FireWithoutTarget(this: *mut Plant, theRow: c_int, thePlantWeapon: c_int) {
     naked_asm!(
         "mov eax, ecx",
         "push ecx",

@@ -25,10 +25,10 @@ macro_rules! add_callback {
 }
 
 /// 通用回调函数 - 支持传递任意实现 IntoLuaMulti 的参数
-/// 
+///
 /// 如果返回了 `true` 将不会执行原函数
 pub fn callback<A>(at: u32, args: A) -> bool
-where 
+where
     A: IntoLuaMulti + Clone,
 {
     let result = with_lua(|lua| {
@@ -66,7 +66,11 @@ where
         for func in funcs {
             // 每次调用都 clone args (因为 IntoLuaMulti 会消耗参数)
             match func.call::<bool>(args.clone()) {
-                Ok(result) => if result { return Ok(result); },
+                Ok(result) => {
+                    if result {
+                        return Ok(result);
+                    }
+                }
                 Err(e) => error!("Lua callback execution failed: {}", e),
             }
         }
@@ -80,9 +84,8 @@ where
     }
 }
 
-
 pub fn callback_data<T>(at: u32, data: &mut T)
-where 
+where
     T: ToLua,
 {
     // 假设这是你获取全局 Lua 实例的方式
@@ -121,7 +124,11 @@ where
 
         for func in funcs {
             match func.call::<bool>(data.to_lua(lua)) {
-                Ok(result) => if result { return Ok(result); },
+                Ok(result) => {
+                    if result {
+                        return Ok(result);
+                    }
+                }
                 Err(e) => error!("Lua callback execution failed: {}", e),
             }
         }

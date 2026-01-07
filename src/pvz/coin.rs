@@ -1,5 +1,5 @@
 use mlua::prelude::*;
-use std::ffi::c_void;
+use std::ffi::{c_int, c_void};
 use tracing::trace;
 use windows::core::BOOL;
 
@@ -143,15 +143,14 @@ pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Coin>) -> *mut Coin 
 
 pub extern "thiscall" fn CoinInitialize(
     this: *mut Coin,
-    theCoinType: i32,
-    theCoinMotion: i32,
-    theX: i32,
-    theY: i32,
+    theCoinType: c_int,
+    theCoinMotion: c_int,
+    thePos: Vec2<c_int>,
 ) {
     //
 
     // trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", theCoinType, theCoinMotion, theX, theY);
-    CoinInitializeWrapper(this, theX, theY, theCoinType, theCoinMotion);
+    CoinInitializeWrapper(this, thePos, theCoinType, theCoinMotion);
 
     // // callback_mut(ADDR_COIN_INITIALIZE, );
 

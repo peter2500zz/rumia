@@ -1,4 +1,3 @@
-
 #[repr(C)]
 pub struct PlayerInfo {
     _pad_0x0_0x20: [u8; 0x20 - 0x0],

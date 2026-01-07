@@ -1,11 +1,5 @@
 use mlua::prelude::*;
-pub(super) use tracing::{
-    trace,
-    debug,
-    info,
-    warn,
-    error
-};
+pub(super) use tracing::{debug, error, info, trace, warn};
 
 use super::LuaRegistration;
 
@@ -16,14 +10,13 @@ macro_rules! create_log_func {
                 .iter()
                 .map(|v| v.to_string().unwrap_or_else(|_| format!("{:?}", v)))
                 .collect();
-            
+
             $macro!("{}", message);
             Ok(())
         })?;
         $log_table.set($name, func)?;
     }};
 }
-
 
 inventory::submit! {
     LuaRegistration(|lua| {

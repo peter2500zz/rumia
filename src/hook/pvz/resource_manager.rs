@@ -1,4 +1,3 @@
-
 pub const ADDR_GET_FONT: u32 = 0x005B7F90;
 
 pub const ADDR_LOAD_FONT: u32 = 0x005B7C00;

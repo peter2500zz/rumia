@@ -2,7 +2,7 @@ pub mod board;
 pub mod lua;
 
 use anyhow::{Result, anyhow};
-use std::{arch::naked_asm, fs::File};
+use std::{arch::naked_asm, ffi::c_int, fs::File};
 use tracing::*;
 
 use crate::{
@@ -72,9 +72,9 @@ pub extern "stdcall" fn InitLevel(this: *mut Board) {
 /// 在游戏中生成掉落物的函数
 pub extern "thiscall" fn AddCoin(
     this: *mut Board,
-    pos: Vec2<i32>,
-    theCoinType: u32,
-    theCoinMotion: u32,
+    pos: Vec2<c_int>,
+    theCoinType: c_int,
+    theCoinMotion: c_int,
 ) -> *mut Coin {
     trace!(
         "spawning coin {} at {:?} with motion {}",
@@ -87,7 +87,7 @@ pub extern "thiscall" fn AddCoin(
 }
 
 /// `Board::KeyDown` 的 hook 函数
-pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: i32) {
+pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: c_int) {
     // trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
     if !callback(PRE | ADDR_KEYDOWN, keycode) {
         // 回调
@@ -98,9 +98,9 @@ add_callback!("AT_BOARD_KEY_DOWN", PRE | ADDR_KEYDOWN);
 
 pub extern "thiscall" fn AddZombieInRow(
     this: *mut Board,
-    theFromWave: i32,
-    theZombieType: i32,
-    theRow: i32,
+    theFromWave: c_int,
+    theZombieType: c_int,
+    theRow: c_int,
 ) -> *mut Zombie {
     trace!(
         "spawning zombie type {} at wave {} row {}",
@@ -111,7 +111,7 @@ pub extern "thiscall" fn AddZombieInRow(
 }
 
 /// 关卡内鼠标点击
-pub extern "thiscall" fn MouseDown(this: *mut Board, pos: Vec2<i32>, theClickCount: i32) {
+pub extern "thiscall" fn MouseDown(this: *mut Board, pos: Vec2<c_int>, theClickCount: c_int) {
     // trace!("Board({:#x?}) 在 {:?} 点击 {}", this, pos, theClickCount);
     if !callback(PRE | ADDR_MOUSE_DOWN, (theClickCount, pos)) {
         ORIGINAL_MOUSE_DOWN.wait()(this, pos, theClickCount)
@@ -120,7 +120,7 @@ pub extern "thiscall" fn MouseDown(this: *mut Board, pos: Vec2<i32>, theClickCou
 add_callback!("AT_BOARD_MOUSE_DOWN", PRE | ADDR_MOUSE_DOWN);
 
 /// 关卡内鼠标松开
-pub extern "thiscall" fn MouseUp(this: *mut Board, pos: Vec2<i32>, theClickCount: i32) {
+pub extern "thiscall" fn MouseUp(this: *mut Board, pos: Vec2<c_int>, theClickCount: c_int) {
     // trace!("Board({:#x?}) 在 {:?} 松开 {}", this, pos, theClickCount);
     if !callback(PRE | ADDR_MOUSE_UP, (theClickCount, pos)) {
         ORIGINAL_MOUSE_UP.wait()(this, pos, theClickCount)
@@ -139,7 +139,7 @@ pub extern "thiscall" fn Update(this: *mut Board) {
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
 
 #[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: i32, theY: i32) -> i32 {
+pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     naked_asm!(
         "push ebp",
         "mov ebp, esp",
@@ -166,7 +166,7 @@ pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: i32, the
 }
 
 #[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridYKeepOnBoard(this: *mut Board, theX: i32, theY: i32) -> i32 {
+pub extern "stdcall" fn PixelToGridYKeepOnBoard(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     naked_asm!(
         "push ebp",
         "mov ebp, esp",
@@ -264,6 +264,7 @@ pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcS
                     (*(*the_app).player_info).save_slot
                 );
                 let file = File::create(&json_path)?;
+                debug!("save custom profile to {}", json_path);
 
                 let profile = PROFILE_MANAGER.lock().unwrap();
                 serde_json::to_writer_pretty(file, &*profile)?;
@@ -286,25 +287,24 @@ pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcS
 pub extern "thiscall" fn GetPlantsOnLawn(
     this: *mut Board,
     thePlantOnLawn: *mut PlantsOnLawn,
-    theGridX: i32,
-    theGridY: i32,
+    theGridPos: Vec2<c_int>,
 ) {
     // unsafe {
     //     debug!("{:?} {:?} {:?} {:?}", this, (*thePlantOnLawn), theGridX, theGridY);
     // }
 
-    GetPlantsOnLawnWrapper(this, thePlantOnLawn, theGridX, theGridY);
+    GetPlantsOnLawnWrapper(this, thePlantOnLawn, theGridPos);
 }
 
 pub extern "stdcall" fn KillAllZombiesInRadius(
     this: *mut Board,
-    theRow: i32,
-    theX: i32,
-    theY: i32,
-    theRadius: i32,
-    theRowRange: i32,
+    theRow: c_int,
+    theX: c_int,
+    theY: c_int,
+    theRadius: c_int,
+    theRowRange: c_int,
     theBurn: bool,
-    theDamageRangeFlags: i32,
+    theDamageRangeFlags: c_int,
 ) {
     trace!("boooooooom!!!");
     ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS.wait()(

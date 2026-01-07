@@ -1,5 +1,6 @@
 use std::{
     arch::{asm, naked_asm},
+    ffi::c_int,
     sync::{
         OnceLock,
         atomic::{AtomicUsize, Ordering},
@@ -47,9 +48,9 @@ pub const ADDR_ADDCOIN: u32 = 0x0040CB10;
 /// `Board::AddCoin` 的签名
 type SignAddCoin = extern "thiscall" fn(
     this: *mut Board,
-    pos: Vec2<i32>,
-    theCoinType: u32,
-    theCoinMotion: u32,
+    pos: Vec2<c_int>,
+    theCoinType: c_int,
+    theCoinMotion: c_int,
 ) -> *mut Coin;
 /// `Board::AddCoin` 的跳板
 pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
@@ -57,7 +58,7 @@ pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
 /// `Board::KeyDown` 的地址
 pub const ADDR_KEYDOWN: u32 = 0x0041B820;
 /// `Board::KeyDown` 的签名
-type SignKeyDown = extern "thiscall" fn(this: *mut Board, keycode: i32);
+type SignKeyDown = extern "thiscall" fn(this: *mut Board, keycode: c_int);
 /// `Board::KeyDown` 的跳板
 pub static ORIGINAL_KEYDOWN: OnceLock<SignKeyDown> = OnceLock::new();
 
@@ -66,9 +67,9 @@ pub const ADDR_ADD_ZOMBIE_IN_ROW: u32 = 0x0040DDC0;
 /// `Board::AddZombieInRow` 的签名
 type SignAddZombieInRow = extern "stdcall" fn(
     this: *mut Board,
-    theZombieType: i32,
-    theRow: i32,
-    theFromWave: i32,
+    theZombieType: c_int,
+    theRow: c_int,
+    theFromWave: c_int,
 ) -> *mut Zombie;
 /// `Board::AddZombieInRow` 的跳板
 pub static ORIGINAL_ADD_ZOMBIE_IN_ROW: OnceLock<SignAddZombieInRow> = OnceLock::new();
@@ -96,9 +97,9 @@ extern "stdcall" fn AddZombieInRowHelper() {
 /// 回调辅助函数
 pub extern "stdcall" fn AddZombieInRowWrapper(
     this: *mut Board,
-    theZombieType: i32,
-    theRow: i32,
-    theFromWave: i32,
+    theZombieType: c_int,
+    theRow: c_int,
+    theFromWave: c_int,
 ) -> *mut Zombie {
     // 获取原函数的指针
     let func = ORIGINAL_ADD_ZOMBIE_IN_ROW.wait();
@@ -130,14 +131,14 @@ pub extern "stdcall" fn AddZombieInRowWrapper(
 /// `Board::MouseDown` 的地址
 pub const ADDR_MOUSE_DOWN: u32 = 0x00411F20;
 /// `Board::KeyDown` 的签名
-type SignMouseDown = extern "thiscall" fn(this: *mut Board, pos: Vec2<i32>, theClickCount: i32);
+type SignMouseDown = extern "thiscall" fn(this: *mut Board, pos: Vec2<c_int>, theClickCount: c_int);
 /// `Board::MouseDown` 的跳板
 pub static ORIGINAL_MOUSE_DOWN: OnceLock<SignMouseDown> = OnceLock::new();
 
 /// `Board::MouseUp` 的地址
 pub const ADDR_MOUSE_UP: u32 = 0x00412540;
 /// `Board::MouseUp` 的签名
-type SignMouseUp = extern "thiscall" fn(this: *mut Board, pos: Vec2<i32>, theClickCount: i32);
+type SignMouseUp = extern "thiscall" fn(this: *mut Board, pos: Vec2<c_int>, theClickCount: c_int);
 /// `Board::MouseUp` 的跳板
 pub static ORIGINAL_MOUSE_UP: OnceLock<SignMouseUp> = OnceLock::new();
 
@@ -243,7 +244,7 @@ pub fn LawnSaveGameWrapper(this: *mut Board, theFilePath: *const MsvcString) -> 
 pub const ADDR_GET_PLANTS_ON_LAWN: u32 = 0x0040D2A0;
 /// `Board::GetPlantsOnLawn` 的函数签名
 type SignGetPlantsOnLawn =
-    fn(this: *mut Board, thePlantOnLawn: *mut PlantsOnLawn, theGridX: i32, theGridY: i32);
+    fn(this: *mut Board, thePlantOnLawn: *mut PlantsOnLawn, theGridPos: Vec2<c_int>);
 static ORIGINAL_GET_PLANTS_ON_LAWN: OnceLock<SignGetPlantsOnLawn> = OnceLock::new();
 
 #[unsafe(naked)]
@@ -266,8 +267,7 @@ extern "stdcall" fn GetPlantsOnLawnHelper() {
 pub fn GetPlantsOnLawnWrapper(
     this: *mut Board,
     thePlantOnLawn: *mut PlantsOnLawn,
-    theGridX: i32,
-    theGridY: i32,
+    theGridPos: Vec2<c_int>,
 ) {
     unsafe {
         asm!(
@@ -278,8 +278,8 @@ pub fn GetPlantsOnLawnWrapper(
 
             in("ebx") thePlantOnLawn,
             in("edx") this,
-            theGridY = in(reg) theGridY,
-            theGridX = in(reg) theGridX,
+            theGridY = in(reg) theGridPos.y,
+            theGridX = in(reg) theGridPos.x,
             func = in(reg) ORIGINAL_GET_PLANTS_ON_LAWN.wait(),
             clobber_abi("C")
         )
@@ -291,13 +291,13 @@ pub const ADDR_KILL_ALL_ZOMBIES_IN_RADIUS: u32 = 0x0041D8A0;
 /// `Board::KillAllZombiesInRadius` 的签名
 type SignKillAllZombiesInRadius = extern "stdcall" fn(
     this: *mut Board,
-    theRow: i32,
-    theX: i32,
-    theY: i32,
-    theRadius: i32,
-    theRowRange: i32,
+    theRow: c_int,
+    theX: c_int,
+    theY: c_int,
+    theRadius: c_int,
+    theRowRange: c_int,
     theBurn: bool,
-    theDamageRangeFlags: i32,
+    theDamageRangeFlags: c_int,
 );
 /// `Board::KillAllZombiesInRadius` 的跳板
 pub static ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS: OnceLock<SignKillAllZombiesInRadius> =

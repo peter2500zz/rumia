@@ -1,14 +1,18 @@
-
-use std::{ffi::c_char, sync::OnceLock};
+use std::{
+    ffi::{c_char, c_int},
+    sync::OnceLock,
+};
 
 use super::{HookRegistration, hook};
-use crate::pvz::lawn_app::{lawn_app::LawnApp, loading::{LoadGroup, LoadingThreadProc}};
+use crate::pvz::lawn_app::{
+    lawn_app::LawnApp,
+    loading::{LoadGroup, LoadingThreadProc},
+};
 
 /// `LawnApp::LoadingThreadProc` 的地址
 const ADDR_LOADING_THREAD_PROC: u32 = 0x004528E0 as _;
 /// `LawnApp::LoadingThreadProc` 的签名
-type SignLoadingThreadProc =
-    extern "thiscall" fn(this: *mut LawnApp);
+type SignLoadingThreadProc = extern "thiscall" fn(this: *mut LawnApp);
 /// `LawnApp::LoadingThreadProc` 的跳板
 pub static ORIGINAL_LOADING_THREAD_PROC: OnceLock<SignLoadingThreadProc> = OnceLock::new();
 
@@ -16,9 +20,9 @@ pub static ORIGINAL_LOADING_THREAD_PROC: OnceLock<SignLoadingThreadProc> = OnceL
 const ADDR_LOAD_GROUP: u32 = 0x00452740 as _;
 /// `LawnApp::LoadingThreadProc` 加载资源线程的签名
 type SignLoadGroup = extern "thiscall" fn(
-    this: *mut LawnApp, 
+    this: *mut LawnApp,
     theGroupName: *const c_char,
-    theGroupAveMsToLoad: i32,
+    theGroupAveMsToLoad: c_int,
 );
 /// `LawnApp::LoadingThreadProc` 的跳板
 pub static ORIGINAL_LOAD_GROUP: OnceLock<SignLoadGroup> = OnceLock::new();
