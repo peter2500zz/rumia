@@ -7,7 +7,7 @@ use windows::core::BOOL;
 use super::{HookRegistration, hook};
 use crate::{
     pvz::{graphics::graphics::Graphics, zombie::{self, zombie::Zombie}},
-    utils::data_array::DataArray,
+    utils::{asm::stack_rotate, data_array::DataArray},
 };
 
 /// `DataArray<Zombie>::DataArrayAlloc` 函数的地址
@@ -77,16 +77,17 @@ static ORIGINAL_ZOMBIE_INITIALIZE: OnceLock<SignZombieInitialize> = OnceLock::ne
 #[unsafe(naked)]
 extern "stdcall" fn ZombieInitializeHelper() {
     naked_asm!(
-        // 压栈 usercall 参数
+        "push 6",
+        "call {stack_rotate}",
+        "pop ecx",
         "push eax",
-        // 修正参数位置
-        "mov eax, [esp]",
-        "xchg eax, [esp+8]",
-        "xchg eax, [esp+4]",
-        "mov [esp], eax",
-        // 调用 hook 函数
-        "jmp {hook}",
 
+        // 调用 hook 函数
+        "call {hook}",
+
+        "ret",
+
+        stack_rotate = sym stack_rotate,
         hook = sym zombie::ZombieInitialize,
     )
 }

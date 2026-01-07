@@ -59,7 +59,7 @@ impl LuaUserData for LuaBoard {
 
         methods.add_method("AddZombie", |lua, _, (zombie_type, row, from_wave)| {
             with_board(|board| {
-                let zombie = AddZombieInRow(zombie_type, from_wave, board, row);
+                let zombie = AddZombieInRow(board, from_wave, zombie_type, row);
 
                 unsafe { (*zombie).to_lua(lua) }
             })

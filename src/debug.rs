@@ -77,7 +77,7 @@ pub fn tigger_handler(flag: String) {
                         let mouse_pos = wm.mouse_pos;
                         let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
 
-                        let zombie = crate::pvz::board::AddZombieInRow(0, 0, board, grid_pos.y);
+                        let zombie = crate::pvz::board::AddZombieInRow(board, 0, 0, grid_pos.y);
 
                         (*zombie).pos = crate::utils::Vec2::new(mouse_pos.x as _, mouse_pos.y as _);
 

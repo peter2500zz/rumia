@@ -141,16 +141,16 @@ pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Coin>) -> *mut Coin 
     DataArrayAllocWrapper(this)
 }
 
-pub extern "stdcall" fn CoinInitialize(
+pub extern "thiscall" fn CoinInitialize(
     this: *mut Coin,
-    theCoinMotion: i32,
     theCoinType: i32,
+    theCoinMotion: i32,
     theX: i32,
     theY: i32,
 ) {
     //
 
-    // trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
+    // trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", theCoinType, theCoinMotion, theX, theY);
     CoinInitializeWrapper(this, theX, theY, theCoinType, theCoinMotion);
 
     // // callback_mut(ADDR_COIN_INITIALIZE, );

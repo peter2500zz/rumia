@@ -17,7 +17,7 @@ pub extern "stdcall" fn PlantInitialize(
     theImitaterType: i32,
 ) {
     trace!(
-        "植物 {} 初始化 at ({}, {})",
+        "plant {} initialized at ({}, {})",
         theSeedType, theGridX, theGridY
     );
     PlantInitializeWrapper(this, theGridX, theGridY, theSeedType, theImitaterType);

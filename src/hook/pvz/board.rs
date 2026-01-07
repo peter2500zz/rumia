@@ -18,7 +18,7 @@ use crate::{
         lawn_app::lawn_app::LawnApp,
         zombie::zombie::Zombie,
     },
-    utils::{Vec2, msvc_string::MsvcString},
+    utils::{Vec2, asm::stack_rotate, msvc_string::MsvcString},
 };
 
 /// `Board` 构造函数的地址
@@ -77,23 +77,18 @@ pub static ORIGINAL_ADD_ZOMBIE_IN_ROW: OnceLock<SignAddZombieInRow> = OnceLock::
 #[unsafe(naked)]
 extern "stdcall" fn AddZombieInRowHelper() {
     naked_asm!(
-        // 压栈 usercall 参数
-        "push eax",
-        // 修正参数位置
-        "mov eax, [esp]",
-        "xchg eax, [esp+8]",
-        "xchg eax, [esp+4]",
-        "mov [esp], eax",
-        // 压栈 usercall 参数
+        // 写入 this
+        "mov ecx, eax",
+        "push 3",
+        "call {stack_rotate}",
         "push ebx",
-        // 修正参数位置
-        "mov eax, [esp]",
-        "xchg eax, [esp+8]",
-        "xchg eax, [esp+4]",
-        "mov [esp], eax",
-        // 调用 hook 函数
-        "jmp {hook}",
 
+        // 调用 hook 函数
+        "call {hook}",
+
+        "ret",
+
+        stack_rotate = sym stack_rotate,
         hook = sym board::AddZombieInRow,
     )
 }
@@ -254,19 +249,16 @@ static ORIGINAL_GET_PLANTS_ON_LAWN: OnceLock<SignGetPlantsOnLawn> = OnceLock::ne
 #[unsafe(naked)]
 extern "stdcall" fn GetPlantsOnLawnHelper() {
     naked_asm!(
-        // 合移位
-        "mov eax, [esp+8]",
-        "xchg eax, [esp+4]",
-        "xchg eax, [esp]",
-        "mov [esp+8], eax",
-
+        "mov ecx, edx",
+        "push 3",
+        "call {stack_rotate}",
         "push ebx",
-        "push edx",
 
         "call {hook}",
 
         "ret",
 
+        stack_rotate = sym stack_rotate,
         hook = sym board::GetPlantsOnLawn
     )
 }

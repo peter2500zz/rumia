@@ -21,7 +21,7 @@ pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Zombie>) -> *mut Zom
     DataArrayAllocWrapper(this)
 }
 
-pub extern "stdcall" fn ZombieInitialize(
+pub extern "thiscall" fn ZombieInitialize(
     this: *mut Zombie,
     theRow: i32,
     theZombieType: i32,

@@ -96,15 +96,15 @@ pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: i32) {
 }
 add_callback!("AT_BOARD_KEY_DOWN", PRE | ADDR_KEYDOWN);
 
-pub extern "stdcall" fn AddZombieInRow(
-    theZombieType: i32,
-    theFromWave: i32,
+pub extern "thiscall" fn AddZombieInRow(
     this: *mut Board,
+    theFromWave: i32,
+    theZombieType: i32,
     theRow: i32,
 ) -> *mut Zombie {
     trace!(
         "spawning zombie type {} at wave {} row {}",
-        theFromWave, theRow, theZombieType
+        theZombieType, theFromWave, theRow
     );
 
     AddZombieInRowWrapper(this, theZombieType, theRow, theFromWave)
@@ -283,7 +283,7 @@ pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcS
 }
 
 /// 获取特定格内的植物
-pub extern "stdcall" fn GetPlantsOnLawn(
+pub extern "thiscall" fn GetPlantsOnLawn(
     this: *mut Board,
     thePlantOnLawn: *mut PlantsOnLawn,
     theGridX: i32,

@@ -6,7 +6,7 @@ use std::{
 use super::{HookRegistration, hook};
 use crate::{
     pvz::coin::{self, Coin},
-    utils::data_array::DataArray,
+    utils::{asm::stack_rotate, data_array::DataArray},
 };
 
 /// `DataArray<Coin>::DataArrayAlloc` 构造函数的地址
@@ -70,23 +70,19 @@ static ORIGINAL_COIN_INITIALIZE: OnceLock<SignCoinInitialize> = OnceLock::new();
 #[unsafe(naked)]
 extern "stdcall" fn CoinInitializeHelper() {
     naked_asm!(
-        // 压栈 usercall 参数
-        "push eax",
-        // 修正参数位置
-        "mov eax, [esp]",
-        "xchg eax, [esp+8]",
-        "xchg eax, [esp+4]",
-        "mov [esp], eax",
-        // 压栈 usercall 参数
+        "push 4",
+        "call {stack_rotate}",
+        "pop edx",
         "push ecx",
-        // 修正参数位置
-        "mov ecx, [esp]",
-        "xchg ecx, [esp+8]",
-        "xchg ecx, [esp+4]",
-        "mov [esp], ecx",
-        // 调用 hook 函数
-        "jmp {hook}",
+        "push eax",
+        "mov ecx, edx",
 
+        // 调用 hook 函数
+        "call {hook}",
+
+        "ret",
+
+        stack_rotate = sym stack_rotate,
         hook = sym coin::CoinInitialize,
     )
 }
