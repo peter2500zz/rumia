@@ -111,7 +111,7 @@ static MANAGER: OnceLock<Mutex<RenderManager>> = OnceLock::new();
 /// 获取管理器单例的内部辅助函数
 fn get_manager() -> &'static Mutex<RenderManager> {
     MANAGER.get_or_init(|| {
-        info!("初始化渲染管理器");
+        info!("render manager initialized");
         Mutex::new(RenderManager::new())
     })
 }

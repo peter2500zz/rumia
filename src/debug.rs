@@ -135,7 +135,7 @@ pub fn tigger_handler(flag: String) {
             }
 
             _ => {
-                debug!("无效调试标志");
+                debug!("Invalid debug tigger");
             }
         }
     }

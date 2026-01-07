@@ -32,7 +32,7 @@ pub extern "thiscall" fn LoadGroup (
 ) {
     unsafe {
         if let Ok(group_name) = CStr::from_ptr(theGroupName).to_str() {
-            info!("加载 {}", group_name);
+            info!("loading resource group: {}", group_name);
         }
     }
 

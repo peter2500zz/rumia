@@ -27,18 +27,18 @@ pub extern "stdcall" fn Constructor(
     uninit: *mut WidgetManager,
     theApp: *mut LawnApp,
 ) -> *mut WidgetManager {
-    trace!("构造 WidgetManager");
+    trace!("constructing widgetmanager");
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(uninit, theApp);
 
-    trace!("地址 {:#x?}", this);
+    trace!("address={:#x?}", this);
 
     this
 }
 
 /// 这是 `WidgetManager` 的析构函数
 pub extern "thiscall" fn Destructor(this: *mut WidgetManager) {
-    trace!("析构 WidgetManager");
+    trace!("destructing widgetmanager");
 
     ORIGINAL_DESTRUCTOR.wait()(this);
 }

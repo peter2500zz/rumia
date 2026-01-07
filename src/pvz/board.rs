@@ -34,7 +34,7 @@ use crate::{
 
 /// 这是 `Board` 的构造函数
 pub extern "thiscall" fn Constructor(uninit: *mut Board, theApp: *mut LawnApp) -> *mut Board {
-    trace!("构造 Board");
+    trace!("constructing board");
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(uninit, theApp);
 
@@ -42,14 +42,14 @@ pub extern "thiscall" fn Constructor(uninit: *mut Board, theApp: *mut LawnApp) -
         pm.clear();
     }
 
-    trace!("地址 {:#x?}", this);
+    trace!("address={:#x?}", this);
 
     this
 }
 
 /// 这是 `Board` 的析构函数
 pub extern "thiscall" fn Destructor(this: *mut Board) {
-    trace!("析构 Board");
+    trace!("destructing board");
 
     ORIGINAL_DESTRUCTOR.wait()(this);
 
@@ -63,7 +63,7 @@ pub extern "thiscall" fn Destructor(this: *mut Board) {
 /// 初始化关卡信息，设定关卡背景、出怪、初始阳光、浓雾坐标等基础数据及卡槽和部分关卡的固定选卡
 pub extern "stdcall" fn InitLevel(this: *mut Board) {
     unsafe {
-        trace!("初始化 Board 大小 {}", size_of_val(&*this));
+        trace!("initializing board, size={}", size_of_val(&*this));
     }
 
     ORIGINAL_INIT_LEVEL.wait()(this);
@@ -77,7 +77,7 @@ pub extern "thiscall" fn AddCoin(
     theCoinMotion: u32,
 ) -> *mut Coin {
     trace!(
-        "产生掉落物 {} at {:?} with motion {}",
+        "spawning coin {} at {:?} with motion {}",
         theCoinType, pos, theCoinMotion
     );
 
@@ -103,7 +103,7 @@ pub extern "stdcall" fn AddZombieInRow(
     theRow: i32,
 ) -> *mut Zombie {
     trace!(
-        "在第 {} 波 行 {} 生成僵尸 类型 {}",
+        "spawning zombie type {} at wave {} row {}",
         theFromWave, theRow, theZombieType
     );
 
@@ -212,7 +212,7 @@ pub extern "thiscall" fn Draw(this: *mut Board, g: *mut Graphics) {
 /// 游戏读取存档
 pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
     unsafe {
-        debug!("从 {} 读取存档", (*theFilePath).to_string());
+        debug!("load profile from {}", (*theFilePath).to_string());
     }
 
     let mut success = LawnLoadGameWrapper(this, theFilePath);
@@ -228,7 +228,7 @@ pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcS
                 let maybe_a_file = File::open(&json_path);
 
                 if let Ok(file) = maybe_a_file {
-                    debug!("从 {} 读取模组数据", json_path);
+                    debug!("load custom profile from {}", json_path);
                     let mut profile = PROFILE_MANAGER.lock().unwrap();
                     *profile = serde_json::from_reader(file)?;
                 }
@@ -250,7 +250,7 @@ pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcS
 /// 游戏读取存档
 pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
     unsafe {
-        debug!("保存存档至 {}", (*theFilePath).to_string());
+        debug!("save profile to {}", (*theFilePath).to_string());
     }
 
     let mut success = LawnSaveGameWrapper(this, theFilePath);

@@ -5,10 +5,8 @@ use anyhow::Result;
 use inventory;
 use minhook::MinHook;
 use std::ffi::c_void;
-use tracing::{
-    debug, error, trace
-};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use tracing::{debug, error, trace};
 
 static HOOKED_FUNC_COUNT: AtomicUsize = AtomicUsize::new(0);
 
@@ -22,9 +20,9 @@ fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
                 HOOKED_FUNC_COUNT.fetch_add(1, Ordering::Relaxed);
 
                 Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
-            },
+            }
             Err(e) => {
-                error!("Hook {:#x?} 时出现错误: {}", target, e);
+                error!("error while hooking {:#x?}: {}", target, e);
 
                 trampoline?;
                 unreachable!()
@@ -33,26 +31,32 @@ fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
     }
 }
 
-fn hook_api<F, T>(module_name: T, proc_name: T, detour: *mut c_void) -> Result<F> 
+fn hook_api<F, T>(module_name: T, proc_name: T, detour: *mut c_void) -> Result<F>
 where
     T: AsRef<str> + Clone,
 {
     unsafe {
-        let trampoline = MinHook::create_hook_api(
-            module_name.clone(),
-            proc_name.clone(), 
-            detour
-        );
+        let trampoline = MinHook::create_hook_api(module_name.clone(), proc_name.clone(), detour);
 
         match &trampoline {
             Ok(trampoline) => {
-                trace!("Hook API {}::{} -> {:#x?}", module_name.as_ref(), proc_name.as_ref(), detour);
+                trace!(
+                    "Hook API {}::{} -> {:#x?}",
+                    module_name.as_ref(),
+                    proc_name.as_ref(),
+                    detour
+                );
                 HOOKED_FUNC_COUNT.fetch_add(1, Ordering::Relaxed);
 
                 Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
-            },
+            }
             Err(e) => {
-                error!("Hook API {}::{} 时出现错误: {}", module_name.as_ref(), proc_name.as_ref(), e);
+                error!(
+                    "error while hooking api {}::{}: {}",
+                    module_name.as_ref(),
+                    proc_name.as_ref(),
+                    e
+                );
 
                 trampoline?;
                 unreachable!()
@@ -77,7 +81,10 @@ pub fn init_hook() -> Result<()> {
         MinHook::enable_all_hooks()?;
     }
 
-    debug!("共 {} 个 Hook", HOOKED_FUNC_COUNT.load(Ordering::Relaxed));
+    debug!(
+        "installed {} hook(s)",
+        HOOKED_FUNC_COUNT.load(Ordering::Relaxed)
+    );
 
     Ok(())
 }

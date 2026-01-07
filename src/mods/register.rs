@@ -32,7 +32,7 @@ inventory::submit! {
                 callbacks.set(callback, callbacks.get(callback).unwrap_or(lua.create_table()?))?;
                 let callback_point: LuaTable = callbacks.get(callback)?;
 
-                trace!("Mod({}) 添加了回调函数，位置 {}", &name, format!("{} 0x{:08x}", if (callback >> 31) == 0 { "Pre" } else { "Post" }, (callback & (u32::MAX >> 1))));
+                trace!("mod ({}) registered a callback at {}", &name, format!("{} 0x{:08x}", if (callback >> 31) == 0 { "Pre" } else { "Post" }, (callback & (u32::MAX >> 1))));
 
                 MOD_CALLBACK_COUNT.fetch_add(1, Ordering::Relaxed);
 

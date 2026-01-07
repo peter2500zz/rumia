@@ -42,7 +42,7 @@ pub extern "stdcall" fn ZombieInitialize(
         let zombie = &mut *this;
 
         callback_data(POST | ADDR_ZOMBIE_INITIALIZE, zombie);
-        trace!("初始化僵尸 {:#x?} {:#x?}", this, (*this).id());
+        trace!("initializing zombie {:#x?} {:#x?}", this, (*this).id());
     }
 }
 add_callback!("AT_ZOMBIE_INIT", POST | ADDR_ZOMBIE_INITIALIZE);
@@ -72,6 +72,6 @@ pub extern "thiscall" fn DieNoLoot(this: *mut Zombie) {
         PROFILE_MANAGER.lock().unwrap().remove_entity(zombie);
     }
     ORIGINAL_DIE_NO_LOOT.wait()(this);
-    trace!("僵尸死亡")
+    trace!("zombie died")
 }
 add_callback!("AT_ZOMBIE_DIE", PRE | ADDR_DIE_NO_LOOT);

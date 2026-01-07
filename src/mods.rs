@@ -25,14 +25,14 @@ inventory::collect!(LuaRegistration);
 
 thread_local! {
 static LUA: LazyLock<UnsafeCell<Lua>> = LazyLock::new(|| {
-    info!("初始化 Lua 状态机");
+    info!("lua state initialized");
 
     let mut lua = Lua::new();
 
     for LuaRegistration(lua_init) in inventory::iter::<LuaRegistration> {
         if let Err(e) = lua_init(&mut lua) {
-            error!("Lua 初始化时出现错误");
-            panic!("Lua 初始化时出现错误: {}", e);
+            error!("error during lua initialization");
+            panic!("error during lua initialization: {}", e);
         }
     }
 
@@ -47,8 +47,8 @@ static LUA: LazyLock<UnsafeCell<Lua>> = LazyLock::new(|| {
 
         Ok(())
     })() {
-        error!("Lua 初始化时出现错误");
-        panic!("Lua 初始化时出现错误: {}", e);
+        error!("error during lua initialization");
+        panic!("error during lua initialization: {}", e);
     }
 
     UnsafeCell::new(lua)
@@ -92,7 +92,10 @@ pub fn load_mods() -> Result<u32> {
         }
     }
 
-    debug!("共 {} 个函数创建回调", MOD_CALLBACK_COUNT.load(Ordering::Relaxed));
+    debug!(
+        "{} function(s) registered callbacks",
+        MOD_CALLBACK_COUNT.load(Ordering::Relaxed)
+    );
 
     Ok(success)
 }
@@ -109,12 +112,12 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
     let main_file = path.join(MAIN_FILE);
 
     let script = fs::read_to_string(&main_file)
-        .with_context(|| format!("读取 Mod 主文件失败: {:?}", main_file))?;
+        .with_context(|| format!("failed to read mod main file: {:?}", main_file))?;
 
     let mod_name = path.file_name().unwrap().to_string_lossy().to_string();
 
     let result = with_lua(move |lua| {
-        info!("正在加载 Mod: {}", mod_name);
+        info!("loading mod: {}", mod_name);
 
         // 1. 创建沙盒环境 (Sandbox Table)
         let sandbox = lua.create_table()?;
@@ -144,7 +147,7 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
     });
 
     if let Err(e) = result {
-        error!("加载 Mod({}) 失败", &path.to_string_lossy());
+        error!("failed to load mod ({})", &path.to_string_lossy());
 
         return Err(anyhow::anyhow!(e.to_string()));
     }

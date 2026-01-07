@@ -17,8 +17,8 @@ pub fn get_delta_mgr() -> std::sync::MutexGuard<'static, DeltaManager> {
     match mutex.lock() {
         Ok(guard) => guard,
         Err(poisoned) => {
-            error!("Delta 管理器的 Mutex 已被毒化");
-            panic!("Delta 管理器的 Mutex 已被毒化: {:?}", poisoned);
+            error!("delta manager mutex is poisoned");
+            panic!("delta manager mutex is poisoned: {:?}", poisoned);
         }
     }
 }
@@ -38,7 +38,6 @@ struct DeltaEntry {
     delta: Duration,
 }
 
-
 impl DeltaManager {
     /// 创建新的 Delta 管理器
     pub fn new() -> Self {
@@ -56,16 +55,13 @@ impl DeltaManager {
 
     #[inline]
     pub fn get_delta(&self, key: &'static str) -> Option<f32> {
-        self.deltas
-            .get(key)
-            .map(|e| e.delta.as_secs_f32())
+        self.deltas.get(key).map(|e| e.delta.as_secs_f32())
     }
 
     #[inline]
     pub fn get_delta_duration(&self, key: &'static str) -> Option<Duration> {
         self.deltas.get(key).map(|e| e.delta)
     }
-
 
     #[inline]
     pub fn update_delta(&mut self, key: &'static str) -> f32 {
@@ -90,7 +86,6 @@ impl DeltaManager {
             }
         }
     }
-
 
     /// 更新 delta 时间戳并返回 Duration
     #[inline]
@@ -126,7 +121,13 @@ impl DeltaManager {
     /// 重置某个键的时间戳为当前时间
     #[inline]
     pub fn reset(&mut self, key: &'static str) {
-        self.deltas.insert(key, DeltaEntry { last: Instant::now(), delta: Duration::ZERO });
+        self.deltas.insert(
+            key,
+            DeltaEntry {
+                last: Instant::now(),
+                delta: Duration::ZERO,
+            },
+        );
     }
 
     /// 移除某个键

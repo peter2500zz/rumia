@@ -20,7 +20,7 @@ use crate::{
 
 /// 这是 `LawnApp` 的构造函数
 pub extern "stdcall" fn Constructor(uninit: *mut LawnApp) -> *mut LawnApp {
-    trace!("构造 LawnApp");
+    trace!("constructing lawnapp");
 
     // unsafe {
     // info!("{:?}", (0x6A9EC0 as *mut usize).is_null());
@@ -29,14 +29,14 @@ pub extern "stdcall" fn Constructor(uninit: *mut LawnApp) -> *mut LawnApp {
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(uninit);
 
-    trace!("地址 {:#x?}", this);
+    trace!("address={:#x?}", this);
 
     this
 }
 
 /// 这是 `LawnApp` 的析构函数
 pub extern "thiscall" fn Destructor(this: *mut LawnApp) {
-    trace!("析构 LawnApp");
+    trace!("destructing lawnapp");
 
     ORIGINAL_DESTRUCTOR.wait()(this);
 }
@@ -45,7 +45,7 @@ pub extern "thiscall" fn Destructor(this: *mut LawnApp) {
 ///
 /// 包括读取设定数据及存档、加载资源、创建标题界面及初始化游戏内的各个系统等
 pub extern "thiscall" fn Init(this: *mut LawnApp) {
-    trace!("初始化 LawnApp");
+    trace!("initializing lawnapp");
 
     ORIGINAL_INIT.wait()(this);
 
@@ -56,11 +56,11 @@ pub extern "thiscall" fn Init(this: *mut LawnApp) {
     match load_mods() {
         Ok(loaded) => {
             if loaded != 0 {
-                info!("共加载 {} 个 Mod", loaded);
+                info!("loaded {} mod(s)", loaded);
             }
         }
         Err(e) => {
-            error!("加载 Mod 时出现错误: {}", e)
+            error!("error while loading mods: {}", e);
         }
     }
     callback(POST | ADDR_INIT, ());
@@ -77,7 +77,7 @@ add_callback!("AT_GAME_INIT", POST | ADDR_INIT);
 ///
 /// 如果能暂停且没有启用作弊会暂停，除此之外没有别的作用
 pub extern "thiscall" fn LostFocus(this: *mut LawnApp) {
-    debug!("游戏失去焦点");
+    debug!("game lost focus");
 
     let _ = this;
     let _ = ORIGINAL_LOST_FOCUS;

@@ -1,6 +1,7 @@
 pub mod board;
 pub mod coin;
 pub mod debug;
+pub mod effect_system;
 pub mod graphics;
 pub mod lawn_app;
 pub mod plant;
@@ -9,7 +10,6 @@ pub mod resource_manager;
 pub mod widget_container;
 pub mod widget_manager;
 pub mod zombie;
-pub mod effect_system;
 
 use tracing::{debug, info};
 use windows::{
@@ -27,16 +27,17 @@ pub extern "stdcall" fn WinMain(
 ) -> i32 {
     let args = unsafe { lpCmdLine.to_string().unwrap_or_default() };
 
-    debug!("启动参数: {}", if args.is_empty() { "无" } else { &args });
-    info!("主程序启动");
-    debug!("句柄 {:#x?}", hInstance.0);
+    debug!("args={}", if args.is_empty() { "<none>" } else { &args });
+
+    info!("main process started");
+    debug!("hinstance={:#x?}", hInstance.0);
 
     let result = ORIGINAL_WINMAIN.wait()(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-    info!("主程序终止");
-    debug!("退出代码 {:#x}", result);
+    info!("main process exited");
+    debug!("exit_code={:#x}", result);
 
-    pause!("请按任意键继续. . .");
+    pause!("Press any key to continue...");
 
     result
 }

@@ -4,12 +4,12 @@ mod logger;
 mod mods;
 #[allow(non_snake_case)]
 mod pvz;
-mod utils;
 mod save;
+mod utils;
 
+use ::serde::{Deserialize, Serialize};
 use anyhow::Result;
 use config::{load_config, save_config};
-use ::serde::{Deserialize, Serialize};
 use std::ffi::c_void;
 use tracing::{debug, info};
 use windows::{
@@ -32,7 +32,6 @@ struct LoaderConfig {
     force_launch: Option<bool>,
 }
 
-
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]
 pub extern "system" fn DllMain(
@@ -46,7 +45,7 @@ pub extern "system" fn DllMain(
     let result = match fdwReason {
         DLL_PROCESS_ATTACH => match on_pocess_attach(hinstDLL) {
             Ok(_) => {
-                info!("初始化成功");
+                info!("initialization successful");
 
                 true
             }
@@ -56,12 +55,12 @@ pub extern "system" fn DllMain(
                     cfg.force_launch = Some(false);
                     save_config(CONFIG, &cfg);
 
-                    "\n\n由于发生错误，已禁用强制启动。你可以在下次启动时选择其他可执行文件。"
-                } else{
+                    "\n\n由于发生错误，已禁用强制启动。你可以在下次启动时选择其他可执行文件。\nForce launch has been disabled due to an error. You can select a different executable on the next launch."
+                } else {
                     ""
                 };
 
-                mb!("初始化时遇到问题\n{}{}", e, extra_msg);
+                mb!("初始化时遇到问题。\nAn issue occurred during initialization.\n{}{}", e, extra_msg);
 
                 false
             }
@@ -80,12 +79,12 @@ fn on_pocess_attach(handle: HINSTANCE) -> Result<()> {
     alloc_console()?;
     setup_logger()?;
 
-    info!("DLL 注入成功");
-    debug!("句柄 {:#x?}", handle.0);
+    info!("DLL injection successful");
+    debug!("hinstDLL={:#x?}", handle.0);
 
     init_hook()?;
 
-    info!("Hook 成功");
+    info!("hook installed successfully");
 
     Ok(())
 }
