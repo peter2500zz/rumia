@@ -161,7 +161,7 @@ pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: c_int, t
         "pop ebp",
         "ret 12",
 
-        func = const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD
+        func = const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
     )
 }
 
@@ -299,8 +299,7 @@ pub extern "thiscall" fn GetPlantsOnLawn(
 pub extern "stdcall" fn KillAllZombiesInRadius(
     this: *mut Board,
     theRow: c_int,
-    theX: c_int,
-    theY: c_int,
+    thePos: Vec2<c_int>,
     theRadius: c_int,
     theRowRange: c_int,
     theBurn: bool,
@@ -310,8 +309,7 @@ pub extern "stdcall" fn KillAllZombiesInRadius(
     ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS.wait()(
         this,
         theRow,
-        theX,
-        theY,
+        thePos,
         theRadius,
         theRowRange,
         theBurn,

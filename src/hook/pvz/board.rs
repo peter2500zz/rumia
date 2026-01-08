@@ -292,8 +292,7 @@ pub const ADDR_KILL_ALL_ZOMBIES_IN_RADIUS: u32 = 0x0041D8A0;
 type SignKillAllZombiesInRadius = extern "stdcall" fn(
     this: *mut Board,
     theRow: c_int,
-    theX: c_int,
-    theY: c_int,
+    thePos: Vec2<c_int>,
     theRadius: c_int,
     theRowRange: c_int,
     theBurn: bool,

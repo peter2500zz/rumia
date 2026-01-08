@@ -22,6 +22,7 @@ Issues and pull requests are welcome!
 
 ### todos
 
+ - [ ] 格式化日志
  - [x] 鼠标点击回调
  - [ ] 绘图相关
    - [x] 绘制矩形
@@ -38,5 +39,5 @@ Issues and pull requests are welcome!
  - [ ] 动画
    - [ ] 播放动画
  - [ ] 粒子
-   - [ ] 粒子绘制
+   - [x] 粒子绘制
    - [ ] 自定义粒子·

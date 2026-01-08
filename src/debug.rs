@@ -10,7 +10,7 @@ use crate::{
         board::board::with_board, lawn_app::lawn_app::with_lawn_app,
         widget_manager::widget_manager::with_widget_manager,
     },
-    save::PROFILE_MANAGER,
+    save::PROFILE_MANAGER, utils::Vec2,
 };
 
 #[derive(Deserialize)]
@@ -50,23 +50,31 @@ pub fn tigger_handler(flag: String) {
             }
 
             "boom" => {
-                let _ = with_widget_manager(|wm| {
-                    with_board(|board| {
-                        let mouse_pos = wm.mouse_pos;
-                        let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
+                let _ = with_lawn_app(|the_app| {
+                    with_widget_manager(|wm| {
+                        with_board(|board| {
+                            let mouse_pos = wm.mouse_pos;
+                            let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
 
-                        crate::pvz::board::KillAllZombiesInRadius(
-                            board,
-                            grid_pos.y,
-                            mouse_pos.x,
-                            mouse_pos.y,
-                            250,
-                            3,
-                            true,
-                            127,
-                        );
+                            crate::pvz::board::KillAllZombiesInRadius(
+                                board,
+                                grid_pos.y,
+                                mouse_pos,
+                                250,
+                                3,
+                                true,
+                                127,
+                            );
 
-                        Ok(())
+                            crate::pvz::effect_system::particle_holder::particle_system::AllocParticleSystem(
+                                (*the_app.effect_system).particle, 
+                                Vec2::new(mouse_pos.x as _, mouse_pos.y as _), 
+                                400000, 
+                                30
+                            );
+
+                            Ok(())
+                        })
                     })
                 });
             }
