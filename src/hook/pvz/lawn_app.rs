@@ -1,5 +1,6 @@
 pub mod loading;
 pub mod save;
+pub mod sound;
 
 use std::sync::OnceLock;
 

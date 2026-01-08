@@ -56,6 +56,8 @@ pub fn tigger_handler(flag: String) {
                             let mouse_pos = wm.mouse_pos;
                             let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
 
+                            crate::pvz::lawn_app::sound::PlaySample(the_app, 0x64);
+
                             crate::pvz::board::KillAllZombiesInRadius(
                                 board,
                                 grid_pos.y,
