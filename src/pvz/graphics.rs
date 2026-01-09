@@ -1,3 +1,5 @@
+pub mod this;
+
 use std::{
     arch::{asm, naked_asm},
     ffi::c_int,
@@ -7,11 +9,9 @@ use crate::{
     hook::pvz::graphics::{
         ADDR_DRAW_RECT, ADDR_FILL_RECT, ADDR_SET_COLOR, ORIGINAL_CREATE, ORIGINAL_DESTRUCTOR,
     },
-    pvz::graphics::graphics::{Color, Font, Graphics},
+    pvz::graphics::this::{Color, Font, Graphics},
     utils::{Rect2, msvc_string::MsvcString},
 };
-
-pub mod graphics;
 
 pub extern "stdcall" fn Create(g: *mut Graphics) -> *mut Graphics {
     ORIGINAL_CREATE.wait()(g)

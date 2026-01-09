@@ -102,7 +102,7 @@ pub struct Font {}
 
 #[repr(C)]
 pub struct Graphics {
-    _pad_0x0_0x4: [u8; 0x4 - 0x0],
+    _pad_0x0_0x4: [u8; 0x4],
     /// 0x4 DDImage
     pub ddimage: *mut DDImage,
     /// 0x8 偏移

@@ -363,13 +363,13 @@ where
             Ok(())
         });
 
-        fields.add_field_method_get("pos", |_, this| Ok(this.position.clone()));
+        fields.add_field_method_get("pos", |_, this| Ok(this.position));
         fields.add_field_method_set("pos", |_, this, value| {
             this.position = value;
             Ok(())
         });
 
-        fields.add_field_method_get("size", |_, this| Ok(this.size.clone()));
+        fields.add_field_method_get("size", |_, this| Ok(this.size));
         fields.add_field_method_set("size", |_, this, value| {
             this.size = value;
             Ok(())

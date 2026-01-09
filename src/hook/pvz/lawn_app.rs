@@ -5,7 +5,7 @@ pub mod sound;
 use std::sync::OnceLock;
 
 use super::{HookRegistration, hook};
-use crate::pvz::lawn_app::{self, lawn_app::LawnApp};
+use crate::pvz::lawn_app::{self, this::LawnApp};
 
 /// `LawnApp` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x0044EAA0;

@@ -1,5 +1,6 @@
 use std::{
     ffi::{CStr, CString, c_char},
+    fmt,
     mem::transmute,
 };
 
@@ -30,14 +31,6 @@ impl MsvcString {
             let to_c_str: ToCStr = transmute(0x004042D0);
 
             to_c_str(self)
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        unsafe {
-            CStr::from_ptr(self.to_c_str())
-                .to_string_lossy()
-                .to_string()
         }
     }
 
@@ -78,6 +71,15 @@ impl MsvcString {
     /// 便捷方法:完整复制另一个字符串
     pub fn assign_all(&mut self, right: &MsvcString) -> &mut Self {
         self.assign(right, 0, u32::MAX)
+    }
+}
+
+impl fmt::Display for MsvcString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        unsafe {
+            let s = CStr::from_ptr(self.to_c_str()).to_string_lossy();
+            write!(f, "{}", s)
+        }
     }
 }
 

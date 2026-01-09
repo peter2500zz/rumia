@@ -4,7 +4,7 @@ use tracing::trace;
 
 use crate::{
     hook::pvz::lawn_app::sound::ORIGINAL_PLAY_SAMPLE, mods::LuaRegistration,
-    pvz::lawn_app::lawn_app::LawnApp,
+    pvz::lawn_app::this::LawnApp,
 };
 
 inventory::submit! {

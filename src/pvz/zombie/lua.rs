@@ -4,8 +4,8 @@ use crate::{
     hook::pvz::board::PixelToGridYKeepOnBoardWrapper,
     mods::ToLua,
     pvz::{
-        board::board::with_board,
-        zombie::zombie::{Zombie, get_zombie, with_zombie},
+        board::this::with_board,
+        zombie::this::{Zombie, get_zombie, with_zombie},
     },
     save::PROFILE_MANAGER,
     utils::data_array::{DataArrayId, HasId},
@@ -34,7 +34,8 @@ impl LuaUserData for LuaZombie {
         });
         methods.add_method("RemoveAttr", |_, this, key| {
             with_zombie(this.0, |zombie| {
-                Ok(PROFILE_MANAGER.lock().unwrap().remove_attr(zombie, key))
+                PROFILE_MANAGER.lock().unwrap().remove_attr(zombie, key);
+                Ok(())
             })
         });
 
@@ -60,7 +61,10 @@ impl LuaUserData for LuaZombie {
             })
         });
         methods.add_method("SetPosRaw", |_, this, pos| {
-            with_zombie(this.0, |zombie| Ok(zombie.pos = pos))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.pos = pos;
+                Ok(())
+            })
         });
 
         methods.add_method("GetSpawnWave", |_, this, ()| {
@@ -68,7 +72,10 @@ impl LuaUserData for LuaZombie {
         });
 
         methods.add_method("SetSpawnWave", |_, this, wave| {
-            with_zombie(this.0, |zombie| Ok(zombie.spawn_wave = wave))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.spawn_wave = wave;
+                Ok(())
+            })
         });
 
         methods.add_method("GetRow", |_, this, ()| {
@@ -76,7 +83,10 @@ impl LuaUserData for LuaZombie {
         });
 
         methods.add_method("SetRow", |_, this, row| {
-            with_zombie(this.0, |zombie| Ok(zombie.row = row))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.row = row;
+                Ok(())
+            })
         });
 
         methods.add_method("GetHitbox", |_, this, ()| {
@@ -107,13 +117,19 @@ impl LuaUserData for LuaZombie {
             with_zombie(this.0, |zombie| Ok(zombie.body_hp))
         });
         methods.add_method("SetBodyHp", |_, this, hp| {
-            with_zombie(this.0, |zombie| Ok(zombie.body_hp = hp))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.body_hp = hp;
+                Ok(())
+            })
         });
         methods.add_method("GetBodyHpMax", |_, this, ()| {
             with_zombie(this.0, |zombie| Ok(zombie.body_hp_max))
         });
         methods.add_method("SetBodyHpMax", |_, this, hp_max| {
-            with_zombie(this.0, |zombie| Ok(zombie.body_hp_max = hp_max))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.body_hp_max = hp_max;
+                Ok(())
+            })
         });
 
         methods.add_method("HasHelmet", |_, this, ()| {
@@ -123,19 +139,28 @@ impl LuaUserData for LuaZombie {
             with_zombie(this.0, |zombie| Ok(zombie.helmet_type))
         });
         methods.add_method("SetHelmetType", |_, this, helmet_type| {
-            with_zombie(this.0, |zombie| Ok(zombie.helmet_type = helmet_type))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.helmet_type = helmet_type;
+                Ok(())
+            })
         });
         methods.add_method("GetHelmetHp", |_, this, ()| {
             with_zombie(this.0, |zombie| Ok(zombie.helmet_hp))
         });
         methods.add_method("SetHelmetHp", |_, this, hp| {
-            with_zombie(this.0, |zombie| Ok(zombie.helmet_hp = hp))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.helmet_hp = hp;
+                Ok(())
+            })
         });
         methods.add_method("GetHelmetHpMax", |_, this, ()| {
             with_zombie(this.0, |zombie| Ok(zombie.helmet_hp_max))
         });
         methods.add_method("SetHelmetHpMax", |_, this, hp_max| {
-            with_zombie(this.0, |zombie| Ok(zombie.helmet_hp_max = hp_max))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.helmet_hp_max = hp_max;
+                Ok(())
+            })
         });
 
         methods.add_method("HasShield", |_, this, ()| {
@@ -145,19 +170,28 @@ impl LuaUserData for LuaZombie {
             with_zombie(this.0, |zombie| Ok(zombie.shield_type))
         });
         methods.add_method("SetShieldType", |_, this, shield_type| {
-            with_zombie(this.0, |zombie| Ok(zombie.shield_type = shield_type))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.shield_type = shield_type;
+                Ok(())
+            })
         });
         methods.add_method("GetShieldHp", |_, this, ()| {
             with_zombie(this.0, |zombie| Ok(zombie.shield_hp))
         });
         methods.add_method("SetShieldHp", |_, this, hp| {
-            with_zombie(this.0, |zombie| Ok(zombie.shield_hp = hp))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.shield_hp = hp;
+                Ok(())
+            })
         });
         methods.add_method("GetShieldHpMax", |_, this, ()| {
             with_zombie(this.0, |zombie| Ok(zombie.shield_hp_max))
         });
         methods.add_method("SetShieldHpMax", |_, this, hp_max| {
-            with_zombie(this.0, |zombie| Ok(zombie.shield_hp_max = hp_max))
+            with_zombie(this.0, |zombie| {
+                let _: () = zombie.shield_hp_max = hp_max;
+                Ok(())
+            })
         });
     }
 }

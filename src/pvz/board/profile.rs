@@ -4,7 +4,7 @@ use tracing::debug;
 
 use crate::{
     hook::pvz::board::{LawnLoadGameWrapper, LawnSaveGameWrapper},
-    pvz::{board::board::Board, lawn_app::lawn_app::get_lawn_app},
+    pvz::{board::this::Board, lawn_app::this::get_lawn_app},
     save::{PROFILE_MANAGER, SAVES_DIR},
     utils::msvc_string::MsvcString,
 };

@@ -4,8 +4,8 @@ use windows::Win32::Foundation::HWND;
 use crate::{
     mods::{LuaRegistration, ToLua},
     pvz::{
-        board::board::Board, effect_system::EffectSystem, player_info::PlayerInfo,
-        resource_manager::ResourceManager, widget_manager::widget_manager::WidgetManager,
+        board::this::Board, effect_system::EffectSystem, player_info::PlayerInfo,
+        resource_manager::ResourceManager, widget_manager::this::WidgetManager,
     },
     utils::Vec2,
 };
@@ -34,7 +34,7 @@ inventory::submit! {
 ///
 /// 手动管理生命周期并不好玩，孩子们
 pub struct LawnApp {
-    _pad_0x0_0xC0: [u8; 0xC0 - 0x0],
+    _pad_0x0_0xC0: [u8; 0xC0],
     /// 0xC0 窗口尺寸
     pub window_size: Vec2<u32>,
     _pad_0xC8_0x320: [u8; 0x320 - 0xC8],

@@ -1,5 +1,5 @@
 pub mod lua;
-pub mod zombie;
+pub mod this;
 
 use std::ffi::c_int;
 use tracing::*;
@@ -12,7 +12,7 @@ use crate::{
         ORIGINAL_DIE_NO_LOOT, UpdateWrapper, ZombieInitializeWrapper,
     },
     mods::callback::{POST, PRE, callback_data},
-    pvz::{graphics::graphics::Graphics, zombie::zombie::Zombie},
+    pvz::{graphics::this::Graphics, zombie::this::Zombie},
     save::PROFILE_MANAGER,
     utils::data_array::{DataArray, HasId},
 };

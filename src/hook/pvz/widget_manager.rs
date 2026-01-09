@@ -8,8 +8,8 @@ use std::{
 
 use super::{HookRegistration, hook};
 use crate::pvz::{
-    lawn_app::lawn_app::LawnApp,
-    widget_manager::{self, PostDrawScreen, PreDrawScreen, widget_manager::WidgetManager},
+    lawn_app::this::LawnApp,
+    widget_manager::{self, PostDrawScreen, PreDrawScreen, this::WidgetManager},
 };
 
 /// `WidgetManager` 构造函数的地址
@@ -187,11 +187,11 @@ inventory::submit! {
             hook(ADDR_KEY_UP as _, KeyUpHelper as _)?
         );
 
-        let _ = ORIGINAL_PRE_DRAW_SCREEN.store(
+        ORIGINAL_PRE_DRAW_SCREEN.store(
             hook(ADDR_PRE_DRAW_SCREEN as _, PreDrawScreenHelper as _)?, Ordering::SeqCst
         );
 
-        let _ = ORIGINAL_POST_DRAW_SCREEN.store(
+        ORIGINAL_POST_DRAW_SCREEN.store(
             hook(ADDR_POST_DRAW_SCREEN as _, PostDrawScreenHelper as _)?, Ordering::SeqCst
         );
 

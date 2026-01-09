@@ -3,7 +3,7 @@ use std::sync::{Mutex, OnceLock};
 use tracing::info;
 
 use crate::mods::LuaRegistration;
-use crate::pvz::graphics::graphics::Graphics;
+use crate::pvz::graphics::this::Graphics;
 
 // ==========================================
 // 1. 基础定义 (Layer 和 Graphics)

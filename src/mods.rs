@@ -86,10 +86,7 @@ pub fn load_mods() -> Result<u32> {
     }
 
     for entry in fs::read_dir(MOD_DIR)? {
-        match load_mod(entry) {
-            Ok(_) => success += 1,
-            Err(_) => (),
-        }
+        if load_mod(entry).is_ok() { success += 1 }
     }
 
     debug!(

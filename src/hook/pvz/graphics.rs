@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 
 use crate::{
     hook::{HookRegistration, hook},
-    pvz::graphics::{self, graphics::Graphics},
+    pvz::graphics::{self, this::Graphics},
 };
 
 /// `Graphics::Create` 的地址

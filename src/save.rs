@@ -37,12 +37,12 @@ impl Profile {
         let namespace_data = self
             .data
             .entry(T::NAMESPACE.to_string())
-            .or_insert_with(HashMap::new);
+            .or_default();
 
         // 第二步：找到 ID 对应的 Map (如果没有则创建)
         let entity_data = namespace_data
             .entry(entity.id())
-            .or_insert_with(HashMap::new);
+            .or_default();
 
         match serde_json::to_value(&value) {
             Ok(json_value) => {
@@ -71,11 +71,10 @@ impl Profile {
 
     // 5. 泛型化的 Remove Attr 方法
     pub fn remove_attr<T: HasId>(&mut self, entity: &T, key: String) {
-        if let Some(namespace_data) = self.data.get_mut(T::NAMESPACE) {
-            if let Some(entity_data) = namespace_data.get_mut(&entity.id()) {
+        if let Some(namespace_data) = self.data.get_mut(T::NAMESPACE)
+            && let Some(entity_data) = namespace_data.get_mut(&entity.id()) {
                 entity_data.remove(&key);
             }
-        }
     }
 
     // 6. 泛型化的 Remove Entity 方法 (删除整个实体的数据)

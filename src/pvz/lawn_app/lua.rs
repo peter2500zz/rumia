@@ -4,8 +4,8 @@ use crate::{
     debug::tigger_handler,
     mods::ToLua,
     pvz::{
-        lawn_app::lawn_app::{LawnApp, with_lawn_app},
-        widget_manager::widget_manager::with_widget_manager,
+        lawn_app::this::{LawnApp, with_lawn_app},
+        widget_manager::this::with_widget_manager,
     },
 };
 

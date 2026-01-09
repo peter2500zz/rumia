@@ -4,7 +4,7 @@ use mlua::prelude::*;
 
 use crate::{
     mods::LuaRegistration,
-    pvz::{lawn_app::lawn_app::get_lawn_app, plant::plant::Plant, zombie::zombie::Zombie},
+    pvz::{lawn_app::this::get_lawn_app, plant::this::Plant, zombie::this::Zombie},
     utils::data_array::DataArray,
 };
 
@@ -21,7 +21,7 @@ pub struct PlantsOnLawn {
 #[repr(C)]
 /// 这是 `Board`
 pub struct Board {
-    _pad_0x0_0x58: [u8; 0x58 - 0x0],
+    _pad_0x0_0x58: [u8; 0x58],
     /// 0x58 鼠标是否按下（暂停不再记录）
     pub mouse_pressing: bool,
     _pad_0x59_0x90: [u8; 0x90 - 0x59],

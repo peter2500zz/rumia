@@ -4,7 +4,7 @@ use crate::{
     mods::ToLua,
     pvz::plant::{
         Fire, FireWithoutTarget,
-        plant::{Plant, get_plant, with_plant},
+        this::{Plant, get_plant, with_plant},
     },
     save::PROFILE_MANAGER,
     utils::data_array::{DataArrayId, HasId},
@@ -34,7 +34,8 @@ impl LuaUserData for LuaPlant {
         });
         methods.add_method("RemoveAttr", |_, this, key| {
             with_plant(this.0, |plant| {
-                Ok(PROFILE_MANAGER.lock().unwrap().remove_attr(plant, key))
+                PROFILE_MANAGER.lock().unwrap().remove_attr(plant, key);
+                Ok(())
             })
         });
 

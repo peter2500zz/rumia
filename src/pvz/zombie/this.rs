@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use windows::core::BOOL;
 
 use crate::{
-    pvz::board::board::get_board,
+    pvz::board::this::get_board,
     utils::{Rect2, Vec2, data_array::HasId},
 };
 

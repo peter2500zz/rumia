@@ -2,7 +2,6 @@
 pub mod pvz;
 
 use anyhow::Result;
-use inventory;
 use minhook::MinHook;
 use std::ffi::c_void;
 use std::sync::atomic::{AtomicUsize, Ordering};

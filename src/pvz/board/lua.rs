@@ -6,12 +6,12 @@ use crate::{
     mods::ToLua,
     pvz::{
         board::{
-            AddCoin, AddZombieInRow, GetPlantsOnLawn, KillAllZombiesInRadius,
+            AddCoin, AddZombieInRow, GetPlantsOnLawn, KillAllZombiesInRadius, PixelToGrid,
             PixelToGridKeepOnBoard,
-            board::{Board, PlantsOnLawn, with_board},
+            this::{Board, PlantsOnLawn, with_board},
         },
         effect_system::particle_holder::particle_system::AllocParticleSystem,
-        lawn_app::{lawn_app::with_lawn_app, sound::PlaySample},
+        lawn_app::{sound::PlaySample, this::with_lawn_app},
     },
     utils::{Vec2, data_array::HasId, delta_mgr::get_delta_mgr},
 };
@@ -37,7 +37,10 @@ impl LuaUserData for LuaBoard {
         });
 
         methods.add_method("SetSun", |_, _, value: i32| {
-            with_board(|board| Ok(board.sun_value = value))
+            with_board(|board| {
+                let _: () = board.sun_value = value;
+                Ok(())
+            })
         });
 
         methods.add_method("GetZombies", |lua, _, ()| {
@@ -144,7 +147,7 @@ impl LuaUserData for LuaBoard {
                 }
 
                 with_board(|board| {
-                    let grid = PixelToGridKeepOnBoard(board, pos);
+                    let grid = PixelToGrid(board, pos);
 
                     let theRadius = if radius > 80 { radius / 80 } else { 0 };
 

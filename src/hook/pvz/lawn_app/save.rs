@@ -45,7 +45,7 @@ pub extern "stdcall" fn GetAppDataFolderWrapper(string: *mut MsvcString) -> *mut
 
 inventory::submit! {
     HookRegistration(|| {
-        let _ = ORIGINAL_GET_APP_DATA_FOLDER.store(
+        ORIGINAL_GET_APP_DATA_FOLDER.store(
             hook(ADDR_GET_APP_DATA_FOLDER as _, GetAppDataFolderHelper as _)?, Ordering::SeqCst
         );
 

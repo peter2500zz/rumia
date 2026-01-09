@@ -8,8 +8,8 @@ use windows::core::BOOL;
 use super::{HookRegistration, hook};
 use crate::{
     pvz::{
-        graphics::graphics::Graphics,
-        zombie::{self, zombie::Zombie},
+        graphics::this::Graphics,
+        zombie::{self, this::Zombie},
     },
     utils::{asm::stack_rotate, data_array::DataArray},
 };

@@ -7,8 +7,8 @@ use windows::Win32::System::Console::AllocConsole;
 use crate::{
     CONFIG,
     pvz::{
-        board::board::with_board, lawn_app::lawn_app::with_lawn_app,
-        widget_manager::widget_manager::with_widget_manager,
+        board::this::with_board, lawn_app::this::with_lawn_app,
+        widget_manager::this::with_widget_manager,
     },
     save::PROFILE_MANAGER, utils::Vec2,
 };
@@ -118,12 +118,12 @@ pub fn tigger_handler(flag: String) {
 
             "win" => {
                 let _ = with_lawn_app(|lawn_app| {
-                    debug!("pre: {}", (*(*lawn_app).board).is_winning);
-                    (*(*lawn_app).board).is_winning = true;
-                    debug!("tiggerred win: {}", (*(*lawn_app).board).is_winning);
-                    debug!("pre: {}", (*(*lawn_app).board).is_win);
-                    (*(*lawn_app).board).is_win = true;
-                    debug!("tiggerred win: {}", (*(*lawn_app).board).is_win);
+                    debug!("pre: {}", (*lawn_app.board).is_winning);
+                    (*lawn_app.board).is_winning = true;
+                    debug!("tiggerred win: {}", (*lawn_app.board).is_winning);
+                    debug!("pre: {}", (*lawn_app.board).is_win);
+                    (*lawn_app.board).is_win = true;
+                    debug!("tiggerred win: {}", (*lawn_app.board).is_win);
 
                     Ok(())
                 });

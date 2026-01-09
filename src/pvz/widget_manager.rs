@@ -1,4 +1,4 @@
-pub mod widget_manager;
+pub mod this;
 
 use tracing::trace;
 
@@ -10,10 +10,10 @@ use crate::{
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
-        board::board::get_board,
-        graphics::graphics::{Graphics, Render},
-        lawn_app::lawn_app::LawnApp,
-        widget_manager::widget_manager::WidgetManager,
+        board::this::get_board,
+        graphics::this::{Graphics, Render},
+        lawn_app::this::LawnApp,
+        widget_manager::this::WidgetManager,
     },
     utils::render_manager::{RenderLayer, execute_layer_render, finish_render_frame},
 };

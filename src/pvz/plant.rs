@@ -1,12 +1,12 @@
 pub mod lua;
-pub mod plant;
+pub mod this;
 
 use std::{arch::naked_asm, ffi::c_int};
 use tracing::trace;
 
 use crate::{
     hook::pvz::plant::{ADDR_FIRE_WITHOUT_TARGET, ORIGINAL_FIRE, PlantInitializeWrapper},
-    pvz::{plant::plant::Plant, zombie::zombie::Zombie},
+    pvz::{plant::this::Plant, zombie::this::Zombie},
     utils::Vec2,
 };
 

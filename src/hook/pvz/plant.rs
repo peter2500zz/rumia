@@ -7,8 +7,8 @@ use std::{
 use crate::{
     hook::{HookRegistration, hook},
     pvz::{
-        plant::{self, plant::Plant},
-        zombie::zombie::Zombie,
+        plant::{self, this::Plant},
+        zombie::this::Zombie,
     },
     utils::{Vec2, asm::stack_rotate},
 };

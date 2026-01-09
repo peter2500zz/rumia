@@ -1,4 +1,4 @@
-pub mod lawn_app;
+pub mod this;
 pub mod loading;
 pub mod lua;
 pub mod save;
@@ -16,7 +16,7 @@ use crate::{
         callback::{POST, callback},
         load_mods,
     },
-    pvz::lawn_app::lawn_app::LawnApp,
+    pvz::lawn_app::this::LawnApp,
 };
 
 /// 这是 `LawnApp` 的构造函数

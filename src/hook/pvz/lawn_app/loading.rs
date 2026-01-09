@@ -5,7 +5,7 @@ use std::{
 
 use super::{HookRegistration, hook};
 use crate::pvz::lawn_app::{
-    lawn_app::LawnApp,
+    this::LawnApp,
     loading::{LoadGroup, LoadingThreadProc},
 };
 

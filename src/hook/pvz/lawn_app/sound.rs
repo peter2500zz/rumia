@@ -1,7 +1,7 @@
 use std::{ffi::c_int, sync::OnceLock};
 
 use super::{HookRegistration, hook};
-use crate::pvz::lawn_app::{self, lawn_app::LawnApp};
+use crate::pvz::lawn_app::{self, this::LawnApp};
 
 /// `LawnApp::PlaySample` 的地址
 const ADDR_PLAY_SAMPLE: u32 = 0x004560C0 as _;

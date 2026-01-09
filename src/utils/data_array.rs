@@ -91,7 +91,7 @@ impl<T: HasId> DataArray<T> {
                 return None;
             }
 
-            return Some(&*element_ptr);
+            Some(&*element_ptr)
         }
     }
 
@@ -119,7 +119,7 @@ impl<T: HasId> DataArray<T> {
                 return None;
             }
 
-            return Some(&mut *element_ptr);
+            Some(&mut *element_ptr)
         }
     }
 
@@ -147,7 +147,7 @@ impl<T: HasId> DataArray<T> {
                 return None;
             }
 
-            return Some(element_ptr);
+            Some(element_ptr)
         }
     }
 }

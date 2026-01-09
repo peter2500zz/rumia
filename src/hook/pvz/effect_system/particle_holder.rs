@@ -1,6 +1,6 @@
 use std::{
     arch::{asm, naked_asm},
-    ffi::{c_float, c_int, c_void},
+    ffi::{c_float, c_int},
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -69,7 +69,7 @@ pub fn AllocParticleSystemWrapper(
 
 inventory::submit! {
     HookRegistration(|| {
-        let _ = ORIGINAL_ALLOC_PARTICLE_SYSTEM.store(
+        ORIGINAL_ALLOC_PARTICLE_SYSTEM.store(
             hook(ADDR_ALLOC_PARTICLE_SYSTEM as _, AllocParticleSystemHelper as _)?, Ordering::Relaxed
         );
 

@@ -1,4 +1,4 @@
-pub mod board;
+pub mod this;
 pub mod lua;
 pub mod profile;
 
@@ -16,11 +16,11 @@ use crate::{
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
-        board::board::{Board, PlantsOnLawn},
+        board::this::{Board, PlantsOnLawn},
         coin::Coin,
-        graphics::graphics::Graphics,
-        lawn_app::lawn_app::LawnApp,
-        zombie::zombie::Zombie,
+        graphics::this::Graphics,
+        lawn_app::this::LawnApp,
+        zombie::this::Zombie,
     },
     save::PROFILE_MANAGER,
     utils::{
@@ -79,9 +79,7 @@ pub extern "thiscall" fn AddCoin(
         theCoinType, pos, theCoinMotion
     );
 
-    let coin = ORIGINAL_ADDCOIN.wait()(this, pos, theCoinType, theCoinMotion);
-
-    coin
+    ORIGINAL_ADDCOIN.wait()(this, pos, theCoinType, theCoinMotion)
 }
 
 /// `Board::KeyDown` 的 hook 函数

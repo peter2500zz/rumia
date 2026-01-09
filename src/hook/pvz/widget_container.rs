@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use crate::{
     hook::{HookRegistration, hook},
     pvz::{
-        graphics::graphics::Graphics,
+        graphics::this::Graphics,
         widget_container::{self, ModalFlags, WidgetContainer},
     },
 };

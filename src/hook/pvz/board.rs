@@ -12,12 +12,12 @@ use crate::{
     pvz::{
         board::{
             self,
-            board::{Board, PlantsOnLawn},
+            this::{Board, PlantsOnLawn},
         },
         coin::Coin,
-        graphics::graphics::Graphics,
-        lawn_app::lawn_app::LawnApp,
-        zombie::zombie::Zombie,
+        graphics::this::Graphics,
+        lawn_app::this::LawnApp,
+        zombie::this::Zombie,
     },
     utils::{Vec2, asm::stack_rotate, msvc_string::MsvcString},
 };
@@ -458,11 +458,11 @@ inventory::submit! {
             hook(ADDR_DRAW as _, board::Draw as _)?
         );
 
-        let _ = ORIGINAL_LAWN_LOAD_GAME.store(
+        ORIGINAL_LAWN_LOAD_GAME.store(
             hook(ADDR_LAWN_LOAD_GAME as _, LawnLoadGameHelper as _)?, Ordering::SeqCst
         );
 
-        let _ = ORIGINAL_LAWN_SAVE_GAME.store(
+        ORIGINAL_LAWN_SAVE_GAME.store(
             hook(ADDR_LAWN_SAVE_GAME as _, LawnSaveGameHelper as _)?, Ordering::SeqCst
         );
 

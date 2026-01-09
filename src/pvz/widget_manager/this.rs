@@ -1,12 +1,12 @@
 use mlua::prelude::*;
 
-use crate::{mods::LuaRegistration, pvz::lawn_app::lawn_app::get_lawn_app, utils::Vec2};
+use crate::{mods::LuaRegistration, pvz::lawn_app::this::get_lawn_app, utils::Vec2};
 
 #[derive(Debug)]
 #[repr(C)]
 /// 这是 `WidgetManager`
 pub struct WidgetManager {
-    _pad_0x0_0xE0: [u8; 0xE0 - 0x0],
+    _pad_0x0_0xE0: [u8; 0xE0],
     /// 0xE0 鼠标坐标
     pub mouse_pos: Vec2<i32>,
     _pad_0xE8_0x1FC: [u8; 0x1FC - 0xE8],

@@ -56,10 +56,8 @@ where
 
         // 收集所有回调函数
         let mut funcs = Vec::new();
-        for pair in callback_point.pairs::<i32, LuaFunction>() {
-            if let Ok((_, func)) = pair {
-                funcs.push(func);
-            }
+        for (_, func) in callback_point.pairs::<i32, LuaFunction>().flatten() {
+            funcs.push(func);
         }
 
         // 执行所有回调
@@ -77,11 +75,8 @@ where
 
         Ok(false)
     });
-    if let Ok(result) = result {
-        result
-    } else {
-        false
-    }
+
+    result.unwrap_or_default()
 }
 
 pub fn callback_data<T>(at: u32, data: &mut T)
@@ -116,10 +111,8 @@ where
         // 收集所有回调函数
         let pairs = callback_point.pairs::<i32, LuaFunction>();
         let mut funcs = Vec::new();
-        for pair in pairs {
-            if let Ok((_, func)) = pair {
-                funcs.push(func);
-            }
+        for (_, func) in pairs.flatten() {
+            funcs.push(func);
         }
 
         for func in funcs {

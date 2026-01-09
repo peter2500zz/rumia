@@ -1,7 +1,7 @@
 use std::ffi::{CStr, c_char, c_int};
 use tracing::info;
 
-use super::lawn_app::LawnApp;
+use super::this::LawnApp;
 use crate::hook::pvz::lawn_app::loading::{ORIGINAL_LOAD_GROUP, ORIGINAL_LOADING_THREAD_PROC};
 
 pub extern "thiscall" fn LoadingThreadProc(this: *mut LawnApp) {
