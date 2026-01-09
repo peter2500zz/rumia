@@ -7,3 +7,4 @@
 ---@field GetWindowSize fun(self): Vec2 @获取窗口尺寸
 ---@field GetMousePos fun(self): Vec2 @获取鼠标坐标
 ---@field GetBoard fun(self): Board? @获取关卡，如果还未创建则为空
+---@field PlaySound fun(self, sound: GameSound) @播放特定音效

@@ -15,6 +15,6 @@ pub extern "thiscall" fn AllocParticleSystem(
     theRenderOrder: c_int,
     theParticleEffect: c_int,
 ) -> *mut ParticleSystem {
-    // tracing::trace!("alloc new particle at {:?}", thePos);
+    tracing::trace!("alloc new particle at {:?}", thePos);
     AllocParticleSystemWrapper(this, thePos, theRenderOrder, theParticleEffect)
 }

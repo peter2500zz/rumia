@@ -59,3 +59,19 @@ fun(self): Board?
 返回值:
 
 - 游戏类 [Board](../class/Board.md) 或 nil
+
+---
+
+### PlaySound
+
+播放特定的音效。
+
+函数签名:
+
+```lua
+fun(self, sound: GameSound)
+```
+
+参数:
+
+- `sound` [GameSound](../alias/GameSound.md): 音频ID

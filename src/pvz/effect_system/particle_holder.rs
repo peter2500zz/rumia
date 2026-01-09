@@ -1,7 +1,5 @@
 pub mod particle_system;
 
-use std::ffi::{c_float, c_int, c_void};
-
 use crate::{
     pvz::effect_system::particle_holder::particle_system::ParticleSystem,
     utils::data_array::DataArray,
