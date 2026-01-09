@@ -2,18 +2,18 @@ pub mod board;
 pub mod lua;
 
 use anyhow::{Result, anyhow};
-use std::{arch::naked_asm, ffi::c_int, fs::File};
+use std::{ffi::c_int, fs::File};
 use tracing::*;
 
 use crate::{
     add_callback,
     hook::pvz::board::{
-        ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
-        ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper,
+        ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_UPDATE, AddZombieInRowWrapper,
         GetPlantsOnLawnWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
         ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
         ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS, ORIGINAL_MOUSE_DOWN,
-        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE, PixelToGridXKeepOnBoardWrapper,
+        PixelToGridYKeepOnBoardWrapper,
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
@@ -138,63 +138,9 @@ pub extern "thiscall" fn Update(this: *mut Board) {
 }
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
 
-#[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
-    naked_asm!(
-        "push ebp",
-        "mov ebp, esp",
-
-        "push ebx",
-        "push esi",
-
-        "mov ebx, [ebp + 8]",
-        "mov esi, [ebp + 12]",
-        "mov eax, [ebp + 16]",
-
-        "mov edx, {func}",
-        "call edx",
-
-        "pop esi",
-        "pop ebx",
-
-        "mov esp, ebp",
-        "pop ebp",
-        "ret 12",
-
-        func = const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
-    )
-}
-
-#[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridYKeepOnBoard(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
-    naked_asm!(
-        "push ebp",
-        "mov ebp, esp",
-
-        "push ebx",
-        "push edi",
-
-        "mov ebx, [ebp + 8]",
-        "mov eax, [ebp + 12]",
-        "mov edi, [ebp + 16]",
-
-        "mov edx, {func}",
-        "call edx",
-
-        "pop edi",
-        "pop ebx",
-
-        "mov esp, ebp",
-        "pop ebp",
-        "ret 12",
-
-        func = const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD
-    )
-}
-
 pub fn PixelToGridKeepOnBoard(this: *mut Board, pos: Vec2<i32>) -> Vec2<i32> {
-    let grid_x = PixelToGridXKeepOnBoard(this, pos.x, pos.y);
-    let grid_y = PixelToGridYKeepOnBoard(this, pos.x, pos.y);
+    let grid_x = PixelToGridXKeepOnBoardWrapper(this, pos.x, pos.y);
+    let grid_y = PixelToGridYKeepOnBoardWrapper(this, pos.x, pos.y);
     Vec2::new(grid_x, grid_y)
 }
 

@@ -152,8 +152,65 @@ pub static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 /// `Board::PixelToGridX` 的地址
 pub const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD: u32 = 0x0041C530;
 
+pub extern "stdcall" fn PixelToGridXKeepOnBoardWrapper(
+    this: *mut Board,
+    theX: c_int,
+    theY: c_int,
+) -> i32 {
+    unsafe {
+        let result;
+
+        asm!(
+            "push esi",
+            "mov esi, {theX}",
+
+            "mov edx, {func}",
+            "call edx",
+
+            "pop esi",
+
+            in("eax") theY,
+            theX = in(reg) theX,
+            in("ebx") this,
+
+            func = const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
+
+            lateout("eax") result,
+            clobber_abi("C")
+        );
+
+        result
+    }
+}
+
 /// `Board::PixelToGridY` 的地址
 pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
+
+pub extern "stdcall" fn PixelToGridYKeepOnBoardWrapper(
+    this: *mut Board,
+    theX: c_int,
+    theY: c_int,
+) -> i32 {
+    unsafe {
+        let result;
+
+        asm!(
+            "mov edx, {func}",
+            "call edx",
+
+            in("edi") theY,
+            in("eax") theX,
+            in("ebx") this,
+
+            func = const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD,
+
+            lateout("eax") result,
+            clobber_abi("C")
+        );
+
+        result
+    }
+}
 
 /// `Board::Draw` 的地址
 pub const ADDR_DRAW: u32 = 0x0041ACF0;
