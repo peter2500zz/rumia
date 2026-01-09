@@ -51,6 +51,8 @@ impl Clone for Board {
 inventory::submit! {
     LuaRegistration(|lua| {
         let globals = lua.globals();
+
+        // 键码
         let mouse_codes = lua.create_table()?;
 
         mouse_codes.set("L_CLICK", 1)?; // 鼠标左键
@@ -60,6 +62,19 @@ inventory::submit! {
         mouse_codes.set("M_CLICK", 3)?; // 鼠标中键
 
         globals.set("MouseCodes", mouse_codes)?;
+
+        // 伤害标志位
+        let damage_flag = lua.create_table()?;
+
+        damage_flag.set("GROUND", 1 << 0)?;      // 0x01 - 地面攻击
+        damage_flag.set("AIR", 1 << 1)?;         // 0x02 - 空中攻击
+        damage_flag.set("WATER", 1 << 2)?;       // 0x04 - 水中攻击
+        damage_flag.set("SPECIAL", 1 << 4)?;     // 0x10 - 特殊状态攻击
+        damage_flag.set("STEALTH", 1 << 5)?;     // 0x20 - 可攻击隐身/特殊僵尸
+        damage_flag.set("JUMPING", 1 << 6)?;     // 0x40 - 可攻击跳跃状态
+        damage_flag.set("CHARMED", 1 << 7)?;     // 0x80 - 可攻击被魅惑的僵尸
+
+        globals.set("DamageFlagsw", damage_flag)?;
 
         Ok(())
     })

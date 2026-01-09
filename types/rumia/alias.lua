@@ -8,3 +8,5 @@
 ---@alias RenderLayer integer
 ---@alias CoinType integer
 ---@alias CoinMotion integer
+---@alias GameSound integer
+---@alias DamageFlag integer

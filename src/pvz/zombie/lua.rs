@@ -1,9 +1,10 @@
 use mlua::prelude::*;
 
 use crate::{
+    hook::pvz::board::PixelToGridYKeepOnBoardWrapper,
     mods::ToLua,
     pvz::{
-        board::{PixelToGridYKeepOnBoard, board::with_board},
+        board::board::with_board,
         zombie::zombie::{Zombie, get_zombie, with_zombie},
     },
     save::PROFILE_MANAGER,
@@ -49,7 +50,7 @@ impl LuaUserData for LuaZombie {
             with_board(|board| {
                 with_zombie(this.0, |zombie| {
                     zombie.pos = pos;
-                    zombie.row = PixelToGridYKeepOnBoard(
+                    zombie.row = PixelToGridYKeepOnBoardWrapper(
                         board,
                         pos.x as _,
                         pos.y as i32 + zombie.hitbox_rect.size.y,

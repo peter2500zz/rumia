@@ -98,6 +98,8 @@ nav:
               - Coin: api/class/Coin.md
       - 枚举:
           - 枚举: api/enum/index.md
+          - GameSounds: api/enum/GameSounds.md
+          - DamageFlags: api/enum/DamageFlags.md
           - 渲染:
               - RenderLayers: api/enum/RenderLayers.md
           - 键鼠输入:
@@ -117,6 +119,8 @@ nav:
           - RenderLayer: api/alias/RenderLayer.md
           - CoinType: api/alias/CoinType.md
           - CoinMotion: api/alias/CoinMotion.md
+          - GameSound: api/alias/GameSound.md
+          - DamageFlag: api/alias/DamageFlag.md
   - 配置文件:
       - 配置文件: configures/index.md
       - Rumia: configures/rumia.md

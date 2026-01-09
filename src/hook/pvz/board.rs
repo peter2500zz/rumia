@@ -150,9 +150,66 @@ type SignUpdate = extern "thiscall" fn(this: *mut Board);
 pub static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 
 /// `Board::PixelToGridX` 的地址
+pub const ADDR_PIXEL_TO_GRID_X: u32 = 0x0041C4C0;
+
+pub fn PixelToGridXWrapper(
+    this: *mut Board,
+    theX: c_int,
+    theY: c_int,
+) -> i32 {
+    unsafe {
+        let result;
+
+        asm!(
+            "mov edx, {func}",
+            "call edx",
+
+            in("edi") theY,
+            in("eax") theX,
+            in("ecx") this,
+
+            func = const ADDR_PIXEL_TO_GRID_X,
+
+            lateout("eax") result,
+            clobber_abi("C")
+        );
+
+        result
+    }
+}
+
+/// `Board::PixelToGridY` 的地址
+pub const ADDR_PIXEL_TO_GRID_Y: u32 = 0x0041C550;
+
+pub fn PixelToGridYWrapper(
+    this: *mut Board,
+    theX: c_int,
+    theY: c_int,
+) -> i32 {
+    unsafe {
+        let result;
+
+        asm!(
+            "call {func}",
+
+            in("ecx") theY,
+            in("eax") theX,
+            in("edx") this,
+
+            func = in(reg) ADDR_PIXEL_TO_GRID_Y,
+
+            lateout("eax") result,
+            clobber_abi("C")
+        );
+
+        result
+    }
+}
+
+/// `Board::PixelToGridXKeepOnBoard` 的地址
 pub const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD: u32 = 0x0041C530;
 
-pub extern "stdcall" fn PixelToGridXKeepOnBoardWrapper(
+pub fn PixelToGridXKeepOnBoardWrapper(
     this: *mut Board,
     theX: c_int,
     theY: c_int,
@@ -183,10 +240,10 @@ pub extern "stdcall" fn PixelToGridXKeepOnBoardWrapper(
     }
 }
 
-/// `Board::PixelToGridY` 的地址
+/// `Board::PixelToGridYKeepOnBoard` 的地址
 pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
 
-pub extern "stdcall" fn PixelToGridYKeepOnBoardWrapper(
+pub fn PixelToGridYKeepOnBoardWrapper(
     this: *mut Board,
     theX: c_int,
     theY: c_int,
@@ -237,7 +294,7 @@ extern "stdcall" fn LawnLoadGameHelper() {
         "leave",
         "ret",
 
-        func = sym board::LawnLoadGame
+        func = sym board::profile::LawnLoadGame
     )
 }
 
@@ -276,7 +333,7 @@ extern "stdcall" fn LawnSaveGameHelper() {
         "leave",
         "ret",
 
-        func = sym board::LawnSaveGame
+        func = sym board::profile::LawnSaveGame
     )
 }
 

@@ -31,9 +31,10 @@ pub fn alloc_console() -> Result<()> {
 }
 
 pub fn tigger_handler(flag: String) {
+    let (cmd, args) = flag.split_once('a').unwrap_or((&flag, ""));
     unsafe {
-        match flag.as_str() {
-            "save slot" => {
+        match cmd {
+            "saveslot" => {
                 let _ = with_lawn_app(|lawn_app| {
                     debug!("{}", (*lawn_app.player_info).save_slot);
 
@@ -52,11 +53,11 @@ pub fn tigger_handler(flag: String) {
             "boom" => {
                 let _ = with_lawn_app(|the_app| {
                     with_widget_manager(|wm| {
-                        with_board(|board| {
-                            let mouse_pos = wm.mouse_pos;
-                            let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
+                        let mouse_pos = wm.mouse_pos;
+                        crate::pvz::lawn_app::sound::PlaySample(the_app, 0x64);
 
-                            crate::pvz::lawn_app::sound::PlaySample(the_app, 0x64);
+                        let _ = with_board(|board| {
+                            let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
 
                             crate::pvz::board::KillAllZombiesInRadius(
                                 board,
@@ -64,19 +65,38 @@ pub fn tigger_handler(flag: String) {
                                 mouse_pos,
                                 250,
                                 3,
-                                true,
+                                false,
                                 127,
                             );
 
-                            crate::pvz::effect_system::particle_holder::particle_system::AllocParticleSystem(
-                                (*the_app.effect_system).particle, 
-                                Vec2::new(mouse_pos.x as _, mouse_pos.y as _), 
-                                400000, 
-                                30
-                            );
-
                             Ok(())
-                        })
+                        });
+
+                        crate::pvz::effect_system::particle_holder::particle_system::AllocParticleSystem(
+                            (*the_app.effect_system).particle, 
+                            Vec2::new(mouse_pos.x as _, mouse_pos.y as _), 
+                            // 钱数
+                            // 关卡进度
+                            // 400000
+                            // 僵尸
+                            // 墓碑
+                            // 小推车
+                            // 3nx000 n=行 x=2 墓碑没了 x=3 植物没了 x=4植物没了 x=7 小推车没了
+                            // 300000 
+                            // 200000
+                            // 150000
+                            // 100001
+                            // 卡槽
+                            // 铲子
+                            // 100000
+                            // 草坪
+                            // 0
+
+                            args.parse().unwrap_or(0), 
+                            30
+                        );
+
+                        Ok(())
                     })
                 });
             }

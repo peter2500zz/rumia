@@ -1,33 +1,31 @@
 pub mod board;
 pub mod lua;
+pub mod profile;
 
-use anyhow::{Result, anyhow};
-use std::{ffi::c_int, fs::File};
+use std::ffi::c_int;
 use tracing::*;
 
 use crate::{
     add_callback,
     hook::pvz::board::{
         ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_UPDATE, AddZombieInRowWrapper,
-        GetPlantsOnLawnWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
-        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
-        ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS, ORIGINAL_MOUSE_DOWN,
-        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE, PixelToGridXKeepOnBoardWrapper,
-        PixelToGridYKeepOnBoardWrapper,
+        GetPlantsOnLawnWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR,
+        ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS,
+        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE, PixelToGridXKeepOnBoardWrapper,
+        PixelToGridXWrapper, PixelToGridYKeepOnBoardWrapper, PixelToGridYWrapper,
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
         board::board::{Board, PlantsOnLawn},
         coin::Coin,
         graphics::graphics::Graphics,
-        lawn_app::lawn_app::{LawnApp, get_lawn_app},
+        lawn_app::lawn_app::LawnApp,
         zombie::zombie::Zombie,
     },
-    save::{PROFILE_MANAGER, SAVES_DIR},
+    save::PROFILE_MANAGER,
     utils::{
         Vec2,
         delta_mgr::get_delta_mgr,
-        msvc_string::MsvcString,
         render_manager::{RenderLayer, execute_layer_render},
     },
 };
@@ -138,6 +136,12 @@ pub extern "thiscall" fn Update(this: *mut Board) {
 }
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
 
+pub fn PixelToGrid(this: *mut Board, pos: Vec2<i32>) -> Vec2<i32> {
+    let grid_x = PixelToGridXWrapper(this, pos.x, pos.y);
+    let grid_y = PixelToGridYWrapper(this, pos.x, pos.y);
+    Vec2::new(grid_x, grid_y)
+}
+
 pub fn PixelToGridKeepOnBoard(this: *mut Board, pos: Vec2<i32>) -> Vec2<i32> {
     let grid_x = PixelToGridXKeepOnBoardWrapper(this, pos.x, pos.y);
     let grid_y = PixelToGridYKeepOnBoardWrapper(this, pos.x, pos.y);
@@ -153,80 +157,6 @@ pub extern "thiscall" fn Draw(this: *mut Board, g: *mut Graphics) {
     execute_layer_render(RenderLayer::Board, g);
 
     // info!(">d>");
-}
-
-/// 游戏读取存档
-pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
-    unsafe {
-        debug!("load profile from {}", (*theFilePath).to_string());
-    }
-
-    let mut success = LawnLoadGameWrapper(this, theFilePath);
-
-    let load_custom_profile = || -> Result<()> {
-        if let Ok(the_app) = get_lawn_app() {
-            unsafe {
-                let json_path = format!(
-                    "{}/user{}.json",
-                    SAVES_DIR,
-                    (*(*the_app).player_info).save_slot
-                );
-                let maybe_a_file = File::open(&json_path);
-
-                if let Ok(file) = maybe_a_file {
-                    debug!("load custom profile from {}", json_path);
-                    let mut profile = PROFILE_MANAGER.lock().unwrap();
-                    *profile = serde_json::from_reader(file)?;
-                }
-            }
-
-            Ok(())
-        } else {
-            Err(anyhow!("can not get LawnApp"))
-        }
-    };
-
-    if success {
-        success = load_custom_profile().is_ok();
-    }
-
-    success
-}
-
-/// 游戏读取存档
-pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
-    unsafe {
-        debug!("save profile to {}", (*theFilePath).to_string());
-    }
-
-    let mut success = LawnSaveGameWrapper(this, theFilePath);
-
-    let save_custom_profile = || -> Result<()> {
-        if let Ok(the_app) = get_lawn_app() {
-            unsafe {
-                let json_path = format!(
-                    "{}/user{}.json",
-                    SAVES_DIR,
-                    (*(*the_app).player_info).save_slot
-                );
-                let file = File::create(&json_path)?;
-                debug!("save custom profile to {}", json_path);
-
-                let profile = PROFILE_MANAGER.lock().unwrap();
-                serde_json::to_writer_pretty(file, &*profile)?;
-            }
-
-            Ok(())
-        } else {
-            Err(anyhow!("can not get LawnApp"))
-        }
-    };
-
-    if success {
-        success = save_custom_profile().is_ok();
-    }
-
-    success
 }
 
 /// 获取特定格内的植物
