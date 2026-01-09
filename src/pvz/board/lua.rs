@@ -4,9 +4,14 @@ use mlua::prelude::*;
 
 use crate::{
     mods::ToLua,
-    pvz::board::{
-        AddCoin, AddZombieInRow, GetPlantsOnLawn, PixelToGridKeepOnBoard,
-        board::{Board, PlantsOnLawn, with_board},
+    pvz::{
+        board::{
+            AddCoin, AddZombieInRow, GetPlantsOnLawn, KillAllZombiesInRadius,
+            PixelToGridKeepOnBoard,
+            board::{Board, PlantsOnLawn, with_board},
+        },
+        effect_system::particle_holder::particle_system::AllocParticleSystem,
+        lawn_app::{lawn_app::with_lawn_app, sound::PlaySample},
     },
     utils::{Vec2, data_array::HasId, delta_mgr::get_delta_mgr},
 };
@@ -129,6 +134,35 @@ impl LuaUserData for LuaBoard {
                         },
                     ))
                 }
+            })
+        });
+
+        methods.add_method("Explode", |_, _, (pos, radius, flag, sound, particle)| {
+            with_lawn_app(|lawn_app| {
+                if let Some(sound) = sound {
+                    PlaySample(lawn_app, sound);
+                }
+
+                with_board(|board| {
+                    let grid = PixelToGridKeepOnBoard(board, pos);
+
+                    let theRadius = if radius > 80 { radius / 80 } else { 0 };
+
+                    KillAllZombiesInRadius(board, grid.y, pos, radius, theRadius, true, flag);
+
+                    if let Some(particle) = particle {
+                        unsafe {
+                            AllocParticleSystem(
+                                (*lawn_app.effect_system).particle,
+                                Vec2::new(pos.x as _, pos.y as _),
+                                400000,
+                                particle,
+                            );
+                        }
+                    }
+
+                    Ok(())
+                })
             })
         });
     }

@@ -74,7 +74,7 @@ inventory::submit! {
         damage_flag.set("JUMPING", 1 << 6)?;     // 0x40 - 可攻击跳跃状态
         damage_flag.set("CHARMED", 1 << 7)?;     // 0x80 - 可攻击被魅惑的僵尸
 
-        globals.set("DamageFlagsw", damage_flag)?;
+        globals.set("DamageFlags", damage_flag)?;
 
         Ok(())
     })

@@ -10,3 +10,4 @@
 ---@alias CoinMotion integer
 ---@alias GameSound integer
 ---@alias DamageFlag integer
+---@alias Particle integer

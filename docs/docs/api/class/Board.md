@@ -220,3 +220,23 @@ fun(self, grid: Vec2): (Plant?, Plant?, Plant?, Plant?)
 - 花盆之类的底部植物
 - 南瓜头之类的外围植物
 - 咖啡豆之类的飞行植物
+
+---
+
+### Explode
+
+在特定位置产生一次特定效果的爆炸。
+
+函数签名:
+
+```lua
+fun(self, pos: Vec2, radius: integer, flag: DamageFlag, sound: GameSound?, particle: Particle?)
+```
+
+参数:
+
+- `pos` [Vec2](../class/Vec2.md): 爆炸的坐标。
+- `radius` integer: 爆炸的半径。作为参考，毁灭菇的爆炸半径是 `250`。
+- `flag` [DamageFlag](../alias/DamageFlag.md): 爆炸伤害的类型。
+- `sound` [DamageFlag](../alias/DamageFlag.md)?: （可选）爆炸的音效。
+- `particle` [Particle](../alias/Particle.md)?: （可选）爆炸的粒子效果。
