@@ -198,28 +198,21 @@ fun(self, id: integer): Plant?
 
 ### GetPlantByGrid
 
-通过棋盘坐标获取对应的植物。
-
-分别返回：常规植物、底部植物、外围植物、空中植物。某个位置不存在植物时以 nil 代表
-
-如果同一个位置存在复数植物则返回 id 最大的。
+通过棋盘坐标获取对应格子中的所有植物。
 
 函数签名:
 
 ```lua
-fun(self, grid: Vec2): (Plant?, Plant?, Plant?, Plant?)
+fun(self, grid_pos: Vec2): table<integer, Plant>
 ```
 
 参数:
 
-- `grid` [Vec2](../class/Vec2.md): 关卡内棋盘坐标
+- `grid_pos` [Vec2](../class/Vec2.md): 关卡内棋盘坐标
 
 返回值:
 
-- 常规植物，也就是普通的植物。
-- 花盆之类的底部植物
-- 南瓜头之类的外围植物
-- 咖啡豆之类的飞行植物
+- 一个表，键是植物的 id，值是 [Plant](../class/Plant.md) 实例
 
 ---
 

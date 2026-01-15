@@ -106,36 +106,17 @@ impl LuaUserData for LuaBoard {
             })
         });
 
-        methods.add_method("GetPlantByGrid", |lua, _, grid: Vec2<_>| {
+        methods.add_method("GetPlantByGrid", |lua, _, grid_pos: Vec2<i32>| {
             with_board(|board| {
-                let mut plants = PlantsOnLawn::default();
+                let plants = lua.create_table()?;
 
-                board::GetPlantsOnLawn(board, &mut plants, grid);
-
-                unsafe {
-                    Ok((
-                        if plants.normal.is_null() {
-                            LuaNil
-                        } else {
-                            (*plants.normal).to_lua(lua)?
-                        },
-                        if plants.buttom.is_null() {
-                            LuaNil
-                        } else {
-                            (*plants.buttom).to_lua(lua)?
-                        },
-                        if plants.outer.is_null() {
-                            LuaNil
-                        } else {
-                            (*plants.outer).to_lua(lua)?
-                        },
-                        if plants.flying.is_null() {
-                            LuaNil
-                        } else {
-                            (*plants.flying).to_lua(lua)?
-                        },
-                    ))
+                for plant in board.plants.iter() {
+                    if plant.col == grid_pos.x && plant.row == grid_pos.y {
+                        plants.set(plant.id(), plant.to_lua(lua)?)?;
+                    }
                 }
+
+                Ok(plants)
             })
         });
 

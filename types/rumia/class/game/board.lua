@@ -12,6 +12,6 @@
 ---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的
 ---@field GetPlants fun(self): table<integer, Plant> @返回场上所有植物
 ---@field GetPlantById fun(self, id: integer): Plant? @通过植物 id 查询植物
----@field GetPlantByGrid fun(self, grid: Vec2): (Plant?, Plant?, Plant?, Plant?) @通过棋盘坐标获取对应的植物。分别返回：常规植物、底部植物、外围植物、空中植物。如果同一个位置存在复数植物则返回 id 最大的。
+---@field GetPlantByGrid fun(self, grid_pos: Vec2): table<integer, Plant> @通过棋盘坐标获取格子中的所有植物。
 ---@field Explode fun(self, pos: Vec2, radius: integer, flag: DamageFlag, sound: GameSound?, particle: Particle?) @在特定位置产生一次爆炸
 ---@field AddPlant fun(self, grid_pos: Vec2, seed_type: integer): Plant @在指定位置种植一株植物
