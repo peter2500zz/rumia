@@ -9,7 +9,10 @@ stack_rotate:
     ;// ebp + 0xC: 🤤
 
     ;// 保存状态
-    pushad
+    push ebx
+    push ecx
+    push edx
+    push eax
     pushfd
 
     ;// i = counts;
@@ -53,7 +56,10 @@ rotate_stack:
 rotate_stack_end:
     ;// 还原状态
     popfd
-    popad
+    pop eax
+    pop edx
+    pop ecx
+    pop ebx
 
     ;// 尾声
     leave

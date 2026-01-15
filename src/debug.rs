@@ -31,7 +31,7 @@ pub fn alloc_console() -> Result<()> {
 }
 
 pub fn tigger_handler(flag: String) {
-    let (cmd, args) = flag.split_once('a').unwrap_or((&flag, ""));
+    let (cmd, args) = flag.split_once(' ').unwrap_or((&flag, ""));
     unsafe {
         match cmd {
             "saveslot" => {
@@ -126,6 +126,19 @@ pub fn tigger_handler(flag: String) {
                     debug!("tiggerred win: {}", (*lawn_app.board).is_win);
 
                     Ok(())
+                });
+            }
+
+            "pea" => {
+                let _ = with_widget_manager(|wm| {
+                    with_board(|board| {
+                        let mouse_pos = wm.mouse_pos;
+                        let grid_pos = crate::pvz::board::PixelToGridKeepOnBoard(board, mouse_pos);
+
+                        let _plant = crate::pvz::board::AddPlant(board, grid_pos, 0, 1);
+
+                        Ok(())
+                    })
                 });
             }
 

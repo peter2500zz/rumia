@@ -8,19 +8,11 @@ use tracing::*;
 use crate::{
     add_callback,
     hook::pvz::board::{
-        ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_UPDATE, AddZombieInRowWrapper,
-        GetPlantsOnLawnWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR,
-        ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS,
-        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE, PixelToGridXKeepOnBoardWrapper,
-        PixelToGridXWrapper, PixelToGridYKeepOnBoardWrapper, PixelToGridYWrapper,
+        ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_UPDATE, AddPlantWrapper, AddZombieInRowWrapper, GetPlantsOnLawnWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE, PixelToGridXKeepOnBoardWrapper, PixelToGridXWrapper, PixelToGridYKeepOnBoardWrapper, PixelToGridYWrapper
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
-        board::this::{Board, PlantsOnLawn},
-        coin::Coin,
-        graphics::this::Graphics,
-        lawn_app::this::LawnApp,
-        zombie::this::Zombie,
+        board::this::{Board, PlantsOnLawn}, coin::Coin, graphics::this::Graphics, lawn_app::this::LawnApp, plant::this::Plant, zombie::this::Zombie
     },
     save::PROFILE_MANAGER,
     utils::{
@@ -189,4 +181,13 @@ pub extern "stdcall" fn KillAllZombiesInRadius(
         theBurn,
         theDamageRangeFlags,
     )
+}
+
+pub extern "thiscall" fn AddPlant(
+    this: *mut Board,
+    theGridPos: Vec2<c_int>,
+    theSeedType: c_int,
+    theImitaterType: c_int,
+) -> *mut Plant {
+    AddPlantWrapper(this, theGridPos, theSeedType, theImitaterType)
 }

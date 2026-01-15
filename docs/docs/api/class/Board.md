@@ -240,3 +240,26 @@ fun(self, pos: Vec2, radius: integer, flag: DamageFlag, sound: GameSound?, parti
 - `flag` [DamageFlag](../alias/DamageFlag.md): 爆炸伤害的类型。
 - `sound` [DamageFlag](../alias/DamageFlag.md)?: （可选）爆炸的音效。
 - `particle` [Particle](../alias/Particle.md)?: （可选）爆炸的粒子效果。
+
+---
+
+### AddPlant
+
+在指定游戏棋盘位置种植一株植物。
+
+无视种植条件。
+
+函数签名:
+
+```lua
+fun(self, grid_pos: Vec2, seed_type: integer): Plant
+```
+
+参数:
+
+- `grid_pos` [Vec2](../class/Vec2.md): 游戏棋盘坐标。
+- `seed_type` integer: 植物的种类。
+
+返回值:
+
+- 返回创建植物的 [Plant](../class/Plant.md) 实例

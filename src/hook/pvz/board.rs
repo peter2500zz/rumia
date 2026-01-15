@@ -17,6 +17,7 @@ use crate::{
         coin::Coin,
         graphics::this::Graphics,
         lawn_app::this::LawnApp,
+        plant::this::Plant,
         zombie::this::Zombie,
     },
     utils::{Vec2, asm::stack_rotate, msvc_string::MsvcString},
@@ -152,11 +153,7 @@ pub static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 /// `Board::PixelToGridX` 的地址
 pub const ADDR_PIXEL_TO_GRID_X: u32 = 0x0041C4C0;
 
-pub fn PixelToGridXWrapper(
-    this: *mut Board,
-    theX: c_int,
-    theY: c_int,
-) -> i32 {
+pub fn PixelToGridXWrapper(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     unsafe {
         let result;
 
@@ -181,11 +178,7 @@ pub fn PixelToGridXWrapper(
 /// `Board::PixelToGridY` 的地址
 pub const ADDR_PIXEL_TO_GRID_Y: u32 = 0x0041C550;
 
-pub fn PixelToGridYWrapper(
-    this: *mut Board,
-    theX: c_int,
-    theY: c_int,
-) -> i32 {
+pub fn PixelToGridYWrapper(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     unsafe {
         let result;
 
@@ -209,11 +202,7 @@ pub fn PixelToGridYWrapper(
 /// `Board::PixelToGridXKeepOnBoard` 的地址
 pub const ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD: u32 = 0x0041C530;
 
-pub fn PixelToGridXKeepOnBoardWrapper(
-    this: *mut Board,
-    theX: c_int,
-    theY: c_int,
-) -> i32 {
+pub fn PixelToGridXKeepOnBoardWrapper(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     unsafe {
         let result;
 
@@ -243,11 +232,7 @@ pub fn PixelToGridXKeepOnBoardWrapper(
 /// `Board::PixelToGridYKeepOnBoard` 的地址
 pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
 
-pub fn PixelToGridYKeepOnBoardWrapper(
-    this: *mut Board,
-    theX: c_int,
-    theY: c_int,
-) -> i32 {
+pub fn PixelToGridYKeepOnBoardWrapper(this: *mut Board, theX: c_int, theY: c_int) -> i32 {
     unsafe {
         let result;
 
@@ -416,6 +401,67 @@ type SignKillAllZombiesInRadius = extern "stdcall" fn(
 pub static ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS: OnceLock<SignKillAllZombiesInRadius> =
     OnceLock::new();
 
+/// `Board::AddPlant` 的地址
+pub const ADDR_ADD_PLANT: u32 = 0x0040D120;
+type SignAddPlant = extern "thiscall" fn(
+    this: *mut Board,
+    theGridPos: Vec2<c_int>,
+    theSeedType: c_int,
+    theImitaterType: c_int,
+) -> *mut Plant;
+pub static ORIGINAL_ADD_PLANT: OnceLock<SignAddPlant> = OnceLock::new();
+
+#[unsafe(naked)]
+extern "stdcall" fn AddPlantHelper() {
+    naked_asm!(
+        "push 5",
+        "call {stack_rotate}",
+
+        "pop ecx",
+        "pop edx",
+        "push eax",
+        "push edx",
+
+        "call {hook}",
+
+        "ret",
+
+        stack_rotate = sym stack_rotate,
+        hook = sym board::AddPlant
+    )
+}
+
+pub fn AddPlantWrapper(
+    this: *mut Board,
+    theGridPos: Vec2<c_int>,
+    theSeedType: c_int,
+    theImitaterType: c_int
+) -> *mut Plant {
+    unsafe {
+        let result;
+
+        asm!(
+            "push {theImitaterType}",
+            "push {theSeedType}",
+            "push {theGridX}",
+            "push {this}",
+
+            "call [{func}]",
+
+            in("eax") theGridPos.y,
+            theImitaterType = in(reg) theImitaterType,
+            theSeedType = in(reg) theSeedType,
+            theGridX = in(reg) theGridPos.x,
+            this = in(reg) this,
+            func = in(reg) ORIGINAL_ADD_PLANT.wait(),
+            lateout("eax") result,
+            clobber_abi("C")
+        );
+
+        result
+    }
+}
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(
@@ -472,6 +518,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_KILL_ALL_ZOMBIES_IN_RADIUS.set(
             hook(ADDR_KILL_ALL_ZOMBIES_IN_RADIUS as _, board::KillAllZombiesInRadius as _)?
+        );
+
+        let _ = ORIGINAL_ADD_PLANT.set(
+            hook(ADDR_ADD_PLANT as _, AddPlantHelper     as _)?
         );
 
         Ok(())

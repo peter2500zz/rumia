@@ -6,8 +6,7 @@ use crate::{
     mods::ToLua,
     pvz::{
         board::{
-            AddCoin, AddZombieInRow, GetPlantsOnLawn, KillAllZombiesInRadius, PixelToGrid,
-            PixelToGridKeepOnBoard,
+            self,
             this::{Board, PlantsOnLawn, with_board},
         },
         effect_system::particle_holder::particle_system::AllocParticleSystem,
@@ -67,7 +66,7 @@ impl LuaUserData for LuaBoard {
 
         methods.add_method("AddZombie", |lua, _, (zombie_type, row, from_wave)| {
             with_board(|board| {
-                let zombie = AddZombieInRow(board, from_wave, zombie_type, row);
+                let zombie = board::AddZombieInRow(board, from_wave, zombie_type, row);
 
                 unsafe { (*zombie).to_lua(lua) }
             })
@@ -75,14 +74,14 @@ impl LuaUserData for LuaBoard {
 
         methods.add_method("AddCoin", |_, _, (pos, theCoinType, theCoinMotion)| {
             with_board(|board| {
-                let coin = AddCoin(board, pos, theCoinType, theCoinMotion);
+                let coin = board::AddCoin(board, pos, theCoinType, theCoinMotion);
 
                 unsafe { Ok(ptr::read(coin)) }
             })
         });
 
         methods.add_method("PosToGridKeepOnBoard", |_, _, pos| {
-            with_board(|board| Ok(PixelToGridKeepOnBoard(board, pos)))
+            with_board(|board| Ok(board::PixelToGridKeepOnBoard(board, pos)))
         });
 
         methods.add_method("GetPlants", |lua, _, ()| {
@@ -111,7 +110,7 @@ impl LuaUserData for LuaBoard {
             with_board(|board| {
                 let mut plants = PlantsOnLawn::default();
 
-                GetPlantsOnLawn(board, &mut plants, grid);
+                board::GetPlantsOnLawn(board, &mut plants, grid);
 
                 unsafe {
                     Ok((
@@ -147,11 +146,11 @@ impl LuaUserData for LuaBoard {
                 }
 
                 with_board(|board| {
-                    let grid = PixelToGrid(board, pos);
+                    let grid = board::PixelToGrid(board, pos);
 
                     let theRadius = if radius > 80 { radius / 80 } else { 0 };
 
-                    KillAllZombiesInRadius(board, grid.y, pos, radius, theRadius, true, flag);
+                    board::KillAllZombiesInRadius(board, grid.y, pos, radius, theRadius, true, flag);
 
                     if let Some(particle) = particle {
                         unsafe {
@@ -166,6 +165,14 @@ impl LuaUserData for LuaBoard {
 
                     Ok(())
                 })
+            })
+        });
+
+        methods.add_method("AddPlant", |lua, _, (grid_pos, seed_type)| {
+            with_board(|board| {
+                let plant = board::AddPlant(board, grid_pos, seed_type, -1);
+
+                unsafe { (*plant).to_lua(lua) }
             })
         });
     }
