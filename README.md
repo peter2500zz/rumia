@@ -40,4 +40,4 @@ Issues and pull requests are welcome!
    - [ ] 播放动画
  - [ ] 粒子
    - [x] 粒子绘制
-   - [ ] 自定义粒子·
+   - [ ] 自定义粒子
